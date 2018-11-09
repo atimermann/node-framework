@@ -1,0 +1,17 @@
+{
+  "name": "demo01",
+  "version": "1.0.0",
+  "bin": "main.js",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "build": "npx pkg -t node10-linux-x64 --out-path build .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "André Timermann",
+  "license": "ISC",
+  "dependencies": {
+    "pkg": "^4.3.4",
+    "sindri-framework": "latest"
+  }
+}
