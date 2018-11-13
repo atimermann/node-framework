@@ -1,7 +1,7 @@
 /**
  * **Created on 20/09/2018**
  *
- * src/library/sindriApplication.js
+ * src/library/application.js
  * @author André Timermann <andre.timermann@>
  *
  *   Representa uma aplicação no framework, sempre será instanciado em um novo projeto, pode carregar outras aplicações
@@ -13,7 +13,7 @@
  */
 'use strict'
 
-class SindriApplication {
+class Application {
 
   /**
    * Instancia nova aplicação (app) Sindri
@@ -58,7 +58,7 @@ class SindriApplication {
   }
 }
 
-module.exports = SindriApplication
+module.exports = Application
 
 
 

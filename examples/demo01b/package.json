@@ -1,5 +1,5 @@
 {
-  "name": "demo01",
+  "name": "demo01b",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -9,6 +9,5 @@
   "author": "André Timermann",
   "license": "ISC",
   "dependencies": {
-    "sindri-framework": "latest"
   }
 }

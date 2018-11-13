@@ -1,0 +1,5 @@
+---
+sindri:
+  clusterMode: true
+  cluster:
+    workers: 1

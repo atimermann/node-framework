@@ -16,7 +16,7 @@ let demoApplication = new Application(__dirname, {
   name: 'Demo01'
 })
 
-demoApplication.loadAppplication(require('../demo01b'))
+demoApplication.loadAppplication(require('demo01b'))
 
 if (require.main === module) {
   // Inicializa Servidor

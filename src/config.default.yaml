@@ -1,0 +1,11 @@
+---
+clusterMode: true,
+
+# Estente SocketCluster, mais atributos aqui: https://socketcluster.io/#!/docs/api-socketcluster
+# Nota: Alguns atributos são travados
+cluster:
+  #The port on which to listen for outside connections/requests
+  port: 8000
+
+  #Number of worker processes. auto = Number of CPUS
+  workers: 'auto'

@@ -7,4 +7,4 @@
  */
 'use strict'
 
-module.exports = require('./library/sindriApplication')
+module.exports = require('./library/application')

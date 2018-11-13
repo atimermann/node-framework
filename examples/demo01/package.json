@@ -11,7 +11,7 @@
   "author": "André Timermann",
   "license": "ISC",
   "dependencies": {
-    "pkg": "^4.3.4",
-    "sindri-framework": "latest"
+    "config": "^2.0.1",
+    "pkg": "^4.3.4"
   }
 }
