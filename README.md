@@ -4,7 +4,10 @@ Projeto e tasklist no [YouTrack](http://host01.lifiweb.com.br:4002/issues?q=proj
 
 ### Versões Nodejs:
 
-* 2.0 - 10.13 LTS (Documentar atualização)
+Versões do Nodejs utilizada por cada versão do Sindri
+(Documentar aqui cada atualização, utilizar sempre ultima versão disponível no PKG)
+
+* 2.0 - 10.4 LTS
 
 
 ## Introdução

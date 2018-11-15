@@ -16,10 +16,9 @@
 const {createLogger, format, transports} = require('winston')
 const Log2gelf = require('./winstonTransport/winston-graylog')
 const config = require('./config')
-const moment = require('moment')
 
-
-let hrstart = process.hrtime.bigint()
+let hrstart = process.hrtime()
+let start = hrstart[0] + (hrstart[1] / 1000000000)
 
 /**
  * Informação do Cluster
@@ -76,9 +75,14 @@ if (config.get('sindri.logger.graylog.enabled')) {
 
 const myFormat = format.printf(info => {
 
+  let hrtime = process.hrtime()
+  let stop = hrtime [0] + hrtime [1] / 1000000000
+
   /* eslint-disable-next-line - Eslint não suporte bitInt ainda, por estar no stage3*/
-  let time = parseFloat((process.hrtime.bigint() - hrstart) / 1000000n)
-  return `[${info.timestamp}] [${time / 1000}]${clusterInfo.node !== null ? ' [Node' + clusterInfo.node + ']' : ''}${(clusterInfo.leader ? ' [L]' : '')} [${info.level}] ${info.message}`
+  let time = stop - start
+  time = Math.round(time * 1000) / 1000
+
+  return `[${info.timestamp}] [${time}]${clusterInfo.node !== null ? ' [Node' + clusterInfo.node + ']' : ''}${(clusterInfo.leader ? ' [L]' : '')} [${info.level}] ${info.message}`
 
 })
 

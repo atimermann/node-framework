@@ -21,7 +21,6 @@ module.exports = {
 
     logger.info('Inicializando Sindri...')
 
-
   }
 
 
