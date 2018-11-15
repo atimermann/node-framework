@@ -11,6 +11,7 @@
 
 const SCWorker = require('socketcluster/scworker')
 const Kernel = require('./kernel')
+const {logger, updateClusterInfo} = require('./logger')
 
 class Worker extends SCWorker {
 
@@ -29,7 +30,9 @@ class Worker extends SCWorker {
     // Worker count: 1
     // Broker count: 1
 
-    console.log(`Inicializando Worker ${this.id} ${(this.isLeader) ? '(Leader)' : ''}...`)
+    updateClusterInfo(this.id, this.isLeader)
+
+    logger.info(`Inicializando Worker ${this.id} ${(this.isLeader) ? '(Leader)' : ''}...`)
 
     Kernel.run()
 

@@ -13,8 +13,7 @@
 process.env.SUPPRESS_NO_CONFIG_WARNING = 1
 
 /*
- * TODO: Remover output colorido
- * TODO: Configurar Log de acordo para ficar compatível com logstach ou outro de forma facil (PESQUISA)
+ *
  * TODO: Não utilizar métodos na configuração pois a configuração será serializada para ser enviada a outro Processo
  *
  *
@@ -24,6 +23,7 @@ const config = require('./config')
 const os = require('os')
 const _ = require('lodash')
 const path = require('path')
+const {logger} = require('./logger')
 
 module.exports = {
 
@@ -34,6 +34,8 @@ module.exports = {
   init() {
 
     let clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
+
+    logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
 
     clusterMode
       ? this.loadCluster()
@@ -46,6 +48,7 @@ module.exports = {
    * Inicializa Cluster Socket Cluster
    */
   loadCluster() {
+
 
 
     const SocketCluster = require('socketcluster')
@@ -69,6 +72,8 @@ module.exports = {
     if (options.workers === 'auto') options.workers = os.cpus().length
     options.logLevel = 0
 
+    logger.info('(Cluster) Workers: ' + options.workers)
+    logger.info('(Cluster) Port:    ' + options.port)
 
     new SocketCluster(options)
 
@@ -81,9 +86,7 @@ module.exports = {
   loadServer() {
 
     const Kernel = require('./kernel')
-
     Kernel.run()
-
 
   }
 

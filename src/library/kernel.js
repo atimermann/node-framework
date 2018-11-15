@@ -12,12 +12,14 @@
  */
 'use strict'
 
+const {logger} = require('./logger')
+
 module.exports = {
 
 
   run() {
 
-    console.log(`Inicializando Sindri...`)
+    logger.info('Inicializando Sindri...')
 
 
   }

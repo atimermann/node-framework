@@ -94,6 +94,10 @@ Alguns módulos como socketcluster precisam ser inteiramente adicionado no pkg e
 são adicionados no formato raw, podendo ser lidos facilmente, porém aumenta performance de execução, permite qualquer
 tipo de arquivo e permite adicionar o diretório inteiro
 
+## Integração GrayLog
+
+
+
 ## Arquitetura
 
 O Framework tem dois componentes principais:

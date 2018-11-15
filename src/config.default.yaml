@@ -1,5 +1,5 @@
 ---
-clusterMode: true,
+clusterMode: true
 
 # Estente SocketCluster, mais atributos aqui: https://socketcluster.io/#!/docs/api-socketcluster
 # Nota: Alguns atributos são travados
@@ -9,3 +9,27 @@ cluster:
 
   #Number of worker processes. auto = Number of CPUS
   workers: 'auto'
+
+
+logger:
+
+  # Habilita Log em console
+  console:
+    enabled: true
+    handleExceptions: false
+
+  # Habilita envio de log para sistema GrayLog (https://github.com/Buzut/winston-log2gelf)
+  graylog:
+    enabled: false
+    host: 'localhost'
+    port: 12201
+    protocol: 'tcp'
+    handleExceptions: false
+
+  # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
+  level: 'debug'
+
+  # Silencia log
+  silent: false
+
+
