@@ -13,5 +13,12 @@
   "dependencies": {
     "config": "^2.0.1",
     "pkg": "^4.3.4"
+  },
+  "pkg": {
+    "scripts": "apps/**/controllers/*.js",
+    "assets": [
+      "apps/**/views/*",
+      "public"
+    ]
   }
 }

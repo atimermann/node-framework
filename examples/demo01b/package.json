@@ -9,5 +9,9 @@
   "author": "André Timermann",
   "license": "ISC",
   "dependencies": {
+  },
+  "pkg": {
+    "scripts": "apps/**/controllers/*.js",
+    "assets":  "apps/**/views/*"
   }
 }

@@ -13,48 +13,139 @@
  */
 'use strict'
 
+const {logger} = require('./logger')
+const {defaults} = require('lodash')
+const crypto = require('crypto')
+
 class Application {
 
   /**
-   * Instancia nova aplicação (app) Sindri
    *
-   * @param path      Caminho da aplicação, deve utulizare __dirname
-   * @param options   Lista de Opções da aplicação, as seguintes opções são obrigatórios: name
+   * @param path    {string}  Caminho físico da aplicação (Deve ser definido utilizando __dirname)
+   * @param name    {string}  Nome da aplicação que será carregada Obrigatório
+   * @param options {object}  Lista de Atributos padrão (default) para nova aplicação, Atributos fixos a ser definido
+   *                          via código, paraatributos de usuário utilizar config
+   *
    */
-  constructor(path, options) {
+  constructor(path, name, options = {}) {
 
+    logger.info(`Instanciando aplicação '${name}'...`)
 
-    if (!options.name) throw new Error('Attribute "name" not defined in the project')
+    if (!name) throw new Error('Attribute "name" is required!')
+    if (!path) throw new Error('Attribute "path" is required!')
 
+    if (typeof name !== 'string') throw new TypeError('Attribute "name" must be string! ' + name)
+    if (typeof path !== 'string') throw new TypeError('Attribute "path" must be string! ' + path)
 
 
     /**
-     * Caminho da aplicação atual (Em módulos sempre usar __dirname)
-     *
+     * Nome da Aplicação
+     * @type {string}
+     */
+    this.name = name
+
+    /**
+     * Path da Aplicação
      * @type {string}
      */
     this.path = path
 
+    /**
+     * Lista de Aplicações Carregadas
+     *
+     * @type {Array}
+     */
+    this.applications = []
+
 
     /**
-     * Nome que Identifica a aplicação
-     * @type {string}
+     * Lista de Opções da Aplicação Atual
+     *
+     * @type {Object}
      */
-    this.name = options.name
+    this.options = options
 
-    console.log('Class Init:', path)
+    /**
+     * Identificador ùnico para a aplicação
+     */
+    let current_date = (new Date()).valueOf().toString()
+    let random = Math.random().toString()
+    this.id = crypto.createHash('sha1').update(current_date + random).digest('hex')
+
+
+    this._addApplication(path, name, this.id, this.options)
+
 
   }
 
   /**
-   * Carrega uma Subaplicação
+   * Carrega Subaplicação (dependência da aplicação Principal)
    *
-   * @param application
+   * @param application {Application} Instância da aplicação
+   * @param customOptions     {object}      Lista de atributos da aplicação
    */
-  loadAppplication(application) {
+  loadAppplication(application, customOptions) {
 
-    console.log(`Carregando App '${application.name}'. Path: '${application.path}'`)
-    
+    if (this.constructor.name !== 'Application')
+      throw new TypeError('application must be instance of Application')
+
+    logger.info(`Carregando App '${application.name}'. Path: '${application.path}'`)
+
+    for (let {path, name, id, options} of application.applications) {
+
+      // Altera atributos da aplicação que está sendo carregada (Subaplicações apenas carrega)
+      if (id === application.id) {
+        options = defaults(customOptions, options)
+      }
+
+      this._addApplication(path, name, id, options)
+    }
+
+  }
+
+  /**
+   * Serializa dados da aplicação e retorna dados do projeto (Aplicação Principal)
+   *
+   * Retorna objeto com todas as informações da aplicação para envio entre nós do clusters
+   *
+   * TODO: Observar a necessidade de serialização
+   *
+   * @returns {{name: string, rootPath: string, applications: Array}}
+   */
+  getApplicationData() {
+
+    return {
+      // Nome da aplicação Principal
+      name: this.name,
+
+      // Diretório RAIZ da aplicação principal
+      rootPath: this.path,
+
+      // Lista de aplicaçações, inclui aplicação principal e subaplicações
+      applications: this.applications
+    }
+
+  }
+
+
+  /**
+   * Adiciona aplicação ao lista de aplicações
+   *
+   * @param path    {string}
+   * @param name    {string}
+   * @param id      {string}
+   * @param options {object}
+   * @private
+   */
+  _addApplication(path, name, id, options) {
+
+    this.applications.push({
+      name,
+      path,
+      id,
+      options
+    })
+
   }
 }
 

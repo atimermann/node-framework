@@ -41,6 +41,7 @@ Sindri também tem o intuito de seguir como um *Guia de Estilo* com recomendaç�
 
 * Uso do [EsLint](https://eslint.org/) para padrões de código com template (.eslintrc.yaml)
 * [JSDocs](http://usejsdoc.org/) para documentação de código
+  * https://www.npmjs.com/package/jsdoc-to-markdown
 * Uso do Docker
 * Uso do [NDB](https://github.com/GoogleChromeLabs/ndb) para depuração
 * Mensagens de Erro em Inglês (Comentário livre permitido rápido desenvolvimento, mas para abertura de código necessário
@@ -135,3 +136,48 @@ if (require.main === module) {
 ```
 
 Este modelo permite que a aplicação atual possa ser carregada por outra aplicação.
+
+
+## Logger
+
+Sistema de log do Sindri Framework, já foi desenvolvido pensando em grandes projetos.
+Baseado no Winston, ele já está bem configurado e pronto pra uso, com suporte a console e graylog, já pensando no uso do docker.
+
+Logger do Sindri foi feito para substituir o console.log que nunca deve ser usado.
+
+Para usa-lo em seu projeto.
+
+Por exemplo:
+
+```javascript
+const logger = require('sindri-framework/logger')
+
+logger.info('Mensagem de info')
+logger.debug('Dados extras para depuração')
+logger.error('Erro encontrado')
+```
+
+**ATENÇÃO:** Dentro do Framework a chamada é um pouco diferente:
+
+```javascript
+const {logger} = require('sindri-framework/logger')
+```
+
+## Criando Apps
+
+TODO: Criar apps, Middleware
+TODO: Documentar necessidade de configurar pkg para cada application
+
+### Controller
+
+### TEMPLATE
+
+https://expressjs.com/pt-br/guide/using-template-engines.html
+https://www.npmjs.com/package/consolidate
+
+## TODOs
+
+* Suporte CDN https://github.com/niftylettuce/express-cdn
+* Script de criação de projeto que já configurar package.json com os diretórios corretos para o PKG
+* JS-2-DOC MARDKDOWN
+* DOcumentar @asset

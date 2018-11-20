@@ -30,11 +30,21 @@ class Worker extends SCWorker {
     // Worker count: 1
     // Broker count: 1
 
-    updateClusterInfo(this.id, this.isLeader)
+    try {
 
-    logger.info(`Inicializando Worker ${this.id} ${(this.isLeader) ? '(Leader)' : ''}...`)
+      updateClusterInfo(this.id, this.isLeader)
 
-    Kernel.run()
+      logger.info(`Inicializando Worker ${this.id} ${(this.isLeader) ? '(Leader)' : ''}...`)
+
+      Kernel.run(this.options.application, this)
+
+
+    } catch (error) {
+
+      logger.error(error.stack)
+      process.exit()
+
+    }
 
   }
 

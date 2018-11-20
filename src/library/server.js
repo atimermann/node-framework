@@ -24,31 +24,48 @@ const os = require('os')
 const _ = require('lodash')
 const path = require('path')
 const {logger} = require('./logger')
+const Application = require('./application')
 
 module.exports = {
 
   /**
    * Inicializa Servidor
    *
+   * @param application {Application}
    */
-  init() {
+  init(application) {
 
-    let clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
+    try {
 
-    logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
+      if (!(application instanceof Application)) throw new TypeError('application must be instance of Application')
 
-    clusterMode
-      ? this.loadCluster()
-      : this.loadServer()
+      let clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
+
+      logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
+
+      clusterMode
+        ? this.loadCluster(application)
+        : this.loadServer(application)
+
+
+
+    } catch (error) {
+
+      logger.error(error.stack)
+      process.exit()
+
+
+    }
 
   },
 
 
   /**
    * Inicializa Cluster Socket Cluster
+   *
+   * @param application {Application}
    */
-  loadCluster() {
-
+  loadCluster(application) {
 
 
     const SocketCluster = require('socketcluster')
@@ -75,6 +92,8 @@ module.exports = {
     logger.info('(Cluster) Workers: ' + options.workers)
     logger.info('(Cluster) Port:    ' + options.port)
 
+    options.application = application.getApplicationData()
+
     new SocketCluster(options)
 
   },
@@ -82,11 +101,13 @@ module.exports = {
 
   /**
    * Inicializa Servidor Sindri diretamente sem suporte a cluster nem socket
+   *
+   * @param application {Application}
    */
-  loadServer() {
+  loadServer(application) {
 
     const Kernel = require('./kernel')
-    Kernel.run()
+    Kernel.run(application.getApplicationData())
 
   }
 

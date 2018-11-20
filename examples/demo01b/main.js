@@ -13,9 +13,7 @@
 const Application = require('sindri-framework/application')
 const Server = require('sindri-framework/server')
 
-let demoApplication = new Application(__dirname, {
-  name: 'Demo01Loaded'
-})
+let demoApplication = new Application(__dirname, 'demo01b')
 
 if (require.main === module) {
   // Inicializa Servidor

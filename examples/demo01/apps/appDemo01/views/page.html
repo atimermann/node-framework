@@ -1,0 +1,19 @@
+<div class="entry">
+    <h1>{{title}}</h1>
+    <div class="body">
+        <p>{{body}}</p>
+        <p>{{{escaped_html}}}</p>
+
+
+        <p>{{ @asset 'imagem.png' }}</p>
+
+        <img src="{{ @asset 'imagem.png' }}"/>
+        <hr>
+        <img src="{{ @asset 'appDemo01' 'imagem.png' }}"/>
+        <hr>
+        <img src="{{ @asset 'Demo01' 'appDemo01' 'imagem.png' }}"/>
+
+    </div>
+
+    {{> p }}
+</div>
