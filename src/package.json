@@ -1,6 +1,6 @@
 {
   "name": "sindri-framework",
-  "version": "2.0.0",
+  "version": "2.0.4",
   "description": "Segunda versão do Sindri Framework agora enxuto e simplificado",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,7 +12,6 @@
     "compression": "^1.7.3",
     "config": "^2.0.1",
     "consolidate": "^0.15.1",
-    "crypto": "^1.0.1",
     "express": "^4.16.4",
     "fs-extra": "^7.0.1",
     "handlebars": "^4.0.12",
@@ -29,5 +28,8 @@
       "node_modules/sc-broker",
       "node_modules/socketcluster"
     ]
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0"
   }
 }

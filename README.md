@@ -5,10 +5,13 @@ Projeto e tasklist no [YouTrack](http://host01.lifiweb.com.br:4002/issues?q=proj
 ### Versões Nodejs:
 
 Versões do Nodejs utilizada por cada versão do Sindri
-(Documentar aqui cada atualização, utilizar sempre ultima versão disponível no PKG)
+Necessário atualizar versão nodejs suportada pelo PKG em conjunto com NODEJS
+(Documentar aqui cada atualização)
 
-* 2.0 - 10.4 LTS
+* 2.0 - 10.4.1 LTS
 
+
+**Dica:** Verifique as versões do nodejs instaladas para o node-pkg aqui: /home/andre/.pkg-cache/ 
 
 ## Introdução
 
@@ -62,6 +65,8 @@ Sindri também tem o intuito de seguir como um *Guia de Estilo* com recomendaç�
   * Lembre que o NPM apenas para publicação e uso de outras aplicações, não precisa ter todos os arquivos do projeto.
 * Manter pasta exemplo atualizada com versão exemplo de uso do framework
 * Sempre testar compatíbilidade com PKG antes de gerar versão
+* Sempre manter atualizado o scripts do projeto sindri-cli compatível com a versão do framework.
+* Testar scripts antes de gerar nova versão (Automatizar com CI)
 
 ### Mantendo compatibilidade com PKG
 

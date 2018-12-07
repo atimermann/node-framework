@@ -23,8 +23,8 @@ server:
   # Acessa arquivos estático do pacote (node-pkg): Necessário adicionar no package: "assets":  ["apps/**/views/*", "public"]
   # Deve ser desativado para acesso via CDN, ou se for utilizar o diretório public para arquivos enviados pelo usuário (upload)
   # Em caso de true deve ser empacotado novamente sempre que houver alteração dos arquivos estáticos
+  # Ao desativar não esqueça remover no package.json a entrada "public" em pkg.assets
   loadStaticFromPackage: true
-
 
 
 clusterMode: false
