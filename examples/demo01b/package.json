@@ -9,9 +9,10 @@
   "author": "André Timermann",
   "license": "ISC",
   "dependencies": {
+    "sindri-framework": "^2.0.5"
   },
   "pkg": {
     "scripts": "apps/**/controllers/*.js",
-    "assets":  "apps/**/views/*"
+    "assets": "apps/**/views/*"
   }
 }

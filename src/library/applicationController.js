@@ -17,6 +17,113 @@ const {logger} = require('./logger')
 
 module.exports = {
 
+  /**
+   * Retorna Lista com todos os Assets do projeto incluindo dependencia
+   *
+   * @param applications  {array} Lista de aplicações
+   *
+   * @returns {Promise<Array>}
+   */
+  async getAssets(applications) {
+
+    let assets = []
+
+    for (let application of applications) {
+
+      let appsPath = path.join(application.path, 'apps')
+
+      if (!await fs.pathExists(appsPath)) {
+        throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
+      }
+
+      for (let asset of await this._getAssetsByApps(appsPath, application.name)) {
+        assets.push(asset)
+      }
+
+    }
+
+    return assets
+
+  },
+
+  /**
+   * Retorna lista de todos os assets(arquivos estáticos) de um app
+   *
+   * Essa lista é composta por: caminho do arquivo, nome da aplicação e nome do app
+   *
+   * @param appsPath          {string}  Caminho do App
+   * @param applicationName   {string}  Nome da aplicação
+   *
+   * @returns {Promise<Array>}
+   *
+   * @private
+   */
+  async _getAssetsByApps(appsPath, applicationName) {
+
+
+    let assets = []
+
+    for (let appName of await fs.readdir(appsPath)) {
+
+      logger.debug(`Carregando assets do app: '${appName}'`)
+
+      let assetsPath = path.join(appsPath, appName, 'assets')
+
+      logger.debug(` APP NAME   : '${appName}'`)
+      logger.debug(` ASSET PATH   : '${assetsPath}'`)
+
+      if (await fs.pathExists(assetsPath)) {
+
+        let assetsFile = await fs.readdir(assetsPath)
+
+        for (let assetFile of assetsFile) {
+          assets.push({
+            filePath: path.join(assetsPath, assetFile),
+            applicationName,
+            appName
+          })
+        }
+
+      }
+
+    }
+
+    return assets
+
+  },
+
+
+  /**
+   * Retorna informações sobre todos os apps de todas as aplicação carregadas
+   *
+   * @param applications    {string<Array>}  Lista de aplicações
+   * @returns {Promise<Array>}
+   */
+  async getApps(applications) {
+
+    let apps = []
+
+    for (let application of applications) {
+
+      let appsPath = path.join(application.path, 'apps')
+
+      if (!await fs.pathExists(appsPath)) {
+        throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
+      }
+
+      for (let appName of await fs.readdir(appsPath)) {
+        apps.push({
+          path: path.join(appsPath, appName),
+          applicationName: application.name,
+          appName
+        })
+      }
+
+    }
+
+    return apps
+  },
+
 
   /**
    * Retorna todos os controladores da aplicação atual e define atributos sobre a aplicação atual

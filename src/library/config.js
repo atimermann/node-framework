@@ -9,7 +9,9 @@
  */
 'use strict'
 
-const config = require('../node_modules/config') // *Fix para funcionar com PKG
+//const config = require('../node_modules/config') // *Fix para funcionar com PKG
+const config = require('config') // *Fix para funcionar com PKG
+
 const yaml = require('js-yaml')
 const fs = require('fs')
 const path = require('path')

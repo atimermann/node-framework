@@ -1,7 +1,5 @@
 # Projeto Sindri Framework 2.0
 
-Projeto e tasklist no [YouTrack](http://host01.lifiweb.com.br:4002/issues?q=project:%20%7BSindri%20Framework%202%7D)
-
 ### Versões Nodejs:
 
 Versões do Nodejs utilizada por cada versão do Sindri

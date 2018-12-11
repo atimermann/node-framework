@@ -38,12 +38,17 @@ let transportsList = []
 //////////////////////
 // Console
 //////////////////////
-if (config.get('sindri.logger.console.enabled')) {
 
+// TODO: BUG, transport Console, parece q é carregadfo por padrão, mesmo desativando está exibindo log no console - https://github.com/winstonjs/winston/issues/175
+
+let consoleEnabled = (process.env.LOGGER_CONSOLE_ENABLED !== undefined)
+  ? process.env.LOGGER_CONSOLE_ENABLED
+  : config.get('sindri.logger.console.enabled')
+
+if (consoleEnabled) {
   transportsList.push(new transports.Console({
     handleExceptions: config.get('sindri.logger.console.handleExceptions')
   }))
-
 }
 
 //////////////////////

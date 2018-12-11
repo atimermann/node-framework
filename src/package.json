@@ -1,11 +1,11 @@
 {
   "name": "sindri-framework",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Segunda versão do Sindri Framework agora enxuto e simplificado",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "André Timermann",
+  "author": "André Timermann <andre@timermann.com.br>",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
