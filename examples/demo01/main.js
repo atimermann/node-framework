@@ -16,7 +16,7 @@ let demoApplication = new Application(__dirname, 'Demo01', {
   optionX: 'X'
 })
 
-demoApplication.loadAppplication(require('demo01b'), {
+demoApplication.loadAppplication(require('../demo01b'), {
   optionA: 'Foo',
   optionB: true,
   optionC: 2.0

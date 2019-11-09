@@ -19,7 +19,6 @@
 
 const {logger} = require('./logger')
 const express = require('express')
-const config = require('config')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const helmet = require('helmet')
@@ -30,6 +29,7 @@ const os = require('os')
 const path = require('path')
 const http = require('http')
 
+const config = require('../vendor/config/lib/config') // Fix para funcionar com pkg, projeto config não comṕativel, copiado para vendor
 
 module.exports = {
 
@@ -55,7 +55,7 @@ module.exports = {
 
     let projectPackageInfo = require(application.rootPath + '/package.json')
 
-    let sindriPackageInfo = require('../package.json')
+    let sindriPackageInfo = require('../../package.json')
 
     /**
      * Rota para acesso a recursos estáticos (ex: jpeg, html, js etc...)

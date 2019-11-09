@@ -9,3 +9,5 @@
   traduzir)
 * Manter documentação do projeto atualizada
 * Sempre criar uma pasta exemples para que o usuário possa testar o projeto
+* Manter Fonte na pasta src, depois de cria-la
+

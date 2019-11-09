@@ -11,8 +11,7 @@
   "author": "André Timermann",
   "license": "ISC",
   "dependencies": {
-    "config": "^2.0.1",
-    "pkg": "^4.3.4"
+    "pkg": "^4.4.0"
   },
   "pkg": {
     "scripts": "apps/**/controllers/*.js",

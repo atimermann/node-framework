@@ -1,10 +1,12 @@
 /**
  * **Created on 20/09/18**
  *
- * src/server.js
+ * src/logger.js
  * @author André Timermann <andre.timermann@smarti.io>
  *
  */
 'use strict'
 
-module.exports = require('./library/server')
+const {logger} = require('./src/library/logger')
+
+module.exports = logger

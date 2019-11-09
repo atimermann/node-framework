@@ -114,7 +114,8 @@ para geração de binário com PKG:
 
 Versão do Framework (Apenas major e minor) seguido da versão do NODEJS
 
-* 2.0 - 10.4.1 LTS
+* sindri-framework@2.0 - Node@10.4.1 LTS
+* sindri-framework@2.1 - Node@12.2.0 LTS - pkg@4.3.4
 
 **IMPORTANTE:** Sempre que atualizar o Sindri Framework, verificar ultimas versões e atualizar aqui. Mantenha o 
 histórico e sempre atualize a versão minor do sindri.
@@ -127,7 +128,8 @@ histórico e sempre atualize a versão minor do sindri.
 
 ## Guia de Desenvolvimento
 
-Guia para desenvolvedores do Sindri Framework
+Guia para desenvolvedores do Sindri Framework:
+
 [Guia de Desenvolvimento](./docs/guia_de_desenvolvimento.md)
 
 ## TODOs

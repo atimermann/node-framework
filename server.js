@@ -1,10 +1,10 @@
 /**
  * **Created on 20/09/18**
  *
- * src/application.js
+ * src/server.js
  * @author André Timermann <andre.timermann@smarti.io>
  *
  */
 'use strict'
 
-module.exports = require('./library/application')
+module.exports = require('./src/library/server')

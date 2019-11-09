@@ -48,3 +48,7 @@ Alguns módulos como socketcluster precisam ser inteiramente adicionado no pkg e
 **NOTA:** Scripts podem ser adicionado em assets ou scripts, em scripts são pré-compilados, ocultando o fonte, os assets
 são adicionados no formato raw, podendo ser lidos facilmente, porém aumenta performance de execução, permite qualquer
 tipo de arquivo e permite adicionar o diretório inteiro
+
+### Mantendo Sindri-cli atualizado
+
+Ao atualizar o sindriframework mantenha também autalizado o sindri-cli
