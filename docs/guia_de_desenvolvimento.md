@@ -52,3 +52,8 @@ tipo de arquivo e permite adicionar o diretório inteiro
 ### Mantendo Sindri-cli atualizado
 
 Ao atualizar o sindriframework mantenha também autalizado o sindri-cli
+
+### Erro ao executar build com o pacote config
+
+O pacote config não funciona com o pkg, foi necessário incorpora-lo ao projeto dentor da pasta vendor, ao atualizar,
+verificar se problema foi corrigido ou atualizar config manualmente 
