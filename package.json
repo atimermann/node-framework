@@ -34,7 +34,8 @@
     "application.js",
     "config.js",
     "controller.js",
-    "logger.js"
+    "logger.js",
+    "server.js"
   ],
   "devDependencies": {
     "eslint": "^5.16.0"
