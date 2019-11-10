@@ -1,6 +1,6 @@
 {
   "name": "sindri-framework",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Segunda versão do Sindri Framework agora enxuto e simplificado",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
