@@ -2,12 +2,11 @@
 
 
 * Sempre documentar implementações e alterações do Framework
-* Gerenciamento do projeto no YouTrack oficial
+* Gerenciamento do projeto no GitLab
 * Controle de versão ( [SEMVER](https://semver.org/lang/pt-BR/) )
   * Atualizar versão do nodejs usada em cada nova versão liberada (em 'Versões Nodejs')
 * Raiz do projeto GIT está em **/**
-* Raiz do projeto NPM está em **src**
-  * Manter na pasta NPM apenas diretórios relevantes para execução, documentação e outros manter fora.
+* Controlar usando a configurações files em package.json quais arquivos serão publicados  
   * Lembre que o NPM apenas para publicação e uso de outras aplicações, não precisa ter todos os arquivos do projeto.
 * Manter pasta exemplo atualizada com versão exemplo de uso do framework
 * Sempre testar compatíbilidade com PKG antes de gerar versão
@@ -33,6 +32,8 @@ Caso não seja possível utilizar path.join() ou por outros impedimentos, é pos
 definindo os arquivos no arquivo package.json Veja mais detalhes aqui:
 https://www.npmjs.com/package/pkg#detecting-assets-in-source-code
 
+**IMPORTANTE:** Caso tenha alguma incompatibilidade (erros) ao importar modulos do node de terceiros , adicione 
+manualmente como um asset, não será pré-compilado mas funcionará. 
 
 Alguns módulos como socketcluster precisam ser inteiramente adicionado no pkg e de forma manual:
 
@@ -40,7 +41,8 @@ Alguns módulos como socketcluster precisam ser inteiramente adicionado no pkg e
   "pkg": {
     "assets": [
       "node_modules/sc-broker",
-      "node_modules/socketcluster"
+      "node_modules/socketcluster",
+      "node_modules/config"
     ]
   }
 ```
@@ -49,11 +51,26 @@ Alguns módulos como socketcluster precisam ser inteiramente adicionado no pkg e
 são adicionados no formato raw, podendo ser lidos facilmente, porém aumenta performance de execução, permite qualquer
 tipo de arquivo e permite adicionar o diretório inteiro
 
+* É possível adicionar pacotes em assets em subprojetos 
+
 ### Mantendo Sindri-cli atualizado
 
 Ao atualizar o sindriframework mantenha também autalizado o sindri-cli
 
-### Erro ao executar build com o pacote config
+### PKG
 
-O pacote config não funciona com o pkg, foi necessário incorpora-lo ao projeto dentor da pasta vendor, ao atualizar,
-verificar se problema foi corrigido ou atualizar config manualmente 
+Tabela comparando como um arquivo é carregado e empacotado:
+
+**REF:** https://github.com/zeit/pkg#snapshot-filesystem
+
+value                          | with `node`         | packaged                   | comments
+-------------------------------|---------------------|----------------------------|-----------
+__filename                     | /project/app.js     | /snapshot/project/app.js   |
+__dirname                      | /project            | /snapshot/project          |
+process.cwd()                  | /project            | /deploy                    | suppose the app is called ...
+process.execPath               | /usr/bin/nodejs     | /deploy/app-x64            | `app-x64` and run in `/deploy`
+process.argv[0]                | /usr/bin/nodejs     | /deploy/app-x64            |
+process.argv[1]                | /project/app.js     | /snapshot/project/app.js   |
+process.pkg.entrypoint         | undefined           | /snapshot/project/app.js   |
+process.pkg.defaultEntrypoint  | undefined           | /snapshot/project/app.js   |
+require.main.filename          | /project/app.js     | /snapshot/project/app.js   |

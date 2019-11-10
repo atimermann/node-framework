@@ -29,7 +29,8 @@ const os = require('os')
 const path = require('path')
 const http = require('http')
 
-const config = require('../vendor/config/lib/config') // Fix para funcionar com pkg, projeto config não comṕativel, copiado para vendor
+// const config = require('../vendor/config/lib/config') // Fix para funcionar com pkg, projeto config não comṕativel, copiado para vendor
+const config = require('config')
 
 module.exports = {
 

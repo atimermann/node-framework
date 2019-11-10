@@ -5,7 +5,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "build": "npx pkg -t node10-linux-x64 --out-path build .",
+    "build": "npx pkg -t node122-linux-x64 --out-path build .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "André Timermann",
