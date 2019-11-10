@@ -26,8 +26,6 @@
   },
   "pkg": {
     "assets": [
-      "node_modules/sc-broker",
-      "node_modules/socketcluster",
       "node_modules/config"
     ]
   },
