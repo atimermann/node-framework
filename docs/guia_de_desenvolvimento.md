@@ -37,11 +37,12 @@ manualmente como um asset, não será pré-compilado mas funcionará.
 
 Alguns módulos como socketcluster precisam ser inteiramente adicionado no pkg e de forma manual:
 
+**TODO:** verificar: "node_modules/sc-broker" e "node_modules/socketcluster",
+
 ```
   "pkg": {
     "assets": [
-      "node_modules/sc-broker",
-      "node_modules/socketcluster",
+
       "node_modules/config"
     ]
   }
