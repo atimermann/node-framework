@@ -12,12 +12,7 @@
 //  Desabilita alerta sobre configuração não encontrada
 process.env.SUPPRESS_NO_CONFIG_WARNING = 1
 
-/*
- *
- * TODO: Não utilizar métodos na configuração pois a configuração será serializada para ser enviada a outro Processo
- *
- *
- */
+// TODO: Não utilizar métodos na configuração pois a configuração será serializada para ser enviada a outro Processo
 
 const config = require('./config')
 const os = require('os')

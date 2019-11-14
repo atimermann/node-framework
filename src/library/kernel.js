@@ -38,7 +38,7 @@ module.exports = {
   /**
    * Inicializa Servidor Sindri
    *
-   //* @param serializedApplication  {String} Array listando todas as aplicações e atributos Serializado
+   * // @param serializedApplication  {String} Array listando todas as aplicações e atributos Serializado
 
    * @param application {Object}    Dados da aplicação que está sendo carregada
    * @param scWorker    {SCWorker}  Objeto SCWorker (https://socketcluster.io/#!/docs/api-scworker) instancia do Cluster atual
@@ -86,6 +86,7 @@ module.exports = {
     logger.info('==============================================================')
     logger.info(`Project            : ${application.name}`)
     logger.info(`Root Path          : ${application.rootPath}`)
+    logger.info(`Node Version       : ${process.version}`)
     logger.info(`Environment        : ${process.env.NODE_ENV}`)
     logger.info(`Port               : ${process.env.PORT || config.get('sindri.server.port')}`)
     logger.info(`Pid                : ${process.pid}`)
@@ -96,17 +97,14 @@ module.exports = {
     logger.info(`Application Version: ${projectPackageInfo.version}`)
     logger.info('==============================================================')
 
-
     // Configura ExpressJs
     let app = this._configureExpressHttpServer(httpServer, application)
 
     // Carrega Aplicações
     await this._loadApplications(app, application, scWorker)
 
-
     // Inicializa Servidor HTTP
     this._startHttpServer(httpServer)
-
 
     logger.info('Kernel Loaded!')
 
@@ -134,16 +132,20 @@ module.exports = {
     // Log de Acesso
     // Deve ser registrado antes dos demais middleware para registrar todos os logs
     ////////////////////////////////////////////////////
-    app.use(morgan(config.get('sindri.server.log.format'), {
+    app.use(
+      morgan(
+        config.get('sindri.server.log.format'),
+        {
 
-      stream: new Writable({
-        write(chunk, encoding, callback) {
-          logger.info('[HTTP] ' + chunk.toString('utf8', 0, chunk.length - 1))
-          callback()
+          stream: new Writable({
+            write(chunk, encoding, callback) {
+              logger.info('[HTTP] ' + chunk.toString('utf8', 0, chunk.length - 1))
+              callback()
+            }
+          })
         }
-      })
-    }))
-
+      )
+    )
 
     ////////////////////////////////////////////////////
     // Segurança

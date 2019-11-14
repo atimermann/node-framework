@@ -15,6 +15,8 @@
 
 ### Mantendo compatibilidade com PKG
 
+**IMPORTANTE:** Sempre mantenha o Framework compatível com PKG
+
 O PKG inclui automaticamente os arquivos necessários no binário, como por exemplo ao utilizar require.
 
 Para incluir arquivos estáticos, como arquivo de configuração temos que utilizar o método **path.join()** para que o PKG
