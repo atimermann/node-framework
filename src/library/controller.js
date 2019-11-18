@@ -16,7 +16,6 @@
  */
 'use strict'
 
-
 const path = require('path')
 const {logger} = require('./logger')
 const {isString} = require('lodash')
@@ -35,7 +34,6 @@ class Controller {
       throw new TypeError('Cannot construct Abstract instances directly')
     }
 
-
     /**
      * Nome da aplicação que este controller pertence
      * Definido em controllerController, não alterar
@@ -52,7 +50,6 @@ class Controller {
      */
     this.appName = undefined
 
-
     /**
      * None desde controller
      * Definido em controllerController, não alterar
@@ -60,7 +57,6 @@ class Controller {
      * @type {string}
      */
     this.controllerName = undefined
-
 
     /**
      * Opções definida ao instanciar ou carregar aplicação
@@ -86,7 +82,6 @@ class Controller {
      */
     this.router = undefined
 
-
     /**
      * Objeto com atributo das aplicações
      * Definido em kernel, não alterar
@@ -94,7 +89,6 @@ class Controller {
      * @type {{}}
      */
     this.applications = undefined
-
 
     /**
      * Objeto Express
@@ -120,7 +114,6 @@ class Controller {
      */
     this.applicationsPath = undefined
 
-
     /**
      * URL base padrão  para acesso a recursos estáticos.
      * Será usado pelo Helper @asset, que calcula automaticamente a url do recurso que será carregado na página
@@ -130,7 +123,6 @@ class Controller {
      * @type {string}
      */
     this.staticBaseUrl = undefined
-
 
     /**
      * Objeto socketServer, utilizado para comunicação socket
@@ -154,7 +146,6 @@ class Controller {
      * @type {SCWorker}
      */
     this.socketWorker = undefined
-
 
   }
 
@@ -218,6 +209,15 @@ class Controller {
   }
 
   /**
+   * Await Sleep
+   * @param ms
+   * @returns {Promise<void>}
+   */
+  async sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  /**
    * Permite Carregar View de outra aplicação/app
    *
    * @param applicationName {string}  Nome da aplicação
@@ -230,7 +230,6 @@ class Controller {
    * @returns {Promise<void>}
    */
   async remoteView(applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
-
 
     if (!this.applicationsPath[applicationName]) {
       throw new Error(`Application '${applicationName}' not found. Available: (${Object.keys(this.applicationsPath)})`)
@@ -257,7 +256,6 @@ class Controller {
    * @private
    */
   async _renderView(viewPath, locals, engine) {
-
 
     let templateEngine = consolidate[engine]
 
@@ -314,9 +312,7 @@ class Controller {
 
       }
 
-
     }
-
 
     return await templateEngine(viewPath, locals)
 
