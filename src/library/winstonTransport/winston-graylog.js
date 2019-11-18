@@ -226,7 +226,6 @@ class Log2gelf extends Transport {
 
   }
 
-
 }
 
 module.exports = Log2gelf

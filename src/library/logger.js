@@ -91,7 +91,6 @@ const myFormat = format.printf(info => {
 
 })
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Logger
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,7 +100,6 @@ let logger = createLogger({
   level: config.get('sindri.logger.level'),
   silent: config.get('sindri.logger.silent')
 })
-
 
 module.exports = {
 
@@ -126,5 +124,4 @@ module.exports = {
     }
   }
 }
-
 

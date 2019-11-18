@@ -38,7 +38,6 @@ class Worker extends SCWorker {
 
       Kernel.run(this.options.application, this)
 
-
     } catch (error) {
 
       logger.error(error.stack)
@@ -47,7 +46,6 @@ class Worker extends SCWorker {
     }
 
   }
-
 
 }
 

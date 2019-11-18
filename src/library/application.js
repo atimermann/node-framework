@@ -37,7 +37,6 @@ class Application {
     if (typeof name !== 'string') throw new TypeError('Attribute "name" must be string! ' + name)
     if (typeof path !== 'string') throw new TypeError('Attribute "path" must be string! ' + path)
 
-
     /**
      * Nome da Aplicação
      * @type {string}
@@ -57,7 +56,6 @@ class Application {
      */
     this.applications = []
 
-
     /**
      * Lista de Opções da Aplicação Atual
      *
@@ -72,9 +70,7 @@ class Application {
     let random = Math.random().toString()
     this.id = crypto.createHash('sha1').update(current_date + random).digest('hex')
 
-
     this._addApplication(path, name, this.id, this.options)
-
 
   }
 
@@ -127,7 +123,6 @@ class Application {
 
   }
 
-
   /**
    * Adiciona aplicação ao lista de aplicações
    *
@@ -150,8 +145,4 @@ class Application {
 }
 
 module.exports = Application
-
-
-
-
 

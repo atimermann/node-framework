@@ -22,7 +22,6 @@ demoApplication.loadAppplication(require('../demo01b'), {
   optionC: 2.0
 })
 
-
 if (require.main === module) {
   // Inicializa Servidor
   Server.init(demoApplication)

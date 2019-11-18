@@ -34,7 +34,6 @@ const config = require('config')
 
 module.exports = {
 
-
   /**
    * Inicializa Servidor Sindri
    *
@@ -52,7 +51,6 @@ module.exports = {
     // let application = JSON.parse(serializedApplication)
 
     let httpServer = http.createServer()
-
 
     let projectPackageInfo = require(application.rootPath + '/package.json')
 
@@ -74,7 +72,6 @@ module.exports = {
     this.cdn = (process.env.CDN === undefined)
       ? config.get('sindri.server.cdn')
       : process.env.CDN
-
 
     /**
      * Url Base do Servidor CDN
@@ -109,7 +106,6 @@ module.exports = {
     logger.info('Kernel Loaded!')
 
   },
-
 
   /**
    * Configura Servidor Express
@@ -205,7 +201,6 @@ module.exports = {
       limit: config.get('sindri.server.json.limit')
     }))
 
-
     ////////////////////////////////////////////////////
     // Compressão
     ////////////////////////////////////////////////////
@@ -214,7 +209,6 @@ module.exports = {
     return app
 
   },
-
 
   /**
    * Carrega Aplicações
@@ -241,12 +235,10 @@ module.exports = {
     //////////////////////////////////////////////////////////////////////////////
     for (let controller of await ApplicationController.getControllers(application.applications)) {
 
-
       /////////////////////////////////////////////
       // Instancia do Expressjs
       /////////////////////////////////////////////
       controller.app = app
-
 
       /////////////////////////////////////////////
       // Cria Rota Especifica para este controlador
@@ -254,7 +246,6 @@ module.exports = {
       controller.router = express.Router({
         strict: true
       })
-
 
       // Extrai Path e cria arvore
       if (applicationPathTree[controller.applicationName] === undefined) {
@@ -284,7 +275,6 @@ module.exports = {
         controller.socketWorker = scWorker
 
       }
-
 
       /////////////////////////////////////////////
       // Adiciona na Lista de controllers
@@ -320,7 +310,6 @@ module.exports = {
       // Retorna e define Rota Configurada pelo controller
       app.use(controller.router)
 
-
     }
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -332,9 +321,7 @@ module.exports = {
 
     logger.debug('Applications Loaded!')
 
-
   },
-
 
   /**
    * Inicializa Servidor HTTP
@@ -342,7 +329,6 @@ module.exports = {
    * @param httpServer
    */
   _startHttpServer(httpServer) {
-
 
     let port = process.env.PORT || config.get('sindri.server.port')
 
@@ -359,8 +345,6 @@ module.exports = {
 
     })
 
-
   }
-
 
 }

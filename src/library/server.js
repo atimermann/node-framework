@@ -42,18 +42,14 @@ module.exports = {
         ? this.loadCluster(application)
         : this.loadServer(application)
 
-
-
     } catch (error) {
 
       logger.error(error.stack)
       process.exit()
 
-
     }
 
   },
-
 
   /**
    * Inicializa Cluster Socket Cluster
@@ -61,7 +57,6 @@ module.exports = {
    * @param application {Application}
    */
   loadCluster(application) {
-
 
     const SocketCluster = require('socketcluster')
 
@@ -80,7 +75,6 @@ module.exports = {
     if (process.env.CLUSTER_WORKERS) options.workers = process.env.CLUSTER_WORKERS
     if (process.env.CLUSTER_PORT) options.port = process.env.CLUSTER_PORT
 
-
     if (options.workers === 'auto') options.workers = os.cpus().length
     options.logLevel = 0
 
@@ -92,7 +86,6 @@ module.exports = {
     new SocketCluster(options)
 
   },
-
 
   /**
    * Inicializa Servidor Sindri diretamente sem suporte a cluster nem socket

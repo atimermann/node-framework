@@ -20,7 +20,6 @@ class HelloWorldController extends Controller {
 
     logger.info('HelloWorld Demo01')
 
-
     logger.debug('Debug')
     logger.error('Error')
 
@@ -28,13 +27,11 @@ class HelloWorldController extends Controller {
     logger.info(`Setup do controlador '${this.controllerName}'. App: '${this.appName}'. Application: '${this.applicationName}'`)
     logger.info(`Options: ${JSON.stringify(this.options)}`)
 
-
     if (this.socketWorker) {
       logger.info(`ID: ${this.socketWorker.id}`)
       logger.info(`Leader: ${this.socketWorker.isLeader}`)
       logger.info(`Host: ${this.socketServer.host}`)
       logger.info(`Secure: ${this.socketServer.secure}`)
-
 
       let chatChannel = this.socketServer.exchange.subscribe('chat')
 
@@ -70,7 +67,6 @@ class HelloWorldController extends Controller {
 
     this.get('/helloWorld', async (request, response) => {
 
-
       // partials e cache são atributos especiais que permitem configurar o template
       let renderedPage = await this.view('page.html', {
         title: 'Hello World',
@@ -83,7 +79,6 @@ class HelloWorldController extends Controller {
       response
         .status(200)
         .send(renderedPage)
-
 
     })
 

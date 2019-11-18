@@ -9,7 +9,6 @@
  */
 'use strict'
 
-
 const Application = require('sindri-framework/application')
 const Server = require('sindri-framework/server')
 

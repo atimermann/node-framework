@@ -60,7 +60,6 @@ module.exports = {
    */
   async _getAssetsByApps(appsPath, applicationName) {
 
-
     let assets = []
 
     for (let appName of await fs.readdir(appsPath)) {
@@ -91,7 +90,6 @@ module.exports = {
     return assets
 
   },
-
 
   /**
    * Retorna informações sobre todos os apps de todas as aplicação carregadas
@@ -124,7 +122,6 @@ module.exports = {
     return apps
   },
 
-
   /**
    * Retorna todos os controladores da aplicação atual e define atributos sobre a aplicação atual
    *
@@ -137,7 +134,6 @@ module.exports = {
 
     let controllersInstances = []
 
-
     for (let application of applications) {
 
       logger.info(`Carregando aplicação '${application.name}'`)
@@ -146,13 +142,11 @@ module.exports = {
       logger.debug(` APPLICATION PATH   : '${application.path}'`)
       logger.debug(` APPLICATION OPTIONS: '${JSON.stringify(application.options)}'`)
 
-
       let appsPath = path.join(application.path, 'apps')
 
       if (!await fs.pathExists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
-
 
       for (let controllerInstance of await this._getControllersInstanceByApps(appsPath)) {
 
@@ -243,6 +237,5 @@ module.exports = {
     return controllersInstances
 
   }
-
 
 }

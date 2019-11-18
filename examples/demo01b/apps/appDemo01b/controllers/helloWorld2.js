@@ -40,7 +40,6 @@ class HelloWorld2Controller extends Controller {
         }
       )
 
-
       response.status(200).send(renderedPage)
 
     })
