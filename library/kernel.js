@@ -54,7 +54,7 @@ module.exports = {
 
     let projectPackageInfo = require(application.rootPath + '/package.json')
 
-    let sindriPackageInfo = require('../../package.json')
+    let sindriPackageInfo = require('../package.json')
 
     /**
      * Rota para acesso a recursos estáticos (ex: jpeg, html, js etc...)

@@ -18,7 +18,7 @@ const fs = require('fs')
 const path = require('path')
 
 // Carrega atributos default no config
-let defaultConfigPath = path.join(__dirname, '../config.default.yaml')
+const defaultConfigPath = path.join(__dirname, '../config.default.yaml')
 config.util.setModuleDefaults('sindri', yaml.safeLoad(fs.readFileSync(defaultConfigPath, 'utf8')))
 
 module.exports = config

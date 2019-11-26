@@ -7,4 +7,4 @@
  */
 'use strict'
 
-module.exports = require('./src/library/config')
+module.exports = require('./library/config')

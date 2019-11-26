@@ -7,4 +7,4 @@
  */
 'use strict'
 
-module.exports = require('./src/library/controller')
+module.exports = require('./library/controller')

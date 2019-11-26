@@ -7,4 +7,4 @@
  */
 'use strict'
 
-module.exports = require('./src/library/server')
+module.exports = require('./library/server')
