@@ -36,7 +36,8 @@
     "config.js",
     "controller.js",
     "logger.js",
-    "server.js"
+    "server.js",
+    "config.default.yaml"
   ],
   "devDependencies": {
     "babel-eslint": "^10.0.3",
