@@ -31,7 +31,7 @@
     ]
   },
   "files": [
-    "src",
+    "library",
     "application.js",
     "config.js",
     "controller.js",
