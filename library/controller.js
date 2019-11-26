@@ -17,16 +17,14 @@
 'use strict'
 
 const path = require('path')
-const {logger} = require('./logger')
-const {isString} = require('lodash')
+const { logger } = require('./logger')
+const { isString } = require('lodash')
 const consolidate = require('consolidate')
 
-let paths = {}
+const paths = {}
 
 class Controller {
-
-  constructor() {
-
+  constructor () {
     console.log('Instanciando Controller')
 
     // Define classe como abastrata
@@ -146,46 +144,45 @@ class Controller {
      * @type {SCWorker}
      */
     this.socketWorker = undefined
-
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Métodos Auxiliares para Criação de Rotas e API REST
   // Outros métodos podem ser acessodos utilizando this.app (objeto que refêrencia instancia express usada na aplicação)
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  all() {
+  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  all () {
     this._validate('ALL', arguments[0])
     this.router.all.apply(this.router, arguments)
   }
 
-  use() {
+  use () {
     logger.debug('USE:', isString(arguments[0]) ? arguments[0] : '')
     this.router.use.apply(this.router, arguments)
   }
 
-  post() {
+  post () {
     this._validate('POST', arguments[0])
     this.router.post.apply(this.router, arguments)
   }
 
-  get() {
+  get () {
     this._validate('GET', arguments[0])
     this.router.get.apply(this.router, arguments)
   }
 
-  put() {
+  put () {
     this._validate('PUT', arguments[0])
     this.router.put.apply(this.router, arguments)
   }
 
-  delete() {
+  delete () {
     this._validate('DELETE', arguments[0])
     this.router.delete.apply(this.router, arguments)
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Método Auxiliar para View (Template)
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Renderiza um template usando a biblioteca Consolidate. (Usada pelo express internamente)
@@ -201,11 +198,9 @@ class Controller {
    *
    * @returns {Promise<void>}
    */
-  async view(templatePath, locals = {}, engine = 'handlebars') {
-
-    let viewPath = path.join(this.appPath, 'views', templatePath)
-    return await this._renderView(viewPath, locals, engine)
-
+  async view (templatePath, locals = {}, engine = 'handlebars') {
+    const viewPath = path.join(this.appPath, 'views', templatePath)
+    return this._renderView(viewPath, locals, engine)
   }
 
   /**
@@ -213,7 +208,7 @@ class Controller {
    * @param ms
    * @returns {Promise<void>}
    */
-  async sleep(ms) {
+  async sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
@@ -229,8 +224,7 @@ class Controller {
    *
    * @returns {Promise<void>}
    */
-  async remoteView(applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
-
+  async remoteView (applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
     if (!this.applicationsPath[applicationName]) {
       throw new Error(`Application '${applicationName}' not found. Available: (${Object.keys(this.applicationsPath)})`)
     }
@@ -239,10 +233,9 @@ class Controller {
       throw new Error(`App '${appName}' not found. Available: (${Object.keys(this.applicationsPath[applicationName])})`)
     }
 
-    let viewPath = path.join(this.applicationsPath[applicationName][appName], 'views', templatePath)
+    const viewPath = path.join(this.applicationsPath[applicationName][appName], 'views', templatePath)
 
-    return await this._renderView(viewPath, locals, engine)
-
+    return this._renderView(viewPath, locals, engine)
   }
 
   /**
@@ -255,15 +248,14 @@ class Controller {
    * @returns {Promise<void>}
    * @private
    */
-  async _renderView(viewPath, locals, engine) {
+  async _renderView (viewPath, locals, engine) {
+    const templateEngine = consolidate[engine]
 
-    let templateEngine = consolidate[engine]
-
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// //////////////////////////////////////////////////////////////////////////////////////////////////////
     // Helpers para o template, são funcções que podem ser chamada no template para realizar determinada ação
     // Nota: Não é compatível com todos os templates (Atualmente handlerbars)
-    /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    locals['helpers'] = {
+    /// //////////////////////////////////////////////////////////////////////////////////////////////////////
+    locals.helpers = {
 
       /**
        * Retorna o caminho completo do  Asset passando apenas o nome do arquivo
@@ -277,83 +269,58 @@ class Controller {
        * @returns {*|string|*}
        */
       '@asset': (...args) => {
-
-        ///////////////////////////////////////////////////////
-        // (1) Argumento passado pelo usuario (assetPath)
-        ///////////////////////////////////////////////////////
         if (args.length === 2) {
-
-          let [assetPath,] = args
+          // (1) Argumento passado pelo usuario (assetPath)
+          const [assetPath] = args
           return path.join(this.staticBaseUrl, this.applicationName, this.appName, assetPath)
-        }
-
-        ///////////////////////////////////////////////////////
-        // (2) Argumentos passado pelo usuario (appName, assetPath)
-        ///////////////////////////////////////////////////////
-        else if (args.length === 3) {
-
-          let [appName, assetPath] = args
+        } else if (args.length === 3) {
+          // (2) Argumentos passado pelo usuario (appName, assetPath)
+          const [appName, assetPath] = args
           return path.join(this.staticBaseUrl, this.applicationName, appName, assetPath)
-
-        }
-
-        ///////////////////////////////////////////////////////
-        // (3) Argumentos passado pelo usuario (applicationName, appName, assetPath)
-        ///////////////////////////////////////////////////////
-        else if (args.length === 4) {
-
-          let [applicationName, appName, assetPath] = args
+        } else if (args.length === 4) {
+          // (3) Argumentos passado pelo usuario (applicationName, appName, assetPath)
+          const [applicationName, appName, assetPath] = args
           return path.join(this.staticBaseUrl, applicationName, appName, assetPath)
-
         } else {
-
           throw new Error('Invalid number of arguments. Must be between 1 and 3')
         }
-
       }
 
     }
 
-    return await templateEngine(viewPath, locals)
-
+    return templateEngine(viewPath, locals)
   }
 
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Métodos que podem ser estendidos e implementados na classe filha para Criação de Midleware, Serviços ou Rotas
   // Não deve ser chamado diretamente
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   /**
    * Método abstrado para criação de Midleware Pré
    */
-  async pre() {
-
+  async pre () {
     logger.debug('Middleware pre not implemented')
-
   }
 
   /**
    * Método abstrado para criação de Midleware Pós
    */
-  async pos() {
-
+  async pos () {
     logger.debug('Middleware pos not implemented')
-
   }
 
   /**
    * Método abstrato Setup, utilizado para execução inicial
    */
-  async setup() {
-
+  async setup () {
     logger.debug('Setup not implemented')
-
   }
 
   /**
    * Método Abstrado Router, usado para configurar Rotas
    */
-  async route() {
+  async route () {
     logger.debug('No route configured')
   }
 
@@ -364,13 +331,12 @@ class Controller {
    * @param path
    * @private
    */
-  _validate(method, path) {
-
+  _validate (method, path) {
     if (!isString(path)) throw new TypeError('path must be String!')
 
     logger.debug(method + ':', path)
 
-    let h = [method, path].toString()
+    const h = [method, path].toString()
 
     if (paths[h]) {
       throw new Error(`The route '${paths[h].method}: ${paths[h].path}', which is being defined in app '${this.appName}', has already been defined in the following app: '${paths[h].app}'`)
@@ -381,9 +347,7 @@ class Controller {
         app: this.appName
       }
     }
-
   }
-
 }
 
 module.exports = Controller

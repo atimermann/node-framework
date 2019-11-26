@@ -13,7 +13,7 @@
 
 const path = require('path')
 const fs = require('fs-extra')
-const {logger} = require('./logger')
+const { logger } = require('./logger')
 
 module.exports = {
 
@@ -24,26 +24,22 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getAssets(applications) {
+  async getAssets (applications) {
+    const assets = []
 
-    let assets = []
-
-    for (let application of applications) {
-
-      let appsPath = path.join(application.path, 'apps')
+    for (const application of applications) {
+      const appsPath = path.join(application.path, 'apps')
 
       if (!await fs.pathExists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
 
-      for (let asset of await this._getAssetsByApps(appsPath, application.name)) {
+      for (const asset of await this._getAssetsByApps(appsPath, application.name)) {
         assets.push(asset)
       }
-
     }
 
     return assets
-
   },
 
   /**
@@ -58,37 +54,31 @@ module.exports = {
    *
    * @private
    */
-  async _getAssetsByApps(appsPath, applicationName) {
+  async _getAssetsByApps (appsPath, applicationName) {
+    const assets = []
 
-    let assets = []
-
-    for (let appName of await fs.readdir(appsPath)) {
-
+    for (const appName of await fs.readdir(appsPath)) {
       logger.debug(`Carregando assets do app: '${appName}'`)
 
-      let assetsPath = path.join(appsPath, appName, 'assets')
+      const assetsPath = path.join(appsPath, appName, 'assets')
 
       logger.debug(` APP NAME   : '${appName}'`)
       logger.debug(` ASSET PATH   : '${assetsPath}'`)
 
       if (await fs.pathExists(assetsPath)) {
+        const assetsFile = await fs.readdir(assetsPath)
 
-        let assetsFile = await fs.readdir(assetsPath)
-
-        for (let assetFile of assetsFile) {
+        for (const assetFile of assetsFile) {
           assets.push({
             filePath: path.join(assetsPath, assetFile),
             applicationName,
             appName
           })
         }
-
       }
-
     }
 
     return assets
-
   },
 
   /**
@@ -97,26 +87,23 @@ module.exports = {
    * @param applications    {string<Array>}  Lista de aplicações
    * @returns {Promise<Array>}
    */
-  async getApps(applications) {
+  async getApps (applications) {
+    const apps = []
 
-    let apps = []
-
-    for (let application of applications) {
-
-      let appsPath = path.join(application.path, 'apps')
+    for (const application of applications) {
+      const appsPath = path.join(application.path, 'apps')
 
       if (!await fs.pathExists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
 
-      for (let appName of await fs.readdir(appsPath)) {
+      for (const appName of await fs.readdir(appsPath)) {
         apps.push({
           path: path.join(appsPath, appName),
           applicationName: application.name,
           appName
         })
       }
-
     }
 
     return apps
@@ -130,26 +117,23 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getControllers(applications) {
+  async getControllers (applications) {
+    const controllersInstances = []
 
-    let controllersInstances = []
-
-    for (let application of applications) {
-
+    for (const application of applications) {
       logger.info(`Carregando aplicação '${application.name}'`)
       logger.debug(` APPLICATION NAME   : '${application.name}'`)
       logger.debug(` APPLICATION ID     : '${application.id}'`)
       logger.debug(` APPLICATION PATH   : '${application.path}'`)
       logger.debug(` APPLICATION OPTIONS: '${JSON.stringify(application.options)}'`)
 
-      let appsPath = path.join(application.path, 'apps')
+      const appsPath = path.join(application.path, 'apps')
 
       if (!await fs.pathExists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
 
-      for (let controllerInstance of await this._getControllersInstanceByApps(appsPath)) {
-
+      for (const controllerInstance of await this._getControllersInstanceByApps(appsPath)) {
         // Define Atributos da Aplicação ao Controller
         controllerInstance.applicationName = application.name
         controllerInstance.applicationPath = application.path
@@ -157,9 +141,7 @@ module.exports = {
         controllerInstance.options = application.options
 
         controllersInstances.push(controllerInstance)
-
       }
-
     }
 
     return controllersInstances
@@ -173,37 +155,30 @@ module.exports = {
    * @returns {Promise<Array>} Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByApps(appsPath) {
+  async _getControllersInstanceByApps (appsPath) {
+    const controllersInstances = []
 
-    let controllersInstances = []
-
-    for (let appName of await fs.readdir(appsPath)) {
-
+    for (const appName of await fs.readdir(appsPath)) {
       logger.info(`Carregando app '${appName}'`)
 
-      let controllersPath = path.join(appsPath, appName, 'controllers')
-      let appPath = path.join(appsPath, appName)
+      const controllersPath = path.join(appsPath, appName, 'controllers')
+      const appPath = path.join(appsPath, appName)
 
       logger.debug(` APP NAME   : '${appName}'`)
       logger.debug(` APP PATH   : '${appPath}'`)
 
       if (await fs.pathExists(controllersPath)) {
-
-        for (let controllerInstance of await this._getControllersInstanceByControllers(controllersPath)) {
-
+        for (const controllerInstance of await this._getControllersInstanceByControllers(controllersPath)) {
           // Define Atributos da app ao Controller
           controllerInstance.appName = appName
           controllerInstance.appPath = appPath
 
           controllersInstances.push(controllerInstance)
         }
-
       }
-
     }
 
     return controllersInstances
-
   },
 
   /**
@@ -214,28 +189,25 @@ module.exports = {
    * @returns {Promise<Array>}  Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByControllers(controllersPath) {
+  async _getControllersInstanceByControllers (controllersPath) {
+    const controllersInstances = []
 
-    let controllersInstances = []
-
-    for (let controllerName of await fs.readdir(controllersPath)) {
-
-      let controllerPath = path.join(controllersPath, controllerName)
+    for (const controllerName of await fs.readdir(controllersPath)) {
+      const controllerPath = path.join(controllersPath, controllerName)
 
       logger.info(`Carregando controller '${path.basename(controllerName, '.js')}'`)
       logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
       logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
 
-      let Controller = require(controllerPath)
+      const Controller = require(controllerPath)
 
-      let controllerInstance = new Controller()
+      const controllerInstance = new Controller()
       controllerInstance.controllerName = path.basename(controllerName, '.js')
 
       controllersInstances.push(controllerInstance)
     }
 
     return controllersInstances
-
   }
 
 }

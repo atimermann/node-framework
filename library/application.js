@@ -13,12 +13,11 @@
  */
 'use strict'
 
-const {logger} = require('./logger')
-const {defaults} = require('lodash')
+const { logger } = require('./logger')
+const { defaults } = require('lodash')
 const crypto = require('crypto')
 
 class Application {
-
   /**
    *
    * @param path    {string}  Caminho físico da aplicação (Deve ser definido utilizando __dirname)
@@ -27,8 +26,7 @@ class Application {
    *                          via código, paraatributos de usuário utilizar config
    *
    */
-  constructor(path, name, options = {}) {
-
+  constructor (path, name, options = {}) {
     logger.info(`Instanciando aplicação '${name}'...`)
 
     if (!name) throw new Error('Attribute "name" is required!')
@@ -66,12 +64,11 @@ class Application {
     /**
      * Identificador ùnico para a aplicação
      */
-    let current_date = (new Date()).valueOf().toString()
-    let random = Math.random().toString()
-    this.id = crypto.createHash('sha1').update(current_date + random).digest('hex')
+    const currentDate = (new Date()).valueOf().toString()
+    const random = Math.random().toString()
+    this.id = crypto.createHash('sha1').update(currentDate + random).digest('hex')
 
     this._addApplication(path, name, this.id, this.options)
-
   }
 
   /**
@@ -80,15 +77,12 @@ class Application {
    * @param application {Application} Instância da aplicação
    * @param customOptions     {object}      Lista de atributos da aplicação
    */
-  loadAppplication(application, customOptions) {
-
-    if (this.constructor.name !== 'Application')
-      throw new TypeError('application must be instance of Application')
+  loadAppplication (application, customOptions) {
+    if (this.constructor.name !== 'Application') { throw new TypeError('application must be instance of Application') }
 
     logger.info(`Carregando App '${application.name}'. Path: '${application.path}'`)
 
-    for (let {path, name, id, options} of application.applications) {
-
+    for (let { path, name, id, options } of application.applications) {
       // Altera atributos da aplicação que está sendo carregada (Subaplicações apenas carrega)
       if (id === application.id) {
         options = defaults(customOptions, options)
@@ -96,7 +90,6 @@ class Application {
 
       this._addApplication(path, name, id, options)
     }
-
   }
 
   /**
@@ -108,8 +101,7 @@ class Application {
    *
    * @returns {{name: string, rootPath: string, applications: Array}}
    */
-  getApplicationData() {
-
+  getApplicationData () {
     return {
       // Nome da aplicação Principal
       name: this.name,
@@ -120,7 +112,6 @@ class Application {
       // Lista de aplicaçações, inclui aplicação principal e subaplicações
       applications: this.applications
     }
-
   }
 
   /**
@@ -132,17 +123,14 @@ class Application {
    * @param options {object}
    * @private
    */
-  _addApplication(path, name, id, options) {
-
+  _addApplication (path, name, id, options) {
     this.applications.push({
       name,
       path,
       id,
       options
     })
-
   }
 }
 
 module.exports = Application
-

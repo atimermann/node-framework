@@ -7,6 +7,6 @@
  */
 'use strict'
 
-const {logger} = require('./library/logger')
+const { logger } = require('./library/logger')
 
 module.exports = logger

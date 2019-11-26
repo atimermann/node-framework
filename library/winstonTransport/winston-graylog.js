@@ -21,7 +21,7 @@ const https = require('https')
 const Transport = require('winston-transport')
 
 class Log2gelf extends Transport {
-  constructor(options) {
+  constructor (options) {
     super(options)
 
     this.name = options.name || 'log2gelf'
@@ -49,15 +49,12 @@ class Log2gelf extends Transport {
       const tcpGelf = this.sendTCPGelf()
       this.send = tcpGelf.send
       this.end = tcpGelf.end
-    }
-
-    else if (this.protocol === 'http' || this.protocol === 'https') this.send = this.sendHTTPGelf(this.host, this.port, false)
+    } else if (this.protocol === 'http' || this.protocol === 'https') this.send = this.sendHTTPGelf(this.host, this.port, false)
     else throw new TypeError('protocol shoud be one of the following: tcp, tls, http or https')
 
     // @agt Define atributos do Cluster
     this.clusterNode = null
     this.clusterLeader = null
-
   }
 
   /**
@@ -80,7 +77,7 @@ class Log2gelf extends Transport {
    * Open a TCP socket and return a logger funtion
    * @return { Function } logger – logger(JSONlogs)
    */
-  sendTCPGelf() {
+  sendTCPGelf () {
     const options = {
       host: this.host,
       port: this.port,
@@ -118,10 +115,10 @@ class Log2gelf extends Transport {
     })
 
     return {
-      send(msg) {
+      send (msg) {
         client.write(`${msg}\0`)
       },
-      end() {
+      end () {
         if (client.timeout_id) {
           clearTimeout(client.timeout_id)
         }
@@ -135,7 +132,7 @@ class Log2gelf extends Transport {
    * Set HTTP(S) connection and return logger function
    * @return { Function } logger – logger(JSONlogs)
    */
-  sendHTTPGelf() {
+  sendHTTPGelf () {
     const options = {
       port: this.port,
       hostname: this.host,
@@ -173,7 +170,7 @@ class Log2gelf extends Transport {
    * @param { Object } info – log object
    * @param { Function } callback
    */
-  log(info, callback) {
+  log (info, callback) {
     if (this.silent) {
       callback()
       return
@@ -219,13 +216,10 @@ class Log2gelf extends Transport {
    * @param node
    * @param leader
    */
-  updateClusterInfo(node, leader) {
-
+  updateClusterInfo (node, leader) {
     this.clusterNode = node
     this.clusterLeader = leader
-
   }
-
 }
 
 module.exports = Log2gelf

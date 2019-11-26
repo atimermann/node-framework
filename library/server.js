@@ -18,7 +18,7 @@ const config = require('./config')
 const os = require('os')
 const _ = require('lodash')
 const path = require('path')
-const {logger} = require('./logger')
+const { logger } = require('./logger')
 const Application = require('./application')
 
 module.exports = {
@@ -28,27 +28,21 @@ module.exports = {
    *
    * @param application {Application}
    */
-  init(application) {
-
+  init (application) {
     try {
-
       if (!(application instanceof Application)) throw new TypeError('application must be instance of Application')
 
-      let clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
+      const clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
 
       logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
 
       clusterMode
         ? this.loadCluster(application)
         : this.loadServer(application)
-
     } catch (error) {
-
       logger.error(error.stack)
       process.exit()
-
     }
-
   },
 
   /**
@@ -56,19 +50,18 @@ module.exports = {
    *
    * @param application {Application}
    */
-  loadCluster(application) {
-
+  loadCluster (application) {
     const SocketCluster = require('socketcluster')
 
-    let options = _.clone(config.get('sindri.cluster'))
+    const options = _.clone(config.get('sindri.cluster'))
 
-    //The path to a file used to bootstrap worker processes
+    // The path to a file used to bootstrap worker processes
     options.workerController = path.join(__dirname, 'worker.js')
 
-    //The path to a file used to bootstrap broker processes
+    // The path to a file used to bootstrap broker processes
     options.brokerController = null
 
-    //The path to a file used to bootstrap the workerCluster process
+    // The path to a file used to bootstrap the workerCluster process
     options.workerClusterController = null
 
     // TODO: Fazer um loop em todos os atributos definidos em config.default e verificar se existe na variavel de ambiente de forma dinamica ex: 'CLUSTER_' + 'attribute'
@@ -84,7 +77,6 @@ module.exports = {
     options.application = application.getApplicationData()
 
     new SocketCluster(options)
-
   },
 
   /**
@@ -92,11 +84,9 @@ module.exports = {
    *
    * @param application {Application}
    */
-  loadServer(application) {
-
+  loadServer (application) {
     const Kernel = require('./kernel')
     Kernel.run(application.getApplicationData())
-
   }
 
 }

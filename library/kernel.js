@@ -17,13 +17,13 @@
  */
 'use strict'
 
-const {logger} = require('./logger')
+const { logger } = require('./logger')
 const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const compression = require('compression')
-const {Writable} = require('stream')
+const { Writable } = require('stream')
 const ApplicationController = require('./applicationController')
 const os = require('os')
 const path = require('path')
@@ -43,18 +43,17 @@ module.exports = {
    * @param scWorker    {SCWorker}  Objeto SCWorker (https://socketcluster.io/#!/docs/api-scworker) instancia do Cluster atual
    *
    */
-  async run(application, scWorker) {
-
+  async run (application, scWorker) {
     logger.info('Inicializando Sindri...')
 
     // Deserializa informações da aplicação
     // let application = JSON.parse(serializedApplication)
 
-    let httpServer = http.createServer()
+    const httpServer = http.createServer()
 
-    let projectPackageInfo = require(application.rootPath + '/package.json')
+    const projectPackageInfo = require(application.rootPath + '/package.json')
 
-    let sindriPackageInfo = require('../package.json')
+    const sindriPackageInfo = require('../package.json')
 
     /**
      * Rota para acesso a recursos estáticos (ex: jpeg, html, js etc...)
@@ -95,7 +94,7 @@ module.exports = {
     logger.info('==============================================================')
 
     // Configura ExpressJs
-    let app = this._configureExpressHttpServer(httpServer, application)
+    const app = this._configureExpressHttpServer(httpServer, application)
 
     // Carrega Aplicações
     await this._loadApplications(app, application, scWorker)
@@ -104,7 +103,6 @@ module.exports = {
     this._startHttpServer(httpServer)
 
     logger.info('Kernel Loaded!')
-
   },
 
   /**
@@ -118,23 +116,22 @@ module.exports = {
    * @returns {Object}  Objeto Express
    * @private
    */
-  _configureExpressHttpServer(httpServer, application) {
-
-    let app = express()
+  _configureExpressHttpServer (httpServer, application) {
+    const app = express()
 
     httpServer.on('request', app)
 
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     // Log de Acesso
     // Deve ser registrado antes dos demais middleware para registrar todos os logs
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     app.use(
       morgan(
         config.get('sindri.server.log.format'),
         {
 
           stream: new Writable({
-            write(chunk, encoding, callback) {
+            write (chunk, encoding, callback) {
               logger.info('[HTTP] ' + chunk.toString('utf8', 0, chunk.length - 1))
               callback()
             }
@@ -143,54 +140,47 @@ module.exports = {
       )
     )
 
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     // Segurança
     // Ref: https://helmetjs.github.io/
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     app.use(helmet())
 
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     // Cors
     // TODO: https://github.com/expressjs/cors
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     app.use((req, res, next) => {
-
       // res.header('Access-Control-Allow-Origin', '*');
       // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
       // res.header('Access-Control-Allow-Headers', 'Content-Type');
       next()
     })
 
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     // TODO: Parametrizar possibilidade de usar CDN ou servidor separado
     // Arquivos Estático
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
 
     if (!this.cdn) {
-
       // ref: https://github.com/zeit/pkg#snapshot-filesystem
       let sourceStaticFiles
 
       if (config.get('sindri.server.loadStaticFromPackage')) {
-
         sourceStaticFiles = path.join(application.rootPath, 'public')
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
-
       } else {
-
         sourceStaticFiles = path.join(process.cwd(), 'public')
         logger.info(`Carregando arquivos estáticos do local (${sourceStaticFiles})`)
-
       }
 
       app.use(this.staticRoute, express.static(sourceStaticFiles))
-
     }
 
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     // BodyParser
     // Ref: https://github.com/expressjs/body-parser
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     app.use(bodyParser.urlencoded({
       extended: false,
       limit: config.get('sindri.server.urlenconded.limit')
@@ -201,13 +191,12 @@ module.exports = {
       limit: config.get('sindri.server.json.limit')
     }))
 
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     // Compressão
-    ////////////////////////////////////////////////////
+    /// /////////////////////////////////////////////////
     app.use(compression())
 
     return app
-
   },
 
   /**
@@ -219,30 +208,28 @@ module.exports = {
    *
    * @private
    */
-  async _loadApplications(app, application, scWorker) {
-
-    let controllers = []
+  async _loadApplications (app, application, scWorker) {
+    const controllers = []
 
     /**
      * Arvore de caminho das aplicações
      *
      * @type {{}}
      */
-    let applicationPathTree = {}
+    const applicationPathTree = {}
 
-    //////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////
     // Carrega Controllers
-    //////////////////////////////////////////////////////////////////////////////
-    for (let controller of await ApplicationController.getControllers(application.applications)) {
-
-      /////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////
+    for (const controller of await ApplicationController.getControllers(application.applications)) {
+      /// //////////////////////////////////////////
       // Instancia do Expressjs
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       controller.app = app
 
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       // Cria Rota Especifica para este controlador
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       controller.router = express.Router({
         strict: true
       })
@@ -254,9 +241,9 @@ module.exports = {
 
       applicationPathTree[controller.applicationName][controller.appName] = controller.appPath
 
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       // Static / CDN
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
 
       if (this.cdn) {
         controller.staticBaseUrl = this.cdnUrl
@@ -264,43 +251,39 @@ module.exports = {
         controller.staticBaseUrl = this.staticRoute
       }
 
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       // SocketCluster
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
 
       if (scWorker !== undefined) {
-
-        //Ref: https://socketcluster.io/#!/docs/api-scserver
+        // Ref: https://socketcluster.io/#!/docs/api-scserver
         controller.socketServer = scWorker.scServer
         controller.socketWorker = scWorker
-
       }
 
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       // Adiciona na Lista de controllers
-      /////////////////////////////////////////////
+      /// //////////////////////////////////////////
       controllers.push(controller)
-
     }
 
-    for (let controller of controllers) {
+    for (const controller of controllers) {
       controller.applicationsPath = applicationPathTree
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////
     // middleware - PRÉ
-    //////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////
 
-    for (let controller of controllers) {
+    for (const controller of controllers) {
       await controller.pre()
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////
     // Controller
-    //////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////
 
-    for (let controller of controllers) {
-
+    for (const controller of controllers) {
       // Configuração
       await controller.setup()
 
@@ -309,18 +292,16 @@ module.exports = {
 
       // Retorna e define Rota Configurada pelo controller
       app.use(controller.router)
-
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////
     // middleware - PÓS
-    //////////////////////////////////////////////////////////////////////////////////////
-    for (let controller of controllers) {
+    /// ///////////////////////////////////////////////////////////////////////////////////
+    for (const controller of controllers) {
       await controller.pos()
     }
 
     logger.debug('Applications Loaded!')
-
   },
 
   /**
@@ -328,23 +309,19 @@ module.exports = {
    *
    * @param httpServer
    */
-  _startHttpServer(httpServer) {
-
-    let port = process.env.PORT || config.get('sindri.server.port')
+  _startHttpServer (httpServer) {
+    const port = process.env.PORT || config.get('sindri.server.port')
 
     logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)
 
     httpServer.listen(port, () => {
-
       logger.info('--------------------------------------------------------------')
       logger.info('Address:' + httpServer.address().address)
       logger.info('Port   :' + httpServer.address().port)
       logger.info('Family :' + httpServer.address().family)
       logger.info('--------------------------------------------------------------')
       logger.info('Servidor http iniciado!')
-
     })
-
   }
 
 }
