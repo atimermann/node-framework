@@ -51,8 +51,6 @@ module.exports = {
 
     const httpServer = http.createServer()
 
-    const projectPackageInfo = require(application.rootPath + '/package.json')
-
     const sindriPackageInfo = require('../package.json')
 
     /**
@@ -90,7 +88,7 @@ module.exports = {
     logger.info(`Platform           : ${os.platform()}`)
     logger.info(`Arch               : ${os.arch()}`)
     logger.info(`Sindri Version     : ${sindriPackageInfo.version}`)
-    logger.info(`Application Version: ${projectPackageInfo.version}`)
+    logger.info(`Application Version: ${process.env.npm_package_version}`)
     logger.info('==============================================================')
 
     // Configura ExpressJs
