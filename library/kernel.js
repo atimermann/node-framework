@@ -28,6 +28,7 @@ const ApplicationController = require('./applicationController')
 const os = require('os')
 const path = require('path')
 const http = require('http')
+const figlet = require('figlet')
 
 // const config = require('../vendor/config/lib/config') // Fix para funcionar com pkg, projeto config não comṕativel, copiado para vendor
 const config = require('config')
@@ -44,7 +45,9 @@ module.exports = {
    *
    */
   async run (application, scWorker) {
-    logger.info('Inicializando Sindri...')
+    logger.info('Inicializando Sindri Kernel...')
+
+    if (process.env.NODE_ENV === undefined) throw new Error('Environment is not defined, set $NODE_ENV.')
 
     // Deserializa informações da aplicação
     // let application = JSON.parse(serializedApplication)
@@ -77,6 +80,7 @@ module.exports = {
      */
     this.cdnUrl = process.env.CDN_URL || config.get('sindri.server.cdnUrl')
 
+    console.log(figlet.textSync(`\n${application.name}`))
     logger.info('==============================================================')
     logger.info(`Project            : ${application.name}`)
     logger.info(`Root Path          : ${application.rootPath}`)
