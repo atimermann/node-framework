@@ -23,6 +23,7 @@ const consolidate = require('consolidate')
 
 const paths = {}
 
+// TODO: Migrar para Atributo de Classe quando estiver compatível com PKG
 class Controller {
   constructor () {
     console.log('Instanciando Controller')
@@ -150,34 +151,95 @@ class Controller {
   // Métodos Auxiliares para Criação de Rotas e API REST
   // Outros métodos podem ser acessodos utilizando this.app (objeto que refêrencia instancia express usada na aplicação)
   /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  all () {
-    this._validate('ALL', arguments[0])
-    this.router.all.apply(this.router, arguments)
+  async all (...args) {
+    this.processRestMethod('all', ...args)
   }
 
-  use () {
-    logger.debug('USE:', isString(arguments[0]) ? arguments[0] : '')
-    this.router.use.apply(this.router, arguments)
+  async use (...args) {
+    this.processRestMethod('use', ...args)
   }
 
-  post () {
-    this._validate('POST', arguments[0])
-    this.router.post.apply(this.router, arguments)
+  async post (...args) {
+    this.processRestMethod('post', ...args)
   }
 
-  get () {
-    this._validate('GET', arguments[0])
-    this.router.get.apply(this.router, arguments)
+  async get (...args) {
+    this.processRestMethod('get', ...args)
   }
 
-  put () {
-    this._validate('PUT', arguments[0])
-    this.router.put.apply(this.router, arguments)
+  async put (...args) {
+    this.processRestMethod('put', ...args)
   }
 
-  delete () {
-    this._validate('DELETE', arguments[0])
-    this.router.delete.apply(this.router, arguments)
+  async delete (...args) {
+    this.processRestMethod('delete', ...args)
+  }
+
+  async patch (...args) {
+    this.processRestMethod('patch', ...args)
+  }
+
+  /**
+   * Método que processa resposta da API, formatando  JSON de retorno em um padrão.
+   * Obtém resposta da api e cria uma resposta padronizada.
+   *
+   * Padrão pode ser modificiado estendo
+   *
+   * @param lastCallback  {callback}  Função que define API
+   * @param request       {object}    Objeto Request do Express
+   * @param response      {object}    Objeto Response do Express
+   * @param args          {array}     restante dos argumentos do express, normalmente next e value
+   *
+   * @returns {Promise<void>}
+   */
+  async responseHandler (lastCallback, request, response, ...args) {
+    try {
+      response.json({
+        error: false,
+        data: await lastCallback(request, response, ...args)
+      })
+    } catch (err) {
+      const { status, errorInfo } = await this.errorHandler(err, request, response)
+      response.status(status).json(errorInfo)
+    }
+  }
+
+  /**
+   * Tratamento padronizado de erros da API, pode ser estendido pelo usuário para padronizar ou selecionar erros que
+   * serão exibidos
+   *
+   * @param err
+   * @param request
+   * @param response
+   * @returns {Promise<{errorInfo: {error: boolean, message: *}, status: number}>}
+   */
+  async errorHandler (err, request, response) {
+    return {
+      status: 400,
+      errorInfo: {
+        error: true,
+        message: err.message
+      }
+    }
+  }
+
+  async processRestMethod (httpMethod, ...args) {
+    // Obtém ultimo callback e modifica para tratar retornos
+    const lastCallback = args.pop()
+    if (typeof lastCallback === 'function') {
+      // substitui ultimo callback por uma função que processa o ultimo callback (responseHandler)
+      args.push(async (...args) => {
+        await this.responseHandler(lastCallback, ...args)
+      })
+    } else {
+      args.push(lastCallback)
+    }
+
+    // Valida se o caminho já foi utilizado em outro controller
+    this._validate(httpMethod, args[0])
+
+    // finalmente cria rota
+    this.router[httpMethod](...args)
   }
 
   /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,7 +267,8 @@ class Controller {
 
   /**
    * Await Sleep
-   * @param ms
+   *
+   * @param ms  {int} Tempo de espera em milesegundos
    * @returns {Promise<void>}
    */
   async sleep (ms) {
