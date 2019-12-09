@@ -17,7 +17,7 @@ class Worker extends SCWorker {
   // Override the run function.
   // It will be executed when the worker is ready.
   // noinspection JSUnusedGlobalSymbols
-  run () {
+  async run () {
     // Inicializando Worker...
     // [Active] SocketCluster started
     // Version: 14.3.2
@@ -33,7 +33,7 @@ class Worker extends SCWorker {
 
       logger.info(`Inicializando Worker ${this.id} ${(this.isLeader) ? '(Leader)' : ''}...`)
 
-      Kernel.run(this.options.application, this)
+      await Kernel.run(this.options.application, this)
     } catch (error) {
       logger.error(error.stack)
       process.exit()
