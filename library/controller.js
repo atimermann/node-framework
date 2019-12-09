@@ -194,9 +194,11 @@ class Controller {
    */
   async responseHandler (lastCallback, request, response, ...args) {
     try {
+      const data = await lastCallback(request, response, ...args)
+
       response.json({
         error: false,
-        data: await lastCallback(request, response, ...args)
+        data: data
       })
     } catch (err) {
       const { status, errorInfo } = await this.errorHandler(err, request, response)
@@ -223,9 +225,19 @@ class Controller {
     }
   }
 
+  /**
+   * Intercepta métodos destinados ao Express (GET, POST, etc...) para tratar o retorno do usuário quando utilizando
+   * Await/Async (Promise)
+   *
+   * @param httpMethod  {string}  Método HTTP que será tratado
+   * @param args        {array}   Argumentos do método, callbacks definidos pelo usuário como middlware
+   *
+   * @returns {Promise<void>}
+   */
   async processRestMethod (httpMethod, ...args) {
     // Obtém ultimo callback e modifica para tratar retornos
     const lastCallback = args.pop()
+
     if (typeof lastCallback === 'function') {
       // substitui ultimo callback por uma função que processa o ultimo callback (responseHandler)
       args.push(async (...args) => {

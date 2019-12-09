@@ -41,4 +41,20 @@ class Worker extends SCWorker {
   }
 }
 
-new Worker()
+const workr = new Worker()
+
+workr.on('error', err => {
+  logger.error(err.message)
+})
+
+workr.on('notice', message => {
+  logger.warn(message)
+})
+
+workr.on('exit', message => {
+  logger.error(message)
+})
+
+workr.on('ready', message => {
+  logger.info('Worker is ready to accept requests from users')
+})

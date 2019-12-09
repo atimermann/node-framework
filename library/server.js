@@ -16,12 +16,12 @@ process.env.SUPPRESS_NO_CONFIG_WARNING = 1
 
 const config = require('./config')
 const os = require('os')
-const _ = require('lodash')
-const path = require('path')
-const {logger} = require('./logger')
+const { clone } = require('lodash')
+const { join } = require('path')
+const { logger } = require('./logger')
 const Application = require('./application')
 
-// Adiciona suporte a .env 
+// Adiciona suporte a .env
 require('dotenv').config()
 
 module.exports = {
@@ -31,10 +31,8 @@ module.exports = {
    *
    * @param application {Application}
    */
-  init(application) {
+  init (application) {
     try {
-
-
       if (!(application instanceof Application)) throw new TypeError('application must be instance of Application')
 
       const clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
@@ -55,13 +53,13 @@ module.exports = {
    *
    * @param application {Application}
    */
-  loadCluster(application) {
+  loadCluster (application) {
     const SocketCluster = require('socketcluster')
 
-    const options = _.clone(config.get('sindri.cluster'))
+    const options = clone(config.get('sindri.cluster'))
 
     // The path to a file used to bootstrap worker processes
-    options.workerController = path.join(__dirname, 'worker.js')
+    options.workerController = join(__dirname, 'worker.js')
 
     // The path to a file used to bootstrap broker processes
     options.brokerController = null
@@ -81,7 +79,21 @@ module.exports = {
 
     options.application = application.getApplicationData()
 
-    new SocketCluster(options)
+    const socketCluster = new SocketCluster(options)
+
+    socketCluster.on('ready', message => {
+      logger.info('SocketCluster has booted up and is ready to accept connections.')
+    })
+
+    socketCluster.on('warning', message => {
+      logger.warning(message)
+    })
+
+    socketCluster.on('fail', err => {
+      console.log(err)
+      logger.error(err)
+      process.exit()
+    })
   },
 
   /**
@@ -89,7 +101,7 @@ module.exports = {
    *
    * @param application {Application}
    */
-  loadServer(application) {
+  loadServer (application) {
     const Kernel = require('./kernel')
     Kernel.run(application.getApplicationData())
   }

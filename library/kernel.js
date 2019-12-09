@@ -26,7 +26,7 @@ const compression = require('compression')
 const { Writable } = require('stream')
 const ApplicationController = require('./applicationController')
 const os = require('os')
-const path = require('path')
+const { join } = require('path')
 const http = require('http')
 const figlet = require('figlet')
 
@@ -45,6 +45,8 @@ module.exports = {
    *
    */
   async run (application, scWorker) {
+    global.__BASE = join(application.rootPath, '/')
+
     logger.info('Inicializando Sindri Kernel...')
 
     if (process.env.NODE_ENV === undefined) throw new Error('Environment is not defined, set $NODE_ENV.')
@@ -169,10 +171,10 @@ module.exports = {
       let sourceStaticFiles
 
       if (config.get('sindri.server.loadStaticFromPackage')) {
-        sourceStaticFiles = path.join(application.rootPath, 'public')
+        sourceStaticFiles = join(application.rootPath, 'public')
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
-        sourceStaticFiles = path.join(process.cwd(), 'public')
+        sourceStaticFiles = join(process.cwd(), 'public')
         logger.info(`Carregando arquivos estáticos do local (${sourceStaticFiles})`)
       }
 
