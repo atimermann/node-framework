@@ -20,6 +20,7 @@ const path = require('path')
 const { logger } = require('./logger')
 const { isString } = require('lodash')
 const consolidate = require('consolidate')
+const { performance } = require('perf_hooks')
 
 const paths = {}
 
@@ -241,7 +242,9 @@ class Controller {
     if (typeof lastCallback === 'function') {
       // substitui ultimo callback por uma função que processa o ultimo callback (responseHandler)
       args.push(async (...args) => {
+        const startTimeMeasure = performance.now()
         await this.responseHandler(lastCallback, ...args)
+        this._logRequestInfo(startTimeMeasure, args)
       })
     } else {
       args.push(lastCallback)
@@ -252,6 +255,21 @@ class Controller {
 
     // finalmente cria rota
     this.router[httpMethod](...args)
+  }
+
+  /**
+   * Loga informações sobre a requisição como tempo de execução
+   *
+   * @param startTimeMeasure  {number}  Timestamp do inicio da execução desta requisição
+   * @param args              {array}   Aregumentos enviado para responseHandler
+   *
+   * @private
+   */
+  _logRequestInfo (startTimeMeasure, args) {
+    const durationMeasure = performance.now() - startTimeMeasure
+    const [request, response] = args
+
+    logger.info(`[REQUEST_INFO] ${request.method} ${request.url} ${response.statusCode} +${durationMeasure.toFixed(2)}ms`)
   }
 
   /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

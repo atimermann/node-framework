@@ -21,7 +21,6 @@ const { join } = require('path')
 const { logger } = require('./logger')
 const Application = require('./application')
 
-// Adiciona suporte a .env
 require('dotenv').config()
 
 module.exports = {

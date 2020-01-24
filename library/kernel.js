@@ -30,6 +30,8 @@ const { join } = require('path')
 const http = require('http')
 const figlet = require('figlet')
 
+require('dotenv').config()
+
 // const config = require('../vendor/config/lib/config') // Fix para funcionar com pkg, projeto config não comṕativel, copiado para vendor
 const config = require('config')
 
@@ -49,7 +51,7 @@ module.exports = {
 
     logger.info('Inicializando Sindri Kernel...')
 
-    if (process.env.NODE_ENV === undefined) throw new Error('Environment is not defined, set $NODE_ENV.')
+    if (process.env.NODE_ENV === undefined) throw new Error('Environment is not defined, create an .env file with attribute NODE_ENV.')
 
     // Deserializa informações da aplicação
     // let application = JSON.parse(serializedApplication)
@@ -126,7 +128,7 @@ module.exports = {
     httpServer.on('request', app)
 
     /// /////////////////////////////////////////////////
-    // Log de Acesso
+    // Regista log de acesso no express
     // Deve ser registrado antes dos demais middleware para registrar todos os logs
     /// /////////////////////////////////////////////////
     app.use(

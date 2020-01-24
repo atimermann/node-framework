@@ -10,6 +10,8 @@
  *
  *      const {logger} = require('./logger')
  *
+ *      TODO: https://success.docker.com/article/logging-best-practices
+ *
  */
 'use strict'
 
@@ -80,7 +82,7 @@ const myFormat = format.printf(info => {
   const hrtime = process.hrtime()
   const stop = hrtime[0] + hrtime[1] / 1000000000
 
-  /* eslint-disable-next-line - Eslint não suporte bitInt ainda, por estar no stage3 */
+  /** eslint-disable-next-line - Eslint não suporte bitInt ainda, por estar no stage3 **/
   let time = stop - start
   time = Math.round(time * 1000) / 1000
 
