@@ -1,5 +1,7 @@
 # Guia de Desenvolvimento
 
+**IMPORTANTE:** Erros do **tipo UnhandledPromiseRejectionWarning** são extremamente graves, deve ser tratado 
+imediatamente, representa uma quebra no fluxo Assincrono, provavelmente algum await ou try catch esquecido
 
 * Sempre documentar implementações e alterações do Framework
 * Gerenciamento do projeto no GitLab

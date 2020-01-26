@@ -30,7 +30,7 @@ module.exports = {
    *
    * @param application {Application}
    */
-  init (application) {
+  async init (application) {
     try {
       if (!(application instanceof Application)) throw new TypeError('application must be instance of Application')
 
@@ -39,10 +39,12 @@ module.exports = {
       logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
 
       clusterMode
-        ? this.loadCluster(application)
-        : this.loadServer(application)
+        ? await this.loadCluster(application)
+        : await this.loadServer(application)
     } catch (error) {
-      logger.error(error.stack)
+      process.env.NODE_ENV === 'development'
+        ? console.log(error)
+        : logger.error(`${error.code}\n${error.stack}`)
       process.exit()
     }
   },
@@ -52,7 +54,7 @@ module.exports = {
    *
    * @param application {Application}
    */
-  loadCluster (application) {
+  async loadCluster (application) {
     const SocketCluster = require('socketcluster')
 
     const options = clone(config.get('sindri.cluster'))
@@ -100,9 +102,9 @@ module.exports = {
    *
    * @param application {Application}
    */
-  loadServer (application) {
+  async loadServer (application) {
     const Kernel = require('./kernel')
-    Kernel.run(application.getApplicationData())
+    await Kernel.run(application.getApplicationData())
   }
 
 }
