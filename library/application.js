@@ -18,6 +18,7 @@ const { defaults } = require('lodash')
 const crypto = require('crypto')
 
 class Application {
+
   /**
    *
    * @param path    {string}  Caminho físico da aplicação (Deve ser definido utilizando __dirname)
@@ -132,5 +133,7 @@ class Application {
     })
   }
 }
+
+Application._sindriApplicationClass = true
 
 module.exports = Application
