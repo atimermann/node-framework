@@ -12,10 +12,31 @@
 'use strict'
 
 const path = require('path')
-const fs = require('fs-extra')
-const { logger } = require('./logger')
+// const fs = require('fs-extra')
+const { open, readdir } = require('fs/promises')
+const {logger} = require('./logger')
 
 module.exports = {
+
+  async exists(file) {
+    try {
+      file = await open(file, 'r')
+      await file.close()
+      return true
+
+    } catch (err) {
+
+      if (err) {
+        if (err.code === 'ENOENT') {
+          return false
+        }
+        throw err;
+      }
+    } finally {
+      await file?.close()
+    }
+
+  },
 
   /**
    * Retorna Lista com todos os Assets do projeto incluindo dependencia
@@ -24,13 +45,13 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getAssets (applications) {
+  async getAssets(applications) {
     const assets = []
 
     for (const application of applications) {
       const appsPath = path.join(application.path, 'apps')
 
-      if (!await fs.pathExists(appsPath)) {
+      if (!await this.exists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
 
@@ -54,10 +75,10 @@ module.exports = {
    *
    * @private
    */
-  async _getAssetsByApps (appsPath, applicationName) {
+  async _getAssetsByApps(appsPath, applicationName) {
     const assets = []
 
-    for (const appName of await fs.readdir(appsPath)) {
+    for (const appName of await readdir(appsPath)) {
       logger.debug(`Carregando assets do app: '${appName}'`)
 
       const assetsPath = path.join(appsPath, appName, 'assets')
@@ -65,8 +86,8 @@ module.exports = {
       logger.debug(` APP NAME   : '${appName}'`)
       logger.debug(` ASSET PATH   : '${assetsPath}'`)
 
-      if (await fs.pathExists(assetsPath)) {
-        const assetsFile = await fs.readdir(assetsPath)
+      if (await this.exists(assetsPath)) {
+        const assetsFile = await readdir(assetsPath)
 
         for (const assetFile of assetsFile) {
           assets.push({
@@ -87,17 +108,17 @@ module.exports = {
    * @param applications    {string<Array>}  Lista de aplicações
    * @returns {Promise<Array>}
    */
-  async getApps (applications) {
+  async getApps(applications) {
     const apps = []
 
     for (const application of applications) {
       const appsPath = path.join(application.path, 'apps')
 
-      if (!await fs.pathExists(appsPath)) {
+      if (!await this.exists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
 
-      for (const appName of await fs.readdir(appsPath)) {
+      for (const appName of await readdir(appsPath)) {
         apps.push({
           path: path.join(appsPath, appName),
           applicationName: application.name,
@@ -117,7 +138,7 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getControllers (applications) {
+  async getControllers(applications) {
     const controllersInstances = []
 
     for (const application of applications) {
@@ -129,7 +150,7 @@ module.exports = {
 
       const appsPath = path.join(application.path, 'apps')
 
-      if (!await fs.pathExists(appsPath)) {
+      if (!await this.exists(appsPath)) {
         throw new Error(`Directory 'apps' not exists in application '${application.name}'`)
       }
 
@@ -155,10 +176,10 @@ module.exports = {
    * @returns {Promise<Array>} Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByApps (appsPath) {
+  async _getControllersInstanceByApps(appsPath) {
     const controllersInstances = []
 
-    for (const appName of await fs.readdir(appsPath)) {
+    for (const appName of await readdir(appsPath)) {
       logger.info(`Carregando app '${appName}'`)
 
       const controllersPath = path.join(appsPath, appName, 'controllers')
@@ -167,7 +188,7 @@ module.exports = {
       logger.debug(` APP NAME   : '${appName}'`)
       logger.debug(` APP PATH   : '${appPath}'`)
 
-      if (await fs.pathExists(controllersPath)) {
+      if (await this.exists(controllersPath)) {
         for (const controllerInstance of await this._getControllersInstanceByControllers(controllersPath)) {
           // Define Atributos da app ao Controller
           controllerInstance.appName = appName
@@ -189,10 +210,10 @@ module.exports = {
    * @returns {Promise<Array>}  Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByControllers (controllersPath) {
+  async _getControllersInstanceByControllers(controllersPath) {
     const controllersInstances = []
 
-    for (const controllerName of await fs.readdir(controllersPath)) {
+    for (const controllerName of await readdir(controllersPath)) {
       const controllerPath = path.join(controllersPath, controllerName)
 
       logger.info(`Carregando controller '${path.basename(controllerName, '.js')}'`)

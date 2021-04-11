@@ -181,10 +181,7 @@ class Controller {
   }
 
   /**
-   * Método que processa resposta da API, formatando  JSON de retorno em um padrão.
-   * Obtém resposta da api e cria uma resposta padronizada.
-   *
-   * Padrão pode ser modificiado estendo
+   * Tratamento de erro padrão
    *
    * @param lastCallback  {callback}  Função que define API
    * @param request       {object}    Objeto Request do Express
@@ -195,12 +192,7 @@ class Controller {
    */
   async responseHandler(lastCallback, request, response, ...args) {
     try {
-      const data = await lastCallback(request, response, ...args)
-
-      response.json({
-        error: false,
-        data: data
-      })
+      await lastCallback(request, response, ...args)
     } catch (err) {
       const {status, errorInfo} = await this.errorHandler(err, request, response)
       response.status(status).json(errorInfo)
@@ -236,6 +228,7 @@ class Controller {
    * @returns {Promise<void>}
    */
   async processRestMethod(httpMethod, ...args) {
+
     // Obtém ultimo callback e modifica para tratar retornos
     const lastCallback = args.pop()
 
@@ -250,10 +243,12 @@ class Controller {
       args.push(lastCallback)
     }
 
+    const routePath = args[0]
+
     // Valida se o caminho já foi utilizado em outro controller, se args[0] não for string é um método sem path como
     // use
-    if (typeof path === 'string') {
-      this._validatePath(httpMethod, args[0])
+    if (typeof routePath === 'string') {
+      this._validatePath(httpMethod, routePath)
     }
 
     // finalmente cria rota
