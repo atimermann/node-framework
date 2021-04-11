@@ -146,6 +146,14 @@ class Controller {
      * @type {SCWorker}
      */
     this.socketWorker = undefined
+
+    /**
+     * Caminho Base da aplicação, ex: /api/v1/clients
+     * Funciona como prefixo, não exigindo colocar rota completa sempre
+     *
+     * @type {string}
+     */
+    this.path = undefined
   }
 
   /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////

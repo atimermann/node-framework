@@ -159,3 +159,40 @@ class meuController extends ExtendedController{}
 }
 
 ```
+
+## Rota Padrão
+
+Podemos configurar uma rota padrão no controller, que funcionará como prefixo da rota.
+
+Por exemplo, vamos supor q todas as rotas do nosso controller começa com:
+
+    /api/v1/clients
+
+Para isso basta definir o atributo path:
+
+```javascript
+class HelloWorldController extends Controller {
+  path = '/api/v1/clients'  
+
+  /**
+   * Configuração de Rotas
+   */
+  routes () {
+    /**
+     * API Client
+     */
+    this.get('/', async (request, response) => {
+      response.json(await ClientModel.findAll())
+    })
+
+    this.get('/:id', async (request, response) => {
+      const client = await ClientModel.findById(request.params.id)
+
+      client
+        ? response.json(client)
+        : response.status(404).json(null)
+    })
+  }
+}
+
+```
