@@ -26,7 +26,7 @@ module.exports = {
       // Teste necessário para versão compilada para PKG que funciona de forma diferente
       if (file && typeof file.close === 'function') {
         await file.close()
-      }else{
+      } else {
         console.log(file)
       }
       return true
@@ -41,9 +41,9 @@ module.exports = {
       }
     } finally {
       // Teste necessário para versão compilada para PKG que funciona de forma diferente
-      if (file && typeof file.close === 'function') {
-        await file.close()
-      }
+      // if (file && typeof file.close === 'function') {
+      //   await file.close()
+      // }
     }
 
   },
