@@ -33,7 +33,7 @@ module.exports = {
         throw err;
       }
     } finally {
-      await file?.close()
+      // await file?.close()
     }
 
   },
