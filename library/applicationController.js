@@ -13,15 +13,22 @@
 
 const path = require('path')
 // const fs = require('fs-extra')
-const { open, readdir } = require('fs/promises')
+const {open, readdir} = require('fs/promises')
 const {logger} = require('./logger')
 
 module.exports = {
 
   async exists(file) {
     try {
+
       file = await open(file, 'r')
-      await file.close()
+
+      // Teste necessário para versão compilada para PKG que funciona de forma diferente
+      if (file && typeof file.close === 'function') {
+        await file.close()
+      }else{
+        console.log(file)
+      }
       return true
 
     } catch (err) {
@@ -33,7 +40,10 @@ module.exports = {
         throw err;
       }
     } finally {
-      // await file?.close()
+      // Teste necessário para versão compilada para PKG que funciona de forma diferente
+      if (file && typeof file.close === 'function') {
+        await file.close()
+      }
     }
 
   },
