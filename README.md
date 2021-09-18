@@ -92,6 +92,15 @@ Suporte Integrado à
 
 Outras funcionalidades podem ser facilmente implementada através de apps.
 
+## Gerando Versão
+
+```bash  
+  git commit
+  npm version patch|minor|major
+  npm publish
+```
+
+
 ## Guia de Estilo
 
 Sindri também disponibiliza um guia de estilo para melhorar qualidade e padronização de codificação:
