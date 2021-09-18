@@ -96,8 +96,9 @@ Outras funcionalidades podem ser facilmente implementada através de apps.
 
 ```bash  
   git commit
+  git push
   npm version patch|minor|major
-  npm publish
+  npm publish  
 ```
 
 
