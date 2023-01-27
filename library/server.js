@@ -34,7 +34,7 @@ module.exports = {
     try {
       if (!(application instanceof Application)) throw new TypeError('application must be instance of Application')
 
-      const clusterMode = process.env.CLUSTER_MODE || config.get('clusterMode')
+      const clusterMode = process.env.CLUSTER_MODE || config.get('cluster.enabled')
 
       logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
 
