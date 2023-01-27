@@ -17,16 +17,16 @@
  */
 'use strict'
 
-const {logger} = require('./logger')
+const { logger } = require('./logger')
 const express = require('express')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const compression = require('compression')
-const {Writable} = require('stream')
+const { Writable } = require('stream')
 const ApplicationController = require('./applicationController')
 const os = require('os')
-const {join} = require('path')
+const { join } = require('path')
 const http = require('http')
 const figlet = require('figlet')
 
@@ -46,7 +46,7 @@ module.exports = {
    * @param scWorker    {SCWorker}  Objeto SCWorker (https://socketcluster.io/#!/docs/api-scworker) instancia do Cluster atual
    *
    */
-  async run(application, scWorker) {
+  async run (application, scWorker) {
     global.__BASE = join(application.rootPath, '/')
 
     logger.info('Inicializando Sindri Kernel...')
@@ -122,7 +122,7 @@ module.exports = {
    * @returns {Object}  Objeto Express
    * @private
    */
-  _configureExpressHttpServer(httpServer, application) {
+  _configureExpressHttpServer (httpServer, application) {
     const app = express()
 
     httpServer.on('request', app)
@@ -137,7 +137,7 @@ module.exports = {
         {
 
           stream: new Writable({
-            write(chunk, encoding, callback) {
+            write (chunk, encoding, callback) {
               logger.info('[HTTP] ' + chunk.toString('utf8', 0, chunk.length - 1))
               callback()
             }
@@ -214,7 +214,7 @@ module.exports = {
    *
    * @private
    */
-  async _loadApplications(app, application, scWorker) {
+  async _loadApplications (app, application, scWorker) {
     const controllers = []
 
     /**
@@ -300,7 +300,6 @@ module.exports = {
       controller.path
         ? app.use(controller.path, controller.router)
         : app.use(controller.router)
-
     }
 
     /// ///////////////////////////////////////////////////////////////////////////////////
@@ -318,7 +317,7 @@ module.exports = {
    *
    * @param httpServer
    */
-  _startHttpServer(httpServer) {
+  _startHttpServer (httpServer) {
     const port = process.env.PORT || config.get('sindri.server.port')
 
     logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)

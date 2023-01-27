@@ -60,5 +60,8 @@
   "bugs": {
     "url": "https://github.com/atimermann/sindri-framework/issues"
   },
-  "homepage": "https://github.com/atimermann/sindri-framework#readme"
+  "homepage": "https://github.com/atimermann/sindri-framework#readme",
+  "engines": {
+    "node": ">=14.17"
+  }
 }

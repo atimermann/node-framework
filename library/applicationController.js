@@ -13,14 +13,13 @@
 
 const path = require('path')
 // const fs = require('fs-extra')
-const {open, readdir} = require('fs/promises')
-const {logger} = require('./logger')
+const { open, readdir } = require('fs/promises')
+const { logger } = require('./logger')
 
 module.exports = {
 
-  async exists(file) {
+  async exists (file) {
     try {
-
       file = await open(file, 'r')
 
       // Teste necessário para versão compilada para PKG que funciona de forma diferente
@@ -30,14 +29,12 @@ module.exports = {
         console.log(file)
       }
       return true
-
     } catch (err) {
-
       if (err) {
         if (err.code === 'ENOENT') {
           return false
         }
-        throw err;
+        throw err
       }
     } finally {
       // Teste necessário para versão compilada para PKG que funciona de forma diferente
@@ -45,7 +42,6 @@ module.exports = {
       //   await file.close()
       // }
     }
-
   },
 
   /**
@@ -55,7 +51,7 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getAssets(applications) {
+  async getAssets (applications) {
     const assets = []
 
     for (const application of applications) {
@@ -85,7 +81,7 @@ module.exports = {
    *
    * @private
    */
-  async _getAssetsByApps(appsPath, applicationName) {
+  async _getAssetsByApps (appsPath, applicationName) {
     const assets = []
 
     for (const appName of await readdir(appsPath)) {
@@ -118,7 +114,7 @@ module.exports = {
    * @param applications    {string<Array>}  Lista de aplicações
    * @returns {Promise<Array>}
    */
-  async getApps(applications) {
+  async getApps (applications) {
     const apps = []
 
     for (const application of applications) {
@@ -148,7 +144,7 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getControllers(applications) {
+  async getControllers (applications) {
     const controllersInstances = []
 
     for (const application of applications) {
@@ -186,7 +182,7 @@ module.exports = {
    * @returns {Promise<Array>} Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByApps(appsPath) {
+  async _getControllersInstanceByApps (appsPath) {
     const controllersInstances = []
 
     for (const appName of await readdir(appsPath)) {
@@ -220,7 +216,7 @@ module.exports = {
    * @returns {Promise<Array>}  Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByControllers(controllersPath) {
+  async _getControllersInstanceByControllers (controllersPath) {
     const controllersInstances = []
 
     for (const controllerName of await readdir(controllersPath)) {

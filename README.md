@@ -10,7 +10,7 @@ Para ajudar no desenvolvimento de projetos utilizando o framework, foi criado um
 Instale com o seguinte comando:
 
 ```bash
-$ npm i -g sindri-cli
+$ npm i -g @agtm/sindri-cli
 ```
 
 Para criar um novo projeto digite:
