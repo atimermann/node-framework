@@ -55,6 +55,8 @@ module.exports = {
    * @param application {Application}
    */
   async loadCluster (application) {
+    console.log('DEPRECATED - DEPRECATED - DEPRECATED - DEPRECATED: Versão 14 do socket-cluster está desatualizado.')
+
     const SocketCluster = require('socketcluster')
 
     const options = clone(config.get('cluster'))
