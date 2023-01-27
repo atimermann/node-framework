@@ -66,7 +66,7 @@ module.exports = {
      *
      * @type {string}
      */
-    this.staticRoute = process.env.STATIC_ROUTE || config.get('sindri.server.staticRoute')
+    this.staticRoute = process.env.STATIC_ROUTE || config.get('server.staticRoute')
 
     /**
      * Habilita o acesso a recursos estáticos via CDN (se True desabilita servidor de arquivos estático do Express)
@@ -74,7 +74,7 @@ module.exports = {
      * @type {boolean}
      */
     this.cdn = (process.env.CDN === undefined)
-      ? config.get('sindri.server.cdn')
+      ? config.get('server.cdn')
       : process.env.CDN
 
     /**
@@ -82,7 +82,7 @@ module.exports = {
      *
      * @type {*|value}
      */
-    this.cdnUrl = process.env.CDN_URL || config.get('sindri.server.cdnUrl')
+    this.cdnUrl = process.env.CDN_URL || config.get('server.cdnUrl')
 
     console.log(figlet.textSync(`\n${application.name}`))
     logger.info('==============================================================')
@@ -90,7 +90,7 @@ module.exports = {
     logger.info(`Root Path          : ${application.rootPath}`)
     logger.info(`Node Version       : ${process.version}`)
     logger.info(`Environment        : ${process.env.NODE_ENV}`)
-    logger.info(`Port               : ${process.env.PORT || config.get('sindri.server.port')}`)
+    logger.info(`Port               : ${process.env.PORT || config.get('server.port')}`)
     logger.info(`Pid                : ${process.pid}`)
     logger.info(`Hostname           : ${os.hostname()}`)
     logger.info(`Platform           : ${os.platform()}`)
@@ -133,7 +133,7 @@ module.exports = {
     /// /////////////////////////////////////////////////
     app.use(
       morgan(
-        config.get('sindri.server.log.format'),
+        config.get('server.log.format'),
         {
 
           stream: new Writable({
@@ -172,7 +172,7 @@ module.exports = {
       // ref: https://github.com/zeit/pkg#snapshot-filesystem
       let sourceStaticFiles
 
-      if (config.get('sindri.server.loadStaticFromPackage')) {
+      if (config.get('server.loadStaticFromPackage')) {
         sourceStaticFiles = join(application.rootPath, 'public')
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
@@ -189,12 +189,12 @@ module.exports = {
     /// /////////////////////////////////////////////////
     app.use(bodyParser.urlencoded({
       extended: false,
-      limit: config.get('sindri.server.urlenconded.limit')
+      limit: config.get('server.urlenconded.limit')
     }))
 
     // Configurar Json
     app.use(bodyParser.json({
-      limit: config.get('sindri.server.json.limit')
+      limit: config.get('server.json.limit')
     }))
 
     /// /////////////////////////////////////////////////
@@ -318,7 +318,7 @@ module.exports = {
    * @param httpServer
    */
   _startHttpServer (httpServer) {
-    const port = process.env.PORT || config.get('sindri.server.port')
+    const port = process.env.PORT || config.get('server.port')
 
     logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)
 

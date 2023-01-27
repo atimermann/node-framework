@@ -45,11 +45,11 @@ const transportsList = []
 
 const consoleEnabled = (process.env.LOGGER_CONSOLE_ENABLED !== undefined)
   ? process.env.LOGGER_CONSOLE_ENABLED
-  : config.get('sindri.logger.console.enabled')
+  : config.get('logger.console.enabled')
 
 if (consoleEnabled) {
   transportsList.push(new transports.Console({
-    handleExceptions: config.get('sindri.logger.console.handleExceptions')
+    handleExceptions: config.get('logger.console.handleExceptions')
   }))
 }
 
@@ -62,11 +62,11 @@ if (consoleEnabled) {
  */
 let log2gelf
 
-if (config.get('sindri.logger.graylog.enabled')) {
+if (config.get('logger.graylog.enabled')) {
   log2gelf = new Log2gelf({
-    host: config.get('sindri.logger.graylog.host'),
-    port: config.get('sindri.logger.graylog.port'),
-    handleExceptions: config.get('sindri.logger.graylog.handleExceptions'), // handle exception within Log2gelf
+    host: config.get('logger.graylog.host'),
+    port: config.get('logger.graylog.port'),
+    handleExceptions: config.get('logger.graylog.handleExceptions'), // handle exception within Log2gelf
     exitOnError: true, // exit after exception has been sent
     exitDelay: 1000 // leave Log2gelf 1sec to send the message
   })
@@ -95,8 +95,8 @@ const myFormat = format.printf(info => {
 const logger = createLogger({
   format: format.combine(format.timestamp(), myFormat),
   transports: transportsList,
-  level: config.get('sindri.logger.level'),
-  silent: config.get('sindri.logger.silent')
+  level: config.get('logger.level'),
+  silent: config.get('logger.silent')
 })
 
 module.exports = {

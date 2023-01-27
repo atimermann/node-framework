@@ -34,7 +34,7 @@ module.exports = {
     try {
       if (!(application instanceof Application)) throw new TypeError('application must be instance of Application')
 
-      const clusterMode = process.env.CLUSTER_MODE || config.get('sindri.clusterMode')
+      const clusterMode = process.env.CLUSTER_MODE || config.get('clusterMode')
 
       logger.info('Modo Cluster: ' + (clusterMode ? 'Ativo' : 'Inativo'))
 
@@ -57,7 +57,7 @@ module.exports = {
   async loadCluster (application) {
     const SocketCluster = require('socketcluster')
 
-    const options = clone(config.get('sindri.cluster'))
+    const options = clone(config.get('cluster'))
 
     // The path to a file used to bootstrap worker processes
     options.workerController = join(__dirname, 'worker.js')
