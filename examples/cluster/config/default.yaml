@@ -26,7 +26,7 @@ server:
   # Ao desativar não esqueça remover no package.json a entrada "public" em pkg.assets
   loadStaticFromPackage: true
 
-clusterMode: true
+clusterMode: false
 
 # Estente SocketCluster, mais atributos aqui: https://socketcluster.io/#!/docs/api-socketcluster
 # Nota: Alguns atributos são travados
