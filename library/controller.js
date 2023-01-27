@@ -18,7 +18,6 @@
 
 const path = require('path')
 const { logger } = require('./logger')
-const { isString } = require('lodash')
 const consolidate = require('consolidate')
 const { performance } = require('perf_hooks')
 
