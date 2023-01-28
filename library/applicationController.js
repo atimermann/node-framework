@@ -221,16 +221,29 @@ module.exports = {
 
     for (const controllerName of await readdir(controllersPath)) {
       const controllerPath = path.join(controllersPath, controllerName)
+      let Controller
 
-      logger.info(`Carregando controller '${path.basename(controllerName, '.js')}'`)
-      logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
-      logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
+      // TODO: .js deve ser carregado de acordo com a configuração do package.json
+      if (['.js', '.cjs'].includes(path.extname(controllerPath))) {
+        // TODO: Carrega controler CommonJs (separar em outro método)
+        // TODO: Adaptar para aceitar .cjs
+        logger.info(`Carregando controller '${path.basename(controllerName, '.js')}'`)
+        logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
+        logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
 
-      const Controller = require(controllerPath)
+        Controller = require(controllerPath)
+      } else if (['.mjs'].includes(path.extname(controllerPath))) {
+        // TODO: Carrega controler ESM  (separar em função)
+
+        logger.info(`Carregando controller '${path.basename(controllerName, '.mjs')}'`)
+        logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
+        logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
+
+        Controller = (await import(controllerPath)).default
+      }
 
       const controllerInstance = new Controller()
       controllerInstance.controllerName = path.basename(controllerName, '.js')
-
       controllersInstances.push(controllerInstance)
     }
 

@@ -1,1 +1,2 @@
 - Migrar socketCluster para versão mais nova ( 2 dependencias criticas)
+- Migrar todo projeto para ESM
