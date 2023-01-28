@@ -38,11 +38,13 @@
   },
   "files": [
     "library",
+    "esm",
     "application.js",
     "config.js",
     "controller.js",
     "logger.js",
     "server.js",
+    "index.mjs",
     "config.default.yaml"
   ],
   "devDependencies": {
