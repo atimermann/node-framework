@@ -9,7 +9,9 @@
 export * from './esm/controller.mjs'
 import Application from './library/application.js'
 import Server from './library/server.js'
+import { logger } from './library/logger.js'
+import config from './library/config.js'
 
-export {Application, Server}
+export { Application, Server, logger, config }
 
 
