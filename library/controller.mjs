@@ -14,18 +14,18 @@
  * TODO: Verificar proxy para deixar alguns atributos readonly
  *
  */
-'use strict'
 
-const path = require('path')
-const { logger } = require('./logger')
-const consolidate = require('consolidate')
-const { performance } = require('perf_hooks')
+import path from 'path'
+import logger from '../logger.js'
+
+import consolidate from 'consolidate'
+import {performance} from 'perf_hooks'
 
 const paths = {}
 
 // TODO: Migrar para Atributo de Classe quando estiver compatível com PKG
-class Controller {
-  constructor () {
+export class Controller {
+  constructor() {
 
     // Define classe como abastrata
     if (new.target === Controller) {
@@ -158,31 +158,31 @@ class Controller {
   // Métodos Auxiliares para Criação de Rotas e API REST
   // Outros métodos podem ser acessodos utilizando this.app (objeto que refêrencia instancia express usada na aplicação)
   /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  async all (...args) {
+  all(...args) {
     this.processRestMethod('all', ...args)
   }
 
-  async use (...args) {
+  use(...args) {
     this.processRestMethod('use', ...args)
   }
 
-  async post (...args) {
+  post(...args) {
     this.processRestMethod('post', ...args)
   }
 
-  async get (...args) {
+  get(...args) {
     this.processRestMethod('get', ...args)
   }
 
-  async put (...args) {
+  put(...args) {
     this.processRestMethod('put', ...args)
   }
 
-  async delete (...args) {
+  delete(...args) {
     this.processRestMethod('delete', ...args)
   }
 
-  async patch (...args) {
+  patch(...args) {
     this.processRestMethod('patch', ...args)
   }
 
@@ -196,11 +196,11 @@ class Controller {
    *
    * @returns {Promise<void>}
    */
-  async responseHandler (lastCallback, request, response, ...args) {
+  async responseHandler(lastCallback, request, response, ...args) {
     try {
       await lastCallback(request, response, ...args)
     } catch (err) {
-      const { status, errorInfo } = await this.errorHandler(err, request, response)
+      const {status, errorInfo} = await this.errorHandler(err, request, response)
       response.status(status).json(errorInfo)
     }
   }
@@ -214,7 +214,7 @@ class Controller {
    * @param response
    * @returns {Promise<{errorInfo: {error: boolean, message: *}, status: number}>}
    */
-  async errorHandler (err, request, response) {
+  async errorHandler(err, request, response) {
     return {
       status: 400,
       errorInfo: {
@@ -233,7 +233,7 @@ class Controller {
    *
    * @returns {Promise<void>}
    */
-  async processRestMethod (httpMethod, ...args) {
+  async processRestMethod(httpMethod, ...args) {
     // Obtém ultimo callback e modifica para tratar retornos
     const lastCallback = args.pop()
 
@@ -268,7 +268,7 @@ class Controller {
    *
    * @private
    */
-  _logRequestInfo (startTimeMeasure, args) {
+  _logRequestInfo(startTimeMeasure, args) {
     const durationMeasure = performance.now() - startTimeMeasure
     const [request, response] = args
 
@@ -293,7 +293,7 @@ class Controller {
    *
    * @returns {Promise<void>}
    */
-  async view (templatePath, locals = {}, engine = 'handlebars') {
+  async view(templatePath, locals = {}, engine = 'handlebars') {
     const viewPath = path.join(this.appPath, 'views', templatePath)
     return this._renderView(viewPath, locals, engine)
   }
@@ -304,7 +304,7 @@ class Controller {
    * @param ms  {int} Tempo de espera em milesegundos
    * @returns {Promise<void>}
    */
-  async sleep (ms) {
+  async sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
@@ -320,7 +320,7 @@ class Controller {
    *
    * @returns {Promise<void>}
    */
-  async remoteView (applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
+  async remoteView(applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
     if (!this.applicationsPath[applicationName]) {
       throw new Error(`Application '${applicationName}' not found. Available: (${Object.keys(this.applicationsPath)})`)
     }
@@ -344,7 +344,7 @@ class Controller {
    * @returns {Promise<void>}
    * @private
    */
-  async _renderView (viewPath, locals, engine) {
+  async _renderView(viewPath, locals, engine) {
     const templateEngine = consolidate[engine]
 
     /// //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -395,55 +395,59 @@ class Controller {
   /**
    * Método abstrado para criação de Midleware Pré
    */
-  async pre () {
+  async pre() {
     logger.debug('Middleware pre not implemented')
   }
 
   /**
    * Método abstrado para criação de Midleware Pós
    */
-  async pos () {
+  async pos() {
     logger.debug('Middleware pos not implemented')
   }
 
   /**
    * Método abstrato Setup, utilizado para execução inicial
    */
-  async setup () {
+  async setup() {
     logger.debug('Setup not implemented')
   }
 
   /**
    * Método Abstrado Router, usado para configurar Rotas
    */
-  async route () {
+  async route() {
     logger.debug('No route configured')
   }
 
   /**
-   * Valida Path
+   * Valida url definida
    *
    * @param method
-   * @param path
+   * @param methodPath
    * @private
    */
-  _validatePath (method, path) {
-    if (typeof path !== 'string') throw new TypeError(`path must be String! Type: ${typeof path}`)
+  _validatePath(method, methodPath) {
+    if (typeof methodPath !== 'string') throw new TypeError(`path must be String! Type: ${typeof methodPath}`)
 
-    logger.debug(method + ':', path)
+    const basePath = this.path
+      ? this.path
+      : ''
 
-    const h = [method, path].toString()
+    logger.debug(`Validando Rota em ${this.appName}: ${method}: ${path.join(basePath, methodPath)}`)
+
+    const h = [method, basePath, methodPath].toString()
 
     if (paths[h]) {
       throw new Error(`The route '${paths[h].method}: ${paths[h].path}', which is being defined in app '${this.appName}', has already been defined in the following app: '${paths[h].app}'`)
     } else {
       paths[h] = {
         method,
-        path,
+        path: path.join(basePath, methodPath),
         app: this.appName
       }
     }
   }
 }
 
-module.exports = Controller
+

@@ -285,14 +285,15 @@ module.exports = {
       await controller.pre()
     }
 
+    for (const controller of controllers) {
+      await controller.setup()
+    }
+
     /// ///////////////////////////////////////////////////////////////////////////////////
     // Controller
     /// ///////////////////////////////////////////////////////////////////////////////////
 
     for (const controller of controllers) {
-      // Configuração
-      await controller.setup()
-
       // Configura Rotas
       await controller.routes()
 

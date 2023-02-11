@@ -13,12 +13,12 @@
 
 const path = require('path')
 // const fs = require('fs-extra')
-const { open, readdir } = require('fs/promises')
-const { logger } = require('./logger')
+const {open, readdir} = require('fs/promises')
+const {logger} = require('./logger')
 
 module.exports = {
 
-  async exists (file) {
+  async exists(file) {
     try {
       file = await open(file, 'r')
 
@@ -51,7 +51,7 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getAssets (applications) {
+  async getAssets(applications) {
     const assets = []
 
     for (const application of applications) {
@@ -81,7 +81,7 @@ module.exports = {
    *
    * @private
    */
-  async _getAssetsByApps (appsPath, applicationName) {
+  async _getAssetsByApps(appsPath, applicationName) {
     const assets = []
 
     for (const appName of await readdir(appsPath)) {
@@ -114,7 +114,7 @@ module.exports = {
    * @param applications    {string<Array>}  Lista de aplicações
    * @returns {Promise<Array>}
    */
-  async getApps (applications) {
+  async getApps(applications) {
     const apps = []
 
     for (const application of applications) {
@@ -144,7 +144,7 @@ module.exports = {
    *
    * @returns {Promise<Array>}
    */
-  async getControllers (applications) {
+  async getControllers(applications) {
     const controllersInstances = []
 
     for (const application of applications) {
@@ -182,7 +182,7 @@ module.exports = {
    * @returns {Promise<Array>} Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByApps (appsPath) {
+  async _getControllersInstanceByApps(appsPath) {
     const controllersInstances = []
 
     for (const appName of await readdir(appsPath)) {
@@ -216,35 +216,23 @@ module.exports = {
    * @returns {Promise<Array>}  Lista de controllers já instanciado
    * @private
    */
-  async _getControllersInstanceByControllers (controllersPath) {
+  async _getControllersInstanceByControllers(controllersPath) {
     const controllersInstances = []
 
     for (const controllerName of await readdir(controllersPath)) {
       const controllerPath = path.join(controllersPath, controllerName)
       let Controller
 
-      // TODO: .js deve ser carregado de acordo com a configuração do package.json
-      if (['.js', '.cjs'].includes(path.extname(controllerPath))) {
-        // TODO: Carrega controler CommonJs (separar em outro método)
-        // TODO: Adaptar para aceitar .cjs
-        logger.info(`Carregando controller '${path.basename(controllerName, '.js')}'`)
-        logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
-        logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
-
-        Controller = require(controllerPath)
-      } else if (['.mjs'].includes(path.extname(controllerPath))) {
-        // TODO: Carrega controler ESM  (separar em função)
-
-        logger.info(`Carregando controller '${path.basename(controllerName, '.mjs')}'`)
+      if (['.mjs', '.js'].includes(path.extname(controllerPath))) {
+        logger.info(`Carregando controller '${path.basename(controllerName)}'`)
         logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
         logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
 
         Controller = (await import(controllerPath)).default
+        const controllerInstance = new Controller()
+        controllerInstance.controllerName = path.basename(controllerName, path.extname(controllerPath))
+        controllersInstances.push(controllerInstance)
       }
-
-      const controllerInstance = new Controller()
-      controllerInstance.controllerName = path.basename(controllerName, '.js')
-      controllersInstances.push(controllerInstance)
     }
 
     return controllersInstances

@@ -6,7 +6,7 @@
  *
  */
 
-export * from './esm/controller.mjs'
+export * from './library/controller.mjs'
 import Application from './library/application.js'
 import Server from './library/server.js'
 import { logger } from './library/logger.js'
