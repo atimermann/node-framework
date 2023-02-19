@@ -3,7 +3,6 @@
   "version": "2.5.3",
   "description": "Segunda versão do Sindri Framework agora enxuto e simplificado",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "publish-patch": "npm version patch && npm publish --access public",
     "publish-minor": "npm version minor && npm publish --access public",
     "publish-major": "npm version major && npm publish --access public",
