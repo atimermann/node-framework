@@ -202,7 +202,8 @@ export class Controller {
     } catch (err) {
       const {status, errorInfo} = await this.errorHandler(err, request, response)
       response.status(status).json(errorInfo)
-      logger.error(err)
+      console.error(err)
+      logger.error(JSON.stringify({message: err.message, stack: err.stack}))
     }
   }
 
