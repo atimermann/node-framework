@@ -1,6 +1,6 @@
 {
   "name": "@agtm/sindri-framework",
-  "version": "2.5.3",
+  "version": "2.5.4",
   "description": "Segunda versão do Sindri Framework agora enxuto e simplificado",
   "scripts": {
     "publish-patch": "npm version patch && npm publish --access public",
