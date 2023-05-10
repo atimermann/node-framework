@@ -1,5 +1,0 @@
----
-sindri:
-  clusterMode: false
-  cluster:
-    workers: 'auto'

@@ -8,6 +8,6 @@
 * Mensagens de Erro em Inglês (Comentário livre permitido rápido desenvolvimento, mas para abertura de código necessário
   traduzir)
 * Manter documentação do projeto atualizada
-* Sempre criar uma pasta exemples para que o usuário possa testar o projeto
+* Sempre criar uma pasta playground para que o usuário possa testar o projeto
 * Manter Fonte na pasta src, depois de cria-la
 

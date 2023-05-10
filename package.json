@@ -1,7 +1,7 @@
 {
-  "name": "@agtm/sindri-framework",
+  "name": "@agtm/node-framework",
   "version": "2.5.4",
-  "description": "Segunda versão do Sindri Framework agora enxuto e simplificado",
+  "description": "Framework nodejs baseado no ExpressJs",
   "scripts": {
     "publish-patch": "npm version patch && npm publish --access public",
     "publish-minor": "npm version minor && npm publish --access public",
@@ -62,13 +62,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/atimermann/sindri-framework.git"
+    "url": "git+https://github.com/atimermann/node-framework.git"
   },
   "bugs": {
-    "url": "https://github.com/atimermann/sindri-framework/issues"
+    "url": "https://github.com/atimermann/node-framework/issues"
   },
-  "homepage": "https://github.com/atimermann/sindri-framework#readme",
+  "homepage": "https://github.com/atimermann/node-framework#readme",
   "engines": {
-    "node": ">=14.17"
+    "node": ">=18"
   }
 }
