@@ -1,9 +1,10 @@
-- Migrar todo projeto para ESM
+- Migrar todos os arquivos para ESM
 - colocar fonte em src (por ultimo)
-- Estruturar e definir melhor config com DOT ENV
+- Estruturar e definir melhor config com DOT ENV (foi atualizado muitas versões)
 - Criar teste unitário
-- Suporte await nos controlles
-- modo schedule
 - configuração CORS
 - Suporte CDN https://github.com/niftylettuce/express-cdn
 - JS-2-DOC MARDKDOWN
+- Revisar cabeçalho de documentação dos arquivos (caminho mudou)
+- Typescript
+
