@@ -5,4 +5,5 @@
 - Suporte await nos controlles
 - modo schedule
 - configuração CORS
-
+- Suporte CDN https://github.com/niftylettuce/express-cdn
+- JS-2-DOC MARDKDOWN

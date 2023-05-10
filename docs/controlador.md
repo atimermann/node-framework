@@ -111,7 +111,7 @@ exemplo:
 
 ```javascript
 
-const Controller = require('sindri-framework/controller')
+const Controller = require('node-framework/controller')
 
 
 class ExtendedController extends Controller {

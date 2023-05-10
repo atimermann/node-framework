@@ -1,7 +1,7 @@
 /**
  * **Created on 12/11/18**
  *
- * src/library/sindriConfigConfig.js
+ * src/library/confg.js
  * @author André Timermann <andre.timermann@smarti.io>
  *
  *   Realiza Pré Configuração do módulo Config para ser usado internamente pelo Sindri

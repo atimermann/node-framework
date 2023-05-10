@@ -12,7 +12,7 @@ imediatamente, representa uma quebra no fluxo Assincrono, provavelmente algum aw
   * Lembre que o NPM apenas para publicação e uso de outras aplicações, não precisa ter todos os arquivos do projeto.
 * Manter pasta exemplo atualizada com versão exemplo de uso do framework
 * Sempre testar compatíbilidade com PKG antes de gerar versão
-* Sempre manter atualizado o scripts do projeto sindri-cli compatível com a versão do framework.
+* Sempre manter atualizado o scripts do projeto @agtm/cli-tool compatível com a versão do framework.
 * Testar scripts antes de gerar nova versão (Automatizar com CI)
 
 ### Mantendo compatibilidade com PKG
