@@ -1,3 +1,7 @@
 - Migrar todo projeto para ESM
 - colocar fonte em src (por ultimo)
-- Estruturar e definir melhor config
+- Estruturar e definir melhor config com DOT ENV
+- Criar teste unitário
+- Suporte await nos controlles
+- modo schedule
+- configuração CORS

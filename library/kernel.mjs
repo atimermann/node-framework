@@ -16,27 +16,23 @@
  *
  */
 
-import {logger} from './logger.js'
+import { logger } from './logger.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
 import helmet from 'helmet'
 import compression from 'compression'
-import {Writable} from 'stream'
+import { Writable } from 'stream'
 import ApplicationController from './applicationController.js'
 import os from 'os'
-import {join} from 'path'
-import {createServer} from 'http'
+import { join } from 'path'
+import { createServer } from 'http'
 import figlet from 'figlet'
-import {readFileSync} from 'fs'
-import {sentenceCase} from 'change-case'
-
-import {config as dotenvConfig} from 'dotenv'
+import { readFileSync } from 'fs'
+import { sentenceCase } from 'change-case'
 
 // const { config } = await import('../vendor/config/lib/config.js') // Fix para funcionar com pkg, projeto config não compatível, copiado para vendor
 import config from 'config'
-
-dotenvConfig()
 
 export default {
 
@@ -48,7 +44,7 @@ export default {
    * @param application {Object}    Dados da aplicação que está sendo carregada
    *
    */
-  async run(application) {
+  async run (application) {
     global.__BASE = join(application.rootPath, '/')
 
     logger.info('Inicializando Kernel...')
@@ -126,7 +122,7 @@ export default {
    * @returns {Object}  Objeto Express
    * @private
    */
-  _configureExpressHttpServer(httpServer, application) {
+  _configureExpressHttpServer (httpServer, application) {
     const app = express()
 
     httpServer.on('request', app)
@@ -141,7 +137,7 @@ export default {
         {
 
           stream: new Writable({
-            write(chunk, encoding, callback) {
+            write (chunk, encoding, callback) {
               logger.info('[HTTP] ' + chunk.toString('utf8', 0, chunk.length - 1))
               callback()
             }
@@ -217,7 +213,7 @@ export default {
    *
    * @private
    */
-  async _loadApplications(app, application) {
+  async _loadApplications (app, application) {
     const controllers = []
 
     /**
@@ -311,7 +307,7 @@ export default {
    *
    * @param httpServer
    */
-  _startHttpServer(httpServer) {
+  _startHttpServer (httpServer) {
     const port = process.env.PORT || config.get('server.port')
 
     logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)
