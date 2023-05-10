@@ -16,17 +16,16 @@
  */
 
 import path from 'path'
-import logger from '../logger.js'
+import { logger } from './logger.js'
 
 import consolidate from 'consolidate'
-import {performance} from 'perf_hooks'
+import { performance } from 'perf_hooks'
 
 const paths = {}
 
 // TODO: Migrar para Atributo de Classe quando estiver compatível com PKG
 export class Controller {
-  constructor() {
-
+  constructor () {
     // Define classe como abastrata
     if (new.target === Controller) {
       throw new TypeError('Cannot construct Abstract instances directly')
@@ -158,31 +157,31 @@ export class Controller {
   // Métodos Auxiliares para Criação de Rotas e API REST
   // Outros métodos podem ser acessodos utilizando this.app (objeto que refêrencia instancia express usada na aplicação)
   /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  all(...args) {
+  all (...args) {
     this.processRestMethod('all', ...args)
   }
 
-  use(...args) {
+  use (...args) {
     this.processRestMethod('use', ...args)
   }
 
-  post(...args) {
+  post (...args) {
     this.processRestMethod('post', ...args)
   }
 
-  get(...args) {
+  get (...args) {
     this.processRestMethod('get', ...args)
   }
 
-  put(...args) {
+  put (...args) {
     this.processRestMethod('put', ...args)
   }
 
-  delete(...args) {
+  delete (...args) {
     this.processRestMethod('delete', ...args)
   }
 
-  patch(...args) {
+  patch (...args) {
     this.processRestMethod('patch', ...args)
   }
 
@@ -196,14 +195,14 @@ export class Controller {
    *
    * @returns {Promise<void>}
    */
-  async responseHandler(lastCallback, request, response, ...args) {
+  async responseHandler (lastCallback, request, response, ...args) {
     try {
       await lastCallback(request, response, ...args)
     } catch (err) {
-      const {status, errorInfo} = await this.errorHandler(err, request, response)
+      const { status, errorInfo } = await this.errorHandler(err, request, response)
       response.status(status).json(errorInfo)
       console.error(err)
-      logger.error(JSON.stringify({message: err.message, stack: err.stack}))
+      logger.error(JSON.stringify({ message: err.message, stack: err.stack }))
     }
   }
 
@@ -216,7 +215,7 @@ export class Controller {
    * @param response
    * @returns {Promise<{errorInfo: {error: boolean, message: *}, status: number}>}
    */
-  async errorHandler(err, request, response) {
+  async errorHandler (err, request, response) {
     return {
       status: 400,
       errorInfo: {
@@ -235,7 +234,7 @@ export class Controller {
    *
    * @returns {Promise<void>}
    */
-  async processRestMethod(httpMethod, ...args) {
+  async processRestMethod (httpMethod, ...args) {
     // Obtém ultimo callback e modifica para tratar retornos
     const lastCallback = args.pop()
 
@@ -270,7 +269,7 @@ export class Controller {
    *
    * @private
    */
-  _logRequestInfo(startTimeMeasure, args) {
+  _logRequestInfo (startTimeMeasure, args) {
     const durationMeasure = performance.now() - startTimeMeasure
     const [request, response] = args
 
@@ -295,7 +294,7 @@ export class Controller {
    *
    * @returns {Promise<void>}
    */
-  async view(templatePath, locals = {}, engine = 'handlebars') {
+  async view (templatePath, locals = {}, engine = 'handlebars') {
     const viewPath = path.join(this.appPath, 'views', templatePath)
     return this._renderView(viewPath, locals, engine)
   }
@@ -306,7 +305,7 @@ export class Controller {
    * @param ms  {int} Tempo de espera em milesegundos
    * @returns {Promise<void>}
    */
-  async sleep(ms) {
+  async sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
@@ -322,7 +321,7 @@ export class Controller {
    *
    * @returns {Promise<void>}
    */
-  async remoteView(applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
+  async remoteView (applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
     if (!this.applicationsPath[applicationName]) {
       throw new Error(`Application '${applicationName}' not found. Available: (${Object.keys(this.applicationsPath)})`)
     }
@@ -346,7 +345,7 @@ export class Controller {
    * @returns {Promise<void>}
    * @private
    */
-  async _renderView(viewPath, locals, engine) {
+  async _renderView (viewPath, locals, engine) {
     const templateEngine = consolidate[engine]
 
     /// //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -397,28 +396,28 @@ export class Controller {
   /**
    * Método abstrado para criação de Midleware Pré
    */
-  async pre() {
+  async pre () {
     logger.debug('Middleware pre not implemented')
   }
 
   /**
    * Método abstrado para criação de Midleware Pós
    */
-  async pos() {
+  async pos () {
     logger.debug('Middleware pos not implemented')
   }
 
   /**
    * Método abstrato Setup, utilizado para execução inicial
    */
-  async setup() {
+  async setup () {
     logger.debug('Setup not implemented')
   }
 
   /**
    * Método Abstrado Router, usado para configurar Rotas
    */
-  async route() {
+  async route () {
     logger.debug('No route configured')
   }
 
@@ -429,7 +428,7 @@ export class Controller {
    * @param methodPath
    * @private
    */
-  _validatePath(method, methodPath) {
+  _validatePath (method, methodPath) {
     if (typeof methodPath !== 'string') throw new TypeError(`path must be String! Type: ${typeof methodPath}`)
 
     const basePath = this.path
@@ -451,5 +450,3 @@ export class Controller {
     }
   }
 }
-
-

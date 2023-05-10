@@ -38,18 +38,17 @@ const config = require('config')
 module.exports = {
 
   /**
-   * Inicializa Servidor Sindri
+   * Inicializa Servidor
    *
    * // @param serializedApplication  {String} Array listando todas as aplicações e atributos Serializado
 
    * @param application {Object}    Dados da aplicação que está sendo carregada
-   * @param scWorker    {SCWorker}  Objeto SCWorker (https://socketcluster.io/#!/docs/api-scworker) instancia do Cluster atual
    *
    */
-  async run (application, scWorker) {
+  async run (application) {
     global.__BASE = join(application.rootPath, '/')
 
-    logger.info('Inicializando Sindri Kernel...')
+    logger.info('Inicializando Kernel...')
 
     if (process.env.NODE_ENV === undefined) throw new Error('Environment is not defined, create an .env file with attribute NODE_ENV.')
 
@@ -58,7 +57,7 @@ module.exports = {
 
     const httpServer = http.createServer()
 
-    const sindriPackageInfo = require('../package.json')
+    const packageInfo = require('../package.json')
 
     /**
      * Rota para acesso a recursos estáticos (ex: jpeg, html, js etc...)
@@ -84,26 +83,27 @@ module.exports = {
      */
     this.cdnUrl = process.env.CDN_URL || config.get('server.cdnUrl')
 
+    console.log(figlet.textSync('Node Framework'))
     console.log(figlet.textSync(`\n${application.name}`))
     logger.info('==============================================================')
-    logger.info(`Project            : ${application.name}`)
-    logger.info(`Root Path          : ${application.rootPath}`)
-    logger.info(`Node Version       : ${process.version}`)
-    logger.info(`Environment        : ${process.env.NODE_ENV}`)
-    logger.info(`Port               : ${process.env.PORT || config.get('server.port')}`)
-    logger.info(`Pid                : ${process.pid}`)
-    logger.info(`Hostname           : ${os.hostname()}`)
-    logger.info(`Platform           : ${os.platform()}`)
-    logger.info(`Arch               : ${os.arch()}`)
-    logger.info(`Sindri Version     : ${sindriPackageInfo.version}`)
-    logger.info(`Application Version: ${process.env.npm_package_version}`)
+    logger.info(`Project:                 ${application.name}`)
+    logger.info(`Root Path:               ${application.rootPath}`)
+    logger.info(`Node Version:            ${process.version}`)
+    logger.info(`Environment:             ${process.env.NODE_ENV}`)
+    logger.info(`Port:                    ${process.env.PORT || config.get('server.port')}`)
+    logger.info(`Pid:                     ${process.pid}`)
+    logger.info(`Hostname:                ${os.hostname()}`)
+    logger.info(`Platform:                ${os.platform()}`)
+    logger.info(`Arch:                    ${os.arch()}`)
+    logger.info(`Node Framework Version:  ${packageInfo.version}`)
+    logger.info(`Application Version:     ${process.env.npm_package_version}`)
     logger.info('==============================================================')
 
     // Configura ExpressJs
     const app = this._configureExpressHttpServer(httpServer, application)
 
     // Carrega Aplicações
-    await this._loadApplications(app, application, scWorker)
+    await this._loadApplications(app, application)
 
     // Inicializa Servidor HTTP
     this._startHttpServer(httpServer)
@@ -210,11 +210,10 @@ module.exports = {
    *
    * @param app         {Object}    Objeto Expressjs
    * @param application {Object}    Informações sobre a Aplicação
-   * @param scWorker    {SCWorker}  Objeto Cluster, habilitado apenas se cluster for ativo
    *
    * @private
    */
-  async _loadApplications (app, application, scWorker) {
+  async _loadApplications (app, application) {
     const controllers = []
 
     /**
@@ -255,16 +254,6 @@ module.exports = {
         controller.staticBaseUrl = this.cdnUrl
       } else {
         controller.staticBaseUrl = this.staticRoute
-      }
-
-      /// //////////////////////////////////////////
-      // SocketCluster
-      /// //////////////////////////////////////////
-
-      if (scWorker !== undefined) {
-        // Ref: https://socketcluster.io/#!/docs/api-scserver
-        controller.socketServer = scWorker.scServer
-        controller.socketWorker = scWorker
       }
 
       /// //////////////////////////////////////////
