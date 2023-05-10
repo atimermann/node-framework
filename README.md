@@ -92,6 +92,24 @@ Suporte Integrado à
 
 Outras funcionalidades podem ser facilmente implementada através de apps.
 
+## Agendamento
+
+Baseado no modulo:
+https://www.npmjs.com/package/node-cron
+
+```javascript
+export default class HelloWorldController extends Controller {
+
+  setup() {
+    this.schedule('* * * * *', () => {
+      console.log('Tarefa recorrente')
+    })
+  }
+}
+
+```
+
+
 ## Gerando Versão
 
 ```bash  
@@ -141,6 +159,9 @@ histórico e sempre atualize a versão minor do sindri.
 Guia para desenvolvedores do Sindri Framework:
 
 [Guia de Desenvolvimento](./docs/guia_de_desenvolvimento.md)
+
+
+
 
 ## TODOs
 

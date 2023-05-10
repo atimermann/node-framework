@@ -1,3 +1,5 @@
+// noinspection JSUnusedGlobalSymbols
+
 /**
  * **Created on 16/11/18**
  *
@@ -17,172 +19,157 @@
 
 import path from 'path'
 import { logger } from './logger.js'
+import config from 'config'
 
 import consolidate from 'consolidate'
 import { performance } from 'perf_hooks'
 
+import cron from 'node-cron'
+
 const paths = {}
 
-// TODO: Migrar para Atributo de Classe quando estiver compatível com PKG
 export class Controller {
+  /**
+   * Nome da aplicação que este controller pertence
+   * Definido em controllerController, não alterar
+   *
+   * @type {undefined}
+   */
+  applicationName = undefined
+
+  /**
+   * Nome da app que este controller pertence
+   * Definido em controllerController, não alterar
+   *
+   * @type {string}
+   */
+  appName = undefined
+
+  /**
+   * None desde controller
+   * Definido em controllerController, não alterar
+   *
+   * @type {string}
+   */
+  controllerName = undefined
+
+  /**
+   * Opções definida ao instanciar ou carregar aplicação
+   * Definido em controllerController, não alterar
+   *
+   * @type {{}}
+   */
+  options = {}
+
+  /**
+   * Identificador unico da aplicação
+   * Definido em controllerController, não alterar
+   *
+   * @type {string}
+   */
+  applicationId = undefined
+
+  /**
+   * Objeto Router Express
+   * Definido em kernel, não alterar
+   *
+   * @type {{}}
+   */
+  router = undefined
+
+  /**
+   * Objeto com atributo das aplicações
+   * Definido em kernel, não alterar
+   *
+   * @type {{}}
+   */
+  applications = undefined
+
+  /**
+   * Objeto Express
+   * Definido em kernel, não alterar
+   *
+   * @type {{}}
+   */
+  app = undefined
+
+  /**
+   * Caminho físico desta App
+   * Definido em controllerController, não alterar
+   *
+   * @type {string}
+   */
+  appPath = undefined
+
+  /**
+   * Caminho físico da aplicação onde esta app está
+   * Definido em controllerController, não alterar
+   *
+   * @type {string}
+   */
+  applicationsPath = undefined
+
+  /**
+   * URL base padrão  para acesso a recursos estáticos.
+   * Será usado pelo Helper @asset, que calcula automaticamente a url do recurso que será carregado na página
+   *
+   * Definido em kernel
+   *
+   * @type {string}
+   */
+  staticBaseUrl = undefined
+
+  /**
+   * Caminho Base da aplicação, ex: /api/v1/clients
+   * Funciona como prefixo, não exigindo colocar rota completa sempre
+   *
+   * @type {string}
+   */
+  path = undefined
+
   constructor () {
-    // Define classe como abastrata
     if (new.target === Controller) {
       throw new TypeError('Cannot construct Abstract instances directly')
     }
-
-    /**
-     * Nome da aplicação que este controller pertence
-     * Definido em controllerController, não alterar
-     *
-     * @type {undefined}
-     */
-    this.applicationName = undefined
-
-    /**
-     * Nome da app que este controller pertence
-     * Definido em controllerController, não alterar
-     *
-     * @type {string}
-     */
-    this.appName = undefined
-
-    /**
-     * None desde controller
-     * Definido em controllerController, não alterar
-     *
-     * @type {string}
-     */
-    this.controllerName = undefined
-
-    /**
-     * Opções definida ao instanciar ou carregar aplicação
-     * Definido em controllerController, não alterar
-     *
-     * @type {{}}
-     */
-    this.options = {}
-
-    /**
-     * Identificador unico da aplicação
-     * Definido em controllerController, não alterar
-     *
-     * @type {string}
-     */
-    this.applicationId = undefined
-
-    /**
-     * Objeto Router Express
-     * Definido em kernel, não alterar
-     *
-     * @type {{}}
-     */
-    this.router = undefined
-
-    /**
-     * Objeto com atributo das aplicações
-     * Definido em kernel, não alterar
-     *
-     * @type {{}}
-     */
-    this.applications = undefined
-
-    /**
-     * Objeto Express
-     * Definido em kernel, não alterar
-     *
-     * @type {{}}
-     */
-    this.app = undefined
-
-    /**
-     * Caminho físico desta App
-     * Definido em controllerController, não alterar
-     *
-     * @type {string}
-     */
-    this.appPath = undefined
-
-    /**
-     * Caminho físico da aplicação onde esta app está
-     * Definido em controllerController, não alterar
-     *
-     * @type {string}
-     */
-    this.applicationsPath = undefined
-
-    /**
-     * URL base padrão  para acesso a recursos estáticos.
-     * Será usado pelo Helper @asset, que calcula automaticamente a url do recurso que será carregado na página
-     *
-     * Definido em kernel
-     *
-     * @type {string}
-     */
-    this.staticBaseUrl = undefined
-
-    /**
-     * Objeto socketServer, utilizado para comunicação socket
-     * Undefined se modoCluster estiver desativado
-     * Ref: https://socketcluster.io/#!/docs/api-scserver
-     *
-     * Definido em kernel, não alterar
-     *
-     * @type {SCServer}
-     */
-    this.socketServer = undefined
-
-    /**
-     * Objeto socketWorker, configurações avançada do socketCluster, para comunicação, utilizer socketServer
-     * Undefined se modoCluster estiver desativado
-     *
-     * Ref: https://socketcluster.io/#!/docs/api-scworker
-     *
-     * Definido em kernel, não alterar
-     *
-     * @type {SCWorker}
-     */
-    this.socketWorker = undefined
-
-    /**
-     * Caminho Base da aplicação, ex: /api/v1/clients
-     * Funciona como prefixo, não exigindo colocar rota completa sempre
-     *
-     * @type {string}
-     */
-    this.path = undefined
   }
 
-  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // -------------------------------------------------------------------------------------------------------------------
   // Métodos Auxiliares para Criação de Rotas e API REST
   // Outros métodos podem ser acessodos utilizando this.app (objeto que refêrencia instancia express usada na aplicação)
-  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // -------------------------------------------------------------------------------------------------------------------
   all (...args) {
-    this.processRestMethod('all', ...args)
+    this._processRestMethod('all', ...args)
   }
 
   use (...args) {
-    this.processRestMethod('use', ...args)
+    this._processRestMethod('use', ...args)
   }
 
   post (...args) {
-    this.processRestMethod('post', ...args)
+    this._processRestMethod('post', ...args)
   }
 
   get (...args) {
-    this.processRestMethod('get', ...args)
+    this._processRestMethod('get', ...args)
   }
 
   put (...args) {
-    this.processRestMethod('put', ...args)
+    this._processRestMethod('put', ...args)
   }
 
   delete (...args) {
-    this.processRestMethod('delete', ...args)
+    this._processRestMethod('delete', ...args)
   }
 
   patch (...args) {
-    this.processRestMethod('patch', ...args)
+    this._processRestMethod('patch', ...args)
+  }
+
+  schedule (expression, callback) {
+    cron.schedule(expression, callback, {
+      scheduled: true,
+      timezone: config.get('server.timezone')
+    })
   }
 
   /**
@@ -225,60 +212,9 @@ export class Controller {
     }
   }
 
-  /**
-   * Intercepta métodos destinados ao Express (GET, POST, etc...) para tratar o retorno do usuário quando utilizando
-   * Await/Async (Promise)
-   *
-   * @param httpMethod  {string}  Método HTTP que será tratado
-   * @param args        {array}   Argumentos do método, callbacks definidos pelo usuário como middlware
-   *
-   * @returns {Promise<void>}
-   */
-  async processRestMethod (httpMethod, ...args) {
-    // Obtém ultimo callback e modifica para tratar retornos
-    const lastCallback = args.pop()
-
-    if (typeof lastCallback === 'function') {
-      // substitui ultimo callback por uma função que processa o ultimo callback (responseHandler)
-      args.push(async (...args) => {
-        const startTimeMeasure = performance.now()
-        await this.responseHandler(lastCallback, ...args)
-        this._logRequestInfo(startTimeMeasure, args)
-      })
-    } else {
-      args.push(lastCallback)
-    }
-
-    const routePath = args[0]
-
-    // Valida se o caminho já foi utilizado em outro controller, se args[0] não for string é um método sem path como
-    // use
-    if (typeof routePath === 'string') {
-      this._validatePath(httpMethod, routePath)
-    }
-
-    // finalmente cria rota
-    this.router[httpMethod](...args)
-  }
-
-  /**
-   * Loga informações sobre a requisição como tempo de execução
-   *
-   * @param startTimeMeasure  {number}  Timestamp do inicio da execução desta requisição
-   * @param args              {array}   Aregumentos enviado para responseHandler
-   *
-   * @private
-   */
-  _logRequestInfo (startTimeMeasure, args) {
-    const durationMeasure = performance.now() - startTimeMeasure
-    const [request, response] = args
-
-    logger.info(`[REQUEST_INFO] ${request.method} ${request.url} ${response.statusCode} +${durationMeasure.toFixed(2)}ms`)
-  }
-
-  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // -------------------------------------------------------------------------------------------------------------------
   // Método Auxiliar para View (Template)
-  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // -------------------------------------------------------------------------------------------------------------------
 
   /**
    * Renderiza um template usando a biblioteca Consolidate. (Usada pelo express internamente)
@@ -318,7 +254,6 @@ export class Controller {
    * @param locals  {object}  Váraveis disponíveis no template e configurações diversas
    * @param engine  {string}  Engine de template a ser renderizado
    *
-   *
    * @returns {Promise<void>}
    */
   async remoteView (applicationName, appName, templatePath, locals = {}, engine = 'handlebars') {
@@ -335,6 +270,46 @@ export class Controller {
     return this._renderView(viewPath, locals, engine)
   }
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // Métodos que podem ser estendidos e implementados na classe filha para Criação de Midleware, Serviços ou Rotas
+  // Não deve ser chamado diretamente
+  // -------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * Método abstrado para criação de Midleware Pré
+   * @abstract
+   */
+  async pre () {
+    logger.debug('Middleware pre not implemented')
+  }
+
+  /**
+   * Método abstrado para criação de Midleware Pós
+   * @abstract
+   */
+  async pos () {
+    logger.debug('Middleware pos not implemented')
+  }
+
+  /**
+   * Método abstrato Setup, utilizado para execução inicial
+   * @abstract
+   */
+  async setup () {
+    logger.debug('Setup not implemented')
+  }
+
+  /**
+   * Método Abstrado Router, usado para configurar Rotas
+   * @abstract
+   */
+  async route () {
+    logger.debug('No route configured')
+  }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // PRIVADO
+  // -------------------------------------------------------------------------------------------------------------------
   /**
    * Renderiza uma View
    *
@@ -388,37 +363,57 @@ export class Controller {
     return templateEngine(viewPath, locals)
   }
 
-  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Métodos que podem ser estendidos e implementados na classe filha para Criação de Midleware, Serviços ou Rotas
-  // Não deve ser chamado diretamente
-  /// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
   /**
-   * Método abstrado para criação de Midleware Pré
+   * Intercepta métodos destinados ao Express (GET, POST, etc...) para tratar o retorno do usuário quando utilizando
+   * Await/Async (Promise)
+   *
+   * @param httpMethod  {string}  Método HTTP que será tratado
+   * @param args        {array}   Argumentos do método, callbacks definidos pelo usuário como middlware
+   *
+   * @returns {Promise<void>}
+   *
+   * @private
    */
-  async pre () {
-    logger.debug('Middleware pre not implemented')
+  async _processRestMethod (httpMethod, ...args) {
+    // Obtém ultimo callback e modifica para tratar retornos
+    const lastCallback = args.pop()
+
+    if (typeof lastCallback === 'function') {
+      // substitui ultimo callback por uma função que processa o ultimo callback (responseHandler)
+      args.push(async (...args) => {
+        const startTimeMeasure = performance.now()
+        await this.responseHandler(lastCallback, ...args)
+        this._logRequestInfo(startTimeMeasure, args)
+      })
+    } else {
+      args.push(lastCallback)
+    }
+
+    const routePath = args[0]
+
+    // Valida se o caminho já foi utilizado em outro controller, se args[0] não for string é um método sem path como
+    // use
+    if (typeof routePath === 'string') {
+      this._validatePath(httpMethod, routePath)
+    }
+
+    // finalmente cria rota
+    this.router[httpMethod](...args)
   }
 
   /**
-   * Método abstrado para criação de Midleware Pós
+   * Loga informações sobre a requisição como tempo de execução
+   *
+   * @param startTimeMeasure  {number}  Timestamp do inicio da execução desta requisição
+   * @param args              {array}   Aregumentos enviado para responseHandler
+   *
+   * @private
    */
-  async pos () {
-    logger.debug('Middleware pos not implemented')
-  }
+  _logRequestInfo (startTimeMeasure, args) {
+    const durationMeasure = performance.now() - startTimeMeasure
+    const [request, response] = args
 
-  /**
-   * Método abstrato Setup, utilizado para execução inicial
-   */
-  async setup () {
-    logger.debug('Setup not implemented')
-  }
-
-  /**
-   * Método Abstrado Router, usado para configurar Rotas
-   */
-  async route () {
-    logger.debug('No route configured')
+    logger.info(`[REQUEST_INFO] ${request.method} ${request.url} ${response.statusCode} +${durationMeasure.toFixed(2)}ms`)
   }
 
   /**
