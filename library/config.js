@@ -17,7 +17,7 @@ const path = require('path')
 
 // Carrega atributos default no config
 const defaultConfigPath = path.join(__dirname, '../config.default.yaml')
-const defaultConfig = yaml.safeLoad(fs.readFileSync(defaultConfigPath, 'utf8'))
+const defaultConfig = yaml.load(fs.readFileSync(defaultConfigPath, 'utf8'))
 
 for (const [configName] of Object.entries(defaultConfig)) {
   config.util.setModuleDefaults(configName, defaultConfig[configName])
