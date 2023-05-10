@@ -6,12 +6,10 @@
  *
  */
 
-export * from './library/controller.mjs'
 import Application from './library/application.js'
-import Server from './library/server.js'
+import Server from './library/server.mjs'
 import { logger } from './library/logger.js'
 import config from './library/config.js'
+export * from './library/controller.mjs'
 
 export { Application, Server, logger, config }
-
-

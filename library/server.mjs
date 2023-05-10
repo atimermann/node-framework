@@ -7,15 +7,17 @@
  *   Servidor de execução do Sindri
  *
  */
-'use strict'
+import { createRequire } from 'module'
 
-const Application = require('./application')
-const { logger } = require('./logger')
-const Kernel = require('./kernel')
+import Application from './application.js'
+import { logger } from './logger.js'
+import Kernel from './kernel.mjs'
+
+const require = createRequire(import.meta.url)
 
 require('dotenv').config()
 
-module.exports = {
+export default {
 
   /**
    * Inicializa Servidor

@@ -1,6 +1,3 @@
-- Remover todo suporte socker cluster
 - Migrar todo projeto para ESM
-- Mudar logo para AGTM NODE FRAMEWORK
-- migrar tudo de uma vez em de controller application
-
 - colocar fonte em src (por ultimo)
+- Estruturar e definir melhor config

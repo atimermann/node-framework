@@ -15,27 +15,30 @@
  *  https://expressjs.com/en/advanced/best-practice-security.html
  *
  */
-'use strict'
 
-const { logger } = require('./logger')
-const express = require('express')
-const bodyParser = require('body-parser')
-const morgan = require('morgan')
-const helmet = require('helmet')
-const compression = require('compression')
-const { Writable } = require('stream')
-const ApplicationController = require('./applicationController')
-const os = require('os')
-const { join } = require('path')
-const http = require('http')
-const figlet = require('figlet')
+import {logger} from './logger.js'
+import express from 'express'
+import bodyParser from 'body-parser'
+import morgan from 'morgan'
+import helmet from 'helmet'
+import compression from 'compression'
+import {Writable} from 'stream'
+import ApplicationController from './applicationController.js'
+import os from 'os'
+import {join} from 'path'
+import {createServer} from 'http'
+import figlet from 'figlet'
+import {readFileSync} from 'fs'
+import {sentenceCase} from 'change-case'
 
-require('dotenv').config()
+import {config as dotenvConfig} from 'dotenv'
 
-// const config = require('../vendor/config/lib/config') // Fix para funcionar com pkg, projeto config não comṕativel, copiado para vendor
-const config = require('config')
+// const { config } = await import('../vendor/config/lib/config.js') // Fix para funcionar com pkg, projeto config não compatível, copiado para vendor
+import config from 'config'
 
-module.exports = {
+dotenvConfig()
+
+export default {
 
   /**
    * Inicializa Servidor
@@ -45,7 +48,7 @@ module.exports = {
    * @param application {Object}    Dados da aplicação que está sendo carregada
    *
    */
-  async run (application) {
+  async run(application) {
     global.__BASE = join(application.rootPath, '/')
 
     logger.info('Inicializando Kernel...')
@@ -55,9 +58,10 @@ module.exports = {
     // Deserializa informações da aplicação
     // let application = JSON.parse(serializedApplication)
 
-    const httpServer = http.createServer()
+    const httpServer = createServer()
 
-    const packageInfo = require('../package.json')
+    const filePath = new URL('../package.json', import.meta.url)
+    const packageInfo = JSON.parse(readFileSync(filePath, 'utf8'))
 
     /**
      * Rota para acesso a recursos estáticos (ex: jpeg, html, js etc...)
@@ -84,7 +88,7 @@ module.exports = {
     this.cdnUrl = process.env.CDN_URL || config.get('server.cdnUrl')
 
     console.log(figlet.textSync('Node Framework'))
-    console.log(figlet.textSync(`\n${application.name}`))
+    console.log(figlet.textSync(`\n${sentenceCase(application.name)}`))
     logger.info('==============================================================')
     logger.info(`Project:                 ${application.name}`)
     logger.info(`Root Path:               ${application.rootPath}`)
@@ -122,7 +126,7 @@ module.exports = {
    * @returns {Object}  Objeto Express
    * @private
    */
-  _configureExpressHttpServer (httpServer, application) {
+  _configureExpressHttpServer(httpServer, application) {
     const app = express()
 
     httpServer.on('request', app)
@@ -137,7 +141,7 @@ module.exports = {
         {
 
           stream: new Writable({
-            write (chunk, encoding, callback) {
+            write(chunk, encoding, callback) {
               logger.info('[HTTP] ' + chunk.toString('utf8', 0, chunk.length - 1))
               callback()
             }
@@ -213,7 +217,7 @@ module.exports = {
    *
    * @private
    */
-  async _loadApplications (app, application) {
+  async _loadApplications(app, application) {
     const controllers = []
 
     /**
@@ -307,7 +311,7 @@ module.exports = {
    *
    * @param httpServer
    */
-  _startHttpServer (httpServer) {
+  _startHttpServer(httpServer) {
     const port = process.env.PORT || config.get('server.port')
 
     logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)
