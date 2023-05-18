@@ -9,8 +9,7 @@
  *   Classe Abstrata que representa Controlador do MVC, aqui fica o ponto de entrada da nossa aplicação, desde execução de serviços, configuração de
  *   rotas, middleware (Para implementação de plugins) entre outros
  *
- * REF: Definindo classe abstrata - https://stackoverflow.com/questions/29480569/does-ecmascript-6-have-a-convention-for-abstract-classes
- *
+ * REF: Definindo classe abstrata - https://stackoverflow.com/questions/29480569/does-ecmascript-6-have-a-convention-for-abstract-classes *
  *
  * TODO: Documentar criar um diagrama de fluxo de execução igual do Vuejs
  * TODO: Verificar proxy para deixar alguns atributos readonly
@@ -277,7 +276,7 @@ export class Controller {
 
   /**
    * Método abstrado para criação de Midleware Pré
-   * @abstract
+   * @override
    */
   async pre () {
     logger.debug('Middleware pre not implemented')
@@ -285,7 +284,7 @@ export class Controller {
 
   /**
    * Método abstrado para criação de Midleware Pós
-   * @abstract
+   * @override
    */
   async pos () {
     logger.debug('Middleware pos not implemented')
@@ -293,7 +292,7 @@ export class Controller {
 
   /**
    * Método abstrato Setup, utilizado para execução inicial
-   * @abstract
+   * @override
    */
   async setup () {
     logger.debug('Setup not implemented')
@@ -301,9 +300,9 @@ export class Controller {
 
   /**
    * Método Abstrado Router, usado para configurar Rotas
-   * @abstract
+   * @override
    */
-  async route () {
+  async routes () {
     logger.debug('No route configured')
   }
 
