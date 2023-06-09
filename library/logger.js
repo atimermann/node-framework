@@ -2,7 +2,7 @@
  * **Created on 13/11/18**
  *
  * src/library/logger.js
- * @author André Timermann <andre.timermann@smarti.io>
+ * @author André Timermann <andre@timermann.com.br>
  *
  *   Sistema de Log Pré-Configurado baseado no Winston com suporte GrayLog e Console
  *
@@ -21,16 +21,6 @@ const config = require('./config')
 
 const hrstart = process.hrtime()
 const start = hrstart[0] + (hrstart[1] / 1000000000)
-
-/**
- * Informação do Cluster
- *
- * @type {object}
- */
-let clusterInfo = {
-  node: null,
-  leader: null
-}
 
 /// ///////////////////////////////////////////////////////////////////////////////////////////////
 // Transport
@@ -86,7 +76,7 @@ const myFormat = format.printf(info => {
   let time = stop - start
   time = Math.round(time * 1000) / 1000
 
-  return `[${info.timestamp}] [${time}]${clusterInfo.node !== null ? ' [Node' + clusterInfo.node + ']' : ''}${(clusterInfo.leader ? ' [L]' : '')} [${info.level}] ${info.message}`
+  return `[${info.timestamp}] [${time}] [${info.level}] ${info.message}`
 })
 
 /// ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,24 +90,5 @@ const logger = createLogger({
 })
 
 module.exports = {
-
-  /**
-   * Objeto Logger
-   */
-  logger,
-
-  /**
-   * Define Id do nó do cluster
-   *
-   * @param node  {number}    Id do nó
-   * @param leader {boolean}  Se é o Nó leder
-   */
-  updateClusterInfo (node, leader) {
-    if (log2gelf) log2gelf.updateClusterInfo(node, leader)
-
-    clusterInfo = {
-      node,
-      leader
-    }
-  }
+  logger
 }

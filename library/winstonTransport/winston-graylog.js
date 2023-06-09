@@ -2,7 +2,7 @@
  * **Created on 14/11/18**
  *
  * src/library/winstonTransport/winston-graylog.js
- * @author André Timermann <andre.timermann@smarti.io>
+ * @author André Timermann <andre@timermann.com.br>
  *
  * Versão modificado do Transport https://github.com/Buzut/winston-log2gelf
  *

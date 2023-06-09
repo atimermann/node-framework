@@ -2,7 +2,7 @@
  * **Created on 13/11/18**
  *
  * src/library/kernel.js
- * @author André Timermann <andre.timermann@smarti.io>
+ * @author André Timermann <andre@timermann.com.br>
  *
  *   Nucleo do Framework, onde o servidor é configurado e inicializado.
  *   Inicializa Expressjs, aplicações e sobre o servidor
@@ -14,6 +14,8 @@
  *  Antes de alterar leia sobre Segurança:
  *  https://expressjs.com/en/advanced/best-practice-security.html
  *
+ *  @typedef {import('./application.mjs').default} Application
+ *
  */
 
 import { logger } from './logger.js'
@@ -23,7 +25,7 @@ import morgan from 'morgan'
 import helmet from 'helmet'
 import compression from 'compression'
 import { Writable } from 'stream'
-import ApplicationController from './applicationController.js'
+import ApplicationController from './application-controller.js'
 import os from 'os'
 import { join } from 'path'
 import { createServer } from 'http'
@@ -39,13 +41,11 @@ export default {
   /**
    * Inicializa Servidor
    *
-   * // @param serializedApplication  {String} Array listando todas as aplicações e atributos Serializado
-
-   * @param application {Object}    Dados da aplicação que está sendo carregada
+   * @param application {Application}    Instancia de application
    *
    */
   async run (application) {
-    global.__BASE = join(application.rootPath, '/')
+    global.__BASE = join(application.path, '/')
 
     logger.info('Inicializando Kernel...')
 
@@ -87,7 +87,7 @@ export default {
     console.log(figlet.textSync(`\n${sentenceCase(application.name)}`))
     logger.info('==============================================================')
     logger.info(`Project:                 ${application.name}`)
-    logger.info(`Root Path:               ${application.rootPath}`)
+    logger.info(`Root Path:               ${application.path}`)
     logger.info(`Node Version:            ${process.version}`)
     logger.info(`Environment:             ${process.env.NODE_ENV}`)
     logger.info(`Port:                    ${process.env.PORT || config.get('server.port')}`)
@@ -173,7 +173,7 @@ export default {
       let sourceStaticFiles
 
       if (config.get('server.loadStaticFromPackage')) {
-        sourceStaticFiles = join(application.rootPath, 'public')
+        sourceStaticFiles = join(application.path, 'public')
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
         sourceStaticFiles = join(process.cwd(), 'public')

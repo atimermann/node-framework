@@ -7,7 +7,7 @@
  */
 
 import Application from './library/application.js'
-import ApplicationController from './library/applicationController.js'
+import ApplicationController from './library/application-controller.js'
 import Server from './library/server.mjs'
 import { logger } from './library/logger.js'
 import config from './library/config.js'

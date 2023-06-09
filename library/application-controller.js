@@ -1,8 +1,8 @@
 /**
  * **Created on 16/11/18**
  *
- * src/library/applicationController.js
- * @author André Timermann <andre.timermann@smarti.io>
+ * src/library/application-controller.js
+ * @author André Timermann <andre@timermann.com.br>
  *
  *   Objeto para Carregar, Controlar as Aplicações
  *

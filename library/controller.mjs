@@ -4,7 +4,7 @@
  * **Created on 16/11/18**
  *
  * src/library/controller.js
- * @author André Timermann <andre.timermann@smarti.io>
+ * @author André Timermann <andre@timermann.com.br>
  *
  *   Classe Abstrata que representa Controlador do MVC, aqui fica o ponto de entrada da nossa aplicação, desde execução de serviços, configuração de
  *   rotas, middleware (Para implementação de plugins) entre outros
@@ -18,12 +18,9 @@
 
 import path from 'path'
 import { logger } from './logger.js'
-import config from 'config'
 
 import consolidate from 'consolidate'
 import { performance } from 'perf_hooks'
-
-import cron from 'node-cron'
 
 const paths = {}
 
@@ -32,7 +29,7 @@ export class Controller {
    * Nome da aplicação que este controller pertence
    * Definido em controllerController, não alterar
    *
-   * @type {undefined}
+   * @type {string}
    */
   applicationName = undefined
 
@@ -126,6 +123,26 @@ export class Controller {
    */
   path = undefined
 
+  /**
+   * @typedef {Object} Job
+   * @property {string}   applicationName - The name of the application.
+   * @property {string}   appName         - The name of the app.
+   * @property {string}   controllerName  - The name of the controller
+   * @property {string}   jobName         - The name of the job.
+   * @property {string}   schedule        - The schedule of the job in cron format.
+   * @property {function} jobFunction     - The function to be executed for the job.
+   * @property {Object}   options         - The options for the job.
+   */
+
+  /**
+   * A list of jobs to be executed. Each job in the list is an
+   * instance of Job, which contains 'jobName', 'schedule',
+   * 'jobFunction', and 'options'.
+   *
+   * @type {Job[]}
+   */
+  jobsList = []
+
   constructor () {
     if (new.target === Controller) {
       throw new TypeError('Cannot construct Abstract instances directly')
@@ -164,10 +181,23 @@ export class Controller {
     this._processRestMethod('patch', ...args)
   }
 
-  schedule (expression, callback) {
-    cron.schedule(expression, callback, {
-      scheduled: true,
-      timezone: config.get('server.timezone')
+  /**
+   * Create a new job
+   *
+   * @param {string} jobName - The name of the job.
+   * @param {string} schedule - The schedule for the job in cron format.
+   * @param {function} jobFunction - The function that will be executed when the job is processed.
+   * @param {Object} [options={}] - Optional settings for the job.
+   */
+  job (jobName, schedule, jobFunction, options = {}) {
+    this.jobsList.push({
+      applicationName: this.applicationName,
+      appName: this.appName,
+      controllerName: this.controllerName,
+      jobName,
+      schedule,
+      jobFunction,
+      options
     })
   }
 
@@ -270,13 +300,11 @@ export class Controller {
   }
 
   // -------------------------------------------------------------------------------------------------------------------
-  // Métodos que podem ser estendidos e implementados na classe filha para Criação de Midleware, Serviços ou Rotas
-  // Não deve ser chamado diretamente
+  // Métodos que podem ser estendidos e implementados na classe filha para criação de midleware, serviços, rotas ou jobs
   // -------------------------------------------------------------------------------------------------------------------
 
   /**
    * Método abstrado para criação de Midleware Pré
-   * @override
    */
   async pre () {
     logger.debug('Middleware pre not implemented')
@@ -284,7 +312,6 @@ export class Controller {
 
   /**
    * Método abstrado para criação de Midleware Pós
-   * @override
    */
   async pos () {
     logger.debug('Middleware pos not implemented')
@@ -292,7 +319,6 @@ export class Controller {
 
   /**
    * Método abstrato Setup, utilizado para execução inicial
-   * @override
    */
   async setup () {
     logger.debug('Setup not implemented')
@@ -300,10 +326,17 @@ export class Controller {
 
   /**
    * Método Abstrado Router, usado para configurar Rotas
-   * @override
    */
   async routes () {
     logger.debug('No route configured')
+  }
+
+  /**
+   * Optional abstract method, used for defining jobs.
+   * Can be overridden in a subclass if custom job definitions are needed.
+   */
+  async jobs () {
+    logger.debug('No jobs configured')
   }
 
   // -------------------------------------------------------------------------------------------------------------------
@@ -369,11 +402,11 @@ export class Controller {
    * @param httpMethod  {string}  Método HTTP que será tratado
    * @param args        {array}   Argumentos do método, callbacks definidos pelo usuário como middlware
    *
-   * @returns {Promise<void>}
+   * @returns {void}
    *
    * @private
    */
-  async _processRestMethod (httpMethod, ...args) {
+  _processRestMethod (httpMethod, ...args) {
     // Obtém ultimo callback e modifica para tratar retornos
     const lastCallback = args.pop()
 

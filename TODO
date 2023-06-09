@@ -1,10 +1,14 @@
 - Migrar todos os arquivos para ESM
 - colocar fonte em src (por ultimo)
-- Estruturar e definir melhor config com DOT ENV (foi atualizado muitas versões)
 - Criar teste unitário
 - configuração CORS
 - Suporte CDN https://github.com/niftylettuce/express-cdn
 - JS-2-DOC MARDKDOWN
 - Revisar cabeçalho de documentação dos arquivos (caminho mudou)
-- Typescript
-
+- Migrar para Typescript (pelo menos documentação)
+- Estruturar e definir melhor config com DOT ENV (foi atualizado muitas versões)
+- CONVERTER TODA CONFIGURAÇÃO PARA ENV, deixar um padrão e converter para ENV verificar se dá pra chamar this.config('server.timezone') e em .env ser SERVER_TIMEZONE
+- Dupliquei sleep em varios lugares, centralizar no agt/util e puxar de lá ou pensar numa forma melhor
+- Documentar uso da nova funcionalidade jobs
+    - Dizer q implementa jobs simples, sem fila, algo parecido com cron com fork
+    - Dizer q ŕecisar ser definido dentro do método jobs

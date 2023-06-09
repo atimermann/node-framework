@@ -2,7 +2,7 @@
  * **Created on 20/09/2018**
  *
  * src/library/application.js
- * @author André Timermann <andre.timermann@>
+ * @author André Timermann <andre@timermann.com.br>
  *
  *   Representa uma aplicação no framework, sempre será instanciado em um novo projeto, pode carregar outras aplicações
  *   ou ser carregado por outras aplicações, possibilitando assim reuso.
@@ -93,29 +93,7 @@ class Application {
   }
 
   /**
-   * Serializa dados da aplicação e retorna dados do projeto (Aplicação Principal)
-   *
-   * Retorna objeto com todas as informações da aplicação para envio entre nós do clusters
-   *
-   * TODO: Observar a necessidade de serialização
-   *
-   * @returns {{name: string, rootPath: string, applications: Array}}
-   */
-  getApplicationData () {
-    return {
-      // Nome da aplicação Principal
-      name: this.name,
-
-      // Diretório RAIZ da aplicação principal
-      rootPath: this.path,
-
-      // Lista de aplicaçações, inclui aplicação principal e subaplicações
-      applications: this.applications
-    }
-  }
-
-  /**
-   * Adiciona aplicação ao lista de aplicações
+   * Adiciona aplicação à lista de aplicações
    *
    * @param path    {string}
    * @param name    {string}
