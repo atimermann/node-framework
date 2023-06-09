@@ -207,6 +207,8 @@ export default class JobManager {
 
     jobsProcessInfo.killing = true
 
+    const pidToKill = jobsProcessInfo.jobProcess.pid
+
     // Prepares callback to restart the process when finished.
     jobsProcessInfo.jobProcess.once('close', async (code) => {
       await this.sleep(0)
@@ -223,7 +225,7 @@ export default class JobManager {
     // Wait for 5 seconds TODO: parameterize this duration.
     await this.sleep(5000)
 
-    if (!jobsProcessInfo.jobProcess.connected) return
+    if (pidToKill !== jobsProcessInfo.jobProcess.pid || !jobsProcessInfo.jobProcess.connected) return
 
     logger.info(`[JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Send "SIGTERM"" to process...`)
     jobsProcessInfo.jobProcess.kill('SIGTERM')
@@ -231,14 +233,14 @@ export default class JobManager {
     // Wait for 5 seconds TODO: parameterize this duration.
     await this.sleep(5000)
 
-    if (!jobsProcessInfo.jobProcess.connected) return
+    if (pidToKill !== jobsProcessInfo.jobProcess.pid || !jobsProcessInfo.jobProcess.connected) return
 
     logger.info(`[JOB MANAGER]  [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Send "SIGKILL"" to process...`)
     jobsProcessInfo.jobProcess.kill('SIGKILL')
 
     await this.sleep(5000)
 
-    if (!jobsProcessInfo.jobProcess.connected) return
+    if (pidToKill !== jobsProcessInfo.jobProcess.pid || !jobsProcessInfo.jobProcess.connected) return
 
     logger.error(`[JOB MANAGER][JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Process is stuck. It cannot be killed. Restart aborted.`)
     jobsProcessInfo.killing = false
