@@ -85,7 +85,6 @@ export default class JobManager {
 
   /**
    * Initializes the Job Manager.
-   * Run in master
    *
    * @param {import('./application.js').Application} application - The application context.
    *
@@ -129,8 +128,6 @@ export default class JobManager {
    * If a job is scheduled to run and its previous instance is still running, it will attempt to safely kill the previous instance
    * before launching a new instance.
    *
-   * Run in master and worker
-   *
    * @param {import('./application.js').Application} application - The application context.
    *
    * @returns {Promise<void>} This method doesn't return any value but encapsulates its operations with a Promise due to the async operations involved.
@@ -160,8 +157,6 @@ export default class JobManager {
    * Each job is identified by a unique job index and the details of the job are provided
    * in the job object. The jobsProcess object contains the state of the job process.
    *
-   * Run in master
-   *
    * @param {string} jobIndex - The unique index for the job to be scheduled.
    * @param {Job} job - The job object containing all the details for the job.
    * @param {JobProcess} jobProcess - Object containing information about the job's process status. It includes properties that track whether the job is currently running or is being killed.
@@ -186,8 +181,6 @@ export default class JobManager {
    * The method checks the process status, and if it's not running or if it's not connected,
    * it uses the 'forkJob' method to start a new process for the job.
    * If the process is already running and connected, it tries to terminate it using 'killJob' method.
-   *
-   * Run in master
    *
    * @param {string} jobIndex - The unique index of the job which will be used to start or terminate a job process.
    * @param {Job} job - Object containing information about the job. It includes properties like the job's name, schedule, etc.
@@ -226,8 +219,6 @@ export default class JobManager {
   /**
    * This method is responsible for attempting to kill a running job.
    * Each termination signal is followed by a time sleep period to allow the process to gracefully terminate.
-   *
-   * Run in master
    *
    * @param {string} jobIndex - The index of the job in jobs and jobsProcess.
    * @param {Job} job - Object containing information about the job.
@@ -284,8 +275,6 @@ export default class JobManager {
   /**
    * Starts a new child process to execute a specific job using fork().
    *
-   * Run in master
-   *
    * @param {string} jobIndex - Unique job identifier.
    * @param {Job} job - The details of the job.
    * @param {JobProcess} jobProcess - The process info for the job. This method sets its 'running' flag to true.
@@ -295,7 +284,7 @@ export default class JobManager {
    * @static
    */
   static forkJob (jobIndex, job, jobProcess) {
-    const args = ['job', jobIndex]
+    const args = ['job', job.applicationName, job.appName, job.controllerName, job.jobName]
 
     // TODO: Parametrizar silent
     jobProcess.childProcess = fork('./src/run.mjs', args, { silent: false })
@@ -307,32 +296,5 @@ export default class JobManager {
       jobProcess.running = false
       logger.info(`[JOB MANAGER] [${job.jobName}] Job finished:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobProcess.childProcess.pid}\n\tConnected:\t${jobProcess.childProcess.connected}\n\tCode:\t\t${code}`)
     })
-  }
-
-  /**
-   * Starts the execution of a worker in a separate process.
-   * The worker loads all jobs, then finds and executes a specific job
-   * that matches the command-line arguments.
-   *
-   * Run in worker
-   *
-   * @param {import('./application.js').Application} application - The application context.
-   *
-   * @throws Will throw an error if the specific job could not be found.
-   *
-   * @returns {Promise<void>}
-   *
-   * @static
-   */
-  static async runWorker (application) {
-    await this.loadJobs(application)
-
-    const job = this.jobs[process.argv[3]]
-
-    if (!job) {
-      throw new Error(`Invalid Job: ${process.argv.slice(3).join(' ')}`)
-    }
-
-    await job.jobFunction()
   }
 }

@@ -14,6 +14,7 @@ import HttpServer from './http-server.mjs'
 
 import { config as dotenvConfig } from 'dotenv'
 import JobManager from './job-manager.mjs'
+import JobWorker from './job-worker.mjs'
 
 dotenvConfig()
 
@@ -32,7 +33,7 @@ export default {
       }
 
       if (process.argv[2] === 'job') {
-        await this.runJob(application)
+        await JobWorker.run(application)
       } else {
         await this.initServer(application)
       }
@@ -47,9 +48,6 @@ export default {
       HttpServer.run(application),
       JobManager.run(application)
     ])
-  },
-
-  async runJob (application) {
-    await JobManager.runWorker(application)
   }
+
 }

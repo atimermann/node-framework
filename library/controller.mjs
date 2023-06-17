@@ -189,7 +189,7 @@ export class Controller {
    * @param {function} jobFunction - The function that will be executed when the job is processed.
    * @param {Object} [options={}] - Optional settings for the job.
    */
-  job (jobName, schedule, jobFunction, options = {}) {
+  createJob (jobName, schedule, jobFunction, options = {}) {
     this.jobsList.push({
       applicationName: this.applicationName,
       appName: this.appName,
@@ -227,11 +227,9 @@ export class Controller {
    * serão exibidos
    *
    * @param err
-   * @param request
-   * @param response
    * @returns {Promise<{errorInfo: {error: boolean, message: *}, status: number}>}
    */
-  async errorHandler (err, request, response) {
+  async errorHandler (err) {
     return {
       status: 400,
       errorInfo: {
@@ -332,11 +330,32 @@ export class Controller {
   }
 
   /**
+   * Loading jobs
+   *
    * Optional abstract method, used for defining jobs.
+   *
    * Can be overridden in a subclass if custom job definitions are needed.
    */
   async jobs () {
     logger.debug('No jobs configured')
+  }
+
+  /**
+   * Inicialização, executado para todos os jobs
+   * Roda no worker
+   * @returns {Promise<void>}
+   */
+  async jobSetup () {
+    logger.debug('No jobsSetup configured')
+  }
+
+  /**
+   * Executado depois do job finalizar
+   * Roda no worker
+   * @returns {Promise<void>}
+   */
+  async jobTeardown () {
+    logger.debug('No jobTeardown configured')
   }
 
   // -------------------------------------------------------------------------------------------------------------------

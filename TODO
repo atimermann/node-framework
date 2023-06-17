@@ -12,16 +12,18 @@
 **** JOBS ****
 - Documentar uso da nova funcionalidade jobs
     - Dizer q implementa jobs simples, sem fila, algo parecido com cron com fork
-    - Dizer q ŕecisar ser definido dentro do método jobs
+    - Dizer q precisar ser definido dentro do método jobs
+    - schedule null executa imediatamente
+    - documentar cron com suporte segundo
+    - documentar onde colocar o código de inicialização dos jobs (em jobs)
+    - Documentar como funciona jobSetup e jobTeardown
 - Criar 4 funções para serem executadas e documentar:
     - NO MASTER:
-        - createJob -> Renomar job para createJob()
-            - Implementar: ao definir schedule para null ou undefined para executar o job imediatamente sem agendamento
-        - [X] jobsSetup -> Executa uma vez ao iniciar o framework (Executa no processo Master)
-            - Pode ser configurado diretamente em jobs (explicar este funcionalidade)
+        - [OK] createJob -> Renomar job para createJob()
+          [OK] Implementar: ao definir schedule para null ou undefined para executar o job imediatamente sem agendamento
         - onJobCreated   -> Executa toda vez antes de criar um novo job, ou novo fork (Executa no processo Master)
         - onJobCompleted   -> Executa dota vez depois de executar o job finalizar (Executa no processo Master)
     - NO WORkER:
-        - JobSetup      ->  Executa no worker antes de iniciar o job (Executa no worker)
-        - JobTeardown   ->  Executa no workar antes de finalizar o processo (Executa no worker)
+        - [OK] JobSetup      ->  Executa no worker antes de iniciar o job (Executa no worker)
+        - [OK] JobTeardown   ->  Executa no workar antes de finalizar o processo (Executa no worker)
 - implementar comunicação com worker de qualquer lugar, ex: em uma API REST -> onMessaFromJOB X
