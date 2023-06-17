@@ -15,7 +15,7 @@ import crypto from 'crypto'
 /**
  * Represents the information related to a child job process.
  *
- * @typedef {Object} JobInfo
+ * @typedef {Object} Job
  * @property {string} applicationName - The name of the application the job belongs to.
  * @property {string} appName - The name of the app the job belongs to.
  * @property {string} controllerName - The name of the controller the job belongs to.
@@ -27,10 +27,10 @@ import crypto from 'crypto'
 /**
  * Represents the information related to a child job process.
  *
- * @typedef {Object} JobProcessInfo *
+ * @typedef {Object} JobProcess *
  * @property {boolean} running - Indicates whether the job is currently running.
  * @property {boolean} killing - Indicates whether the job is currently being killed
- * @property {ChildProcess} jobProcess - Reference to the child process itself.
+ * @property {ChildProcess} [childProcess] - Reference to the child process itself.
  */
 
 export default class JobManager {
@@ -54,11 +54,11 @@ export default class JobManager {
    *   ...
    * }
    *
-   * @type {Object.<string, JobInfo>}
+   * @type {Object.<string, Job>}
    *
    * @static
    */
-  static jobsInfo = {}
+  static jobs = {}
 
   /**
    * A static property containing a collection of child process information.
@@ -77,16 +77,17 @@ export default class JobManager {
    *   ...
    * }
    *
-   * @type {Object.<string, JobProcessInfo>}
+   * @type {Object.<string, JobProcess>}
    *
    * @static
    */
-  static jobsProcessInfo = {}
+  static jobsProcess = {}
 
   /**
    * Initializes the Job Manager.
+   * Run in master
    *
-   * @param {Object} application - The application context.
+   * @param {import('./application.js').Application} application - The application context.
    *
    * @returns {Promise<void>}
    *
@@ -97,18 +98,23 @@ export default class JobManager {
 
     await this.loadJobs(application)
 
-    for (const [jobIndex, job] of Object.entries(this.jobsInfo)) {
-      logger.info(`[JOB MANAGER] [${job.jobName}] Scheduling...`)
-      cron.schedule(job.schedule, () => {
-        const jobInfo = this.jobsInfo[jobIndex]
-        const jobsProcessInfo = this.jobsProcessInfo[jobIndex]
+    /**
+     * @type {Promise<void>[]} promises
+     * An array to hold all promises returned by the schedulingJob or runJob function. Each promise
+     * represents the scheduling or immediate execution of a job. The array is used with Promise.all()
+     * to execute all jobs in parallel and wait until all jobs have been scheduled or run.
+     */
+    const promises = []
+    for (const [jobIndex, job] of Object.entries(this.jobs)) {
+      const jobProcess = this.jobsProcess[jobIndex]
 
-        this.runJob(jobIndex, jobInfo, jobsProcessInfo)
-      }, {
-        scheduled: true,
-        timezone: config.get('server.timezone')
-      })
+      if (job.schedule) {
+        promises.push(this.schedulingJob(jobIndex, job, jobProcess))
+      } else {
+        promises.push(this.runJob(jobIndex, job, jobProcess))
+      }
     }
+    await Promise.all(promises)
 
     logger.debug('Applications Loaded!')
   }
@@ -123,7 +129,9 @@ export default class JobManager {
    * If a job is scheduled to run and its previous instance is still running, it will attempt to safely kill the previous instance
    * before launching a new instance.
    *
-   * @param {Object} application - The application context, it is used to fetch and load all the controllers and the jobs therein.
+   * Run in master and worker
+   *
+   * @param {import('./application.js').Application} application - The application context.
    *
    * @returns {Promise<void>} This method doesn't return any value but encapsulates its operations with a Promise due to the async operations involved.
    *
@@ -135,13 +143,42 @@ export default class JobManager {
 
       for (const job of controller.jobsList) {
         const uniqueJobId = crypto.createHash('sha1').update(job.applicationName + job.appName + job.controllerName + job.jobName).digest('hex')
-        this.jobsInfo[uniqueJobId] = job
-        this.jobsProcessInfo[uniqueJobId] = {
+        this.jobs[uniqueJobId] = job
+        this.jobsProcess[uniqueJobId] = {
           running: false,
-          killing: false
+          killing: false,
+          childProcess: undefined
         }
       }
     }
+  }
+
+  /**
+   * Schedules a job to be run based on the job's predefined schedule.
+   *
+   * This method uses a cron scheduler to execute the job at the defined intervals.
+   * Each job is identified by a unique job index and the details of the job are provided
+   * in the job object. The jobsProcess object contains the state of the job process.
+   *
+   * Run in master
+   *
+   * @param {string} jobIndex - The unique index for the job to be scheduled.
+   * @param {Job} job - The job object containing all the details for the job.
+   * @param {JobProcess} jobProcess - Object containing information about the job's process status. It includes properties that track whether the job is currently running or is being killed.
+   *
+   * @type {Promise<void>} promises
+   *
+   * @static
+   */
+  static async schedulingJob (jobIndex, job, jobProcess) {
+    logger.info(`[JOB MANAGER] [${job.jobName}] Scheduling...`)
+
+    cron.schedule(job.schedule, async () => {
+      await this.runJob(jobIndex, job, jobProcess)
+    }, {
+      scheduled: true,
+      timezone: config.get('server.timezone')
+    })
   }
 
   /**
@@ -150,28 +187,28 @@ export default class JobManager {
    * it uses the 'forkJob' method to start a new process for the job.
    * If the process is already running and connected, it tries to terminate it using 'killJob' method.
    *
+   * Run in master
+   *
    * @param {string} jobIndex - The unique index of the job which will be used to start or terminate a job process.
-   * @param {Object} jobInfo - Object containing information about the job. It includes properties like the job's name, schedule, etc.
-   * @param {Object} jobsProcessInfo - Object containing information about the job's process status. It includes properties that track whether the job is currently running or is being killed.
+   * @param {Job} job - Object containing information about the job. It includes properties like the job's name, schedule, etc.
+   * @param {JobProcess} jobProcess - Object containing information about the job's process status. It includes properties that track whether the job is currently running or is being killed.
    *
    * @returns {Promise<void>}
    *
    * @static
    */
-  static async runJob (jobIndex, jobInfo, jobsProcessInfo) {
-    if (jobsProcessInfo.killing) {
-      logger.error(`[JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Waiting to finish...`)
+  static async runJob (jobIndex, job, jobProcess) {
+    if (jobProcess.killing) {
+      logger.error(`[JOB MANAGER] [${job.jobName}] [${jobProcess.childProcess.pid}] Waiting to finish...`)
       return
     }
 
-    logger.info(`[JOB MANAGER] [${jobInfo.jobName}] Running...`)
+    logger.info(`[JOB MANAGER] [${job.jobName}] Running...`)
 
-    const jobProcess = jobsProcessInfo.jobProcess
-
-    if (!jobProcess || !jobProcess.connected) {
-      await this.forkJob(jobIndex, jobInfo, jobsProcessInfo)
+    if (!jobProcess.childProcess || !jobProcess.childProcess.connected) {
+      this.forkJob(jobIndex, job, jobProcess)
     } else {
-      await this.killJob(jobIndex, jobInfo, jobsProcessInfo)
+      await this.killJob(jobIndex, job, jobProcess)
     }
   }
 
@@ -188,88 +225,87 @@ export default class JobManager {
 
   /**
    * This method is responsible for attempting to kill a running job.
-   * It will initially send a 'SIGINT' signal to the process.
-   * If the process doesn't terminate, it escalates the termination signal to 'SIGTERM'.
-   * If the process still doesn't terminate, it then sends a 'SIGKILL' signal which should forcefully stop the process.
-   * If even after 'SIGKILL', the process does not terminate, it logs an error indicating that the process is stuck and cannot be killed.
    * Each termination signal is followed by a time sleep period to allow the process to gracefully terminate.
    *
-   * @param {string} jobIndex - The index of the job in jobsInfo and jobsProcessInfo.
-   * @param {Object} jobInfo - Object containing information about the job.
-   * @param {Object} jobsProcessInfo - Object containing information about the job process.
+   * Run in master
+   *
+   * @param {string} jobIndex - The index of the job in jobs and jobsProcess.
+   * @param {Job} job - Object containing information about the job.
+   * @param {JobProcess} jobsProcess - Object containing information about the job process.
    *
    * @returns {Promise<void>}
    *
    * @static
    */
-  static async killJob (jobIndex, jobInfo, jobsProcessInfo) {
-    logger.error(`[JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Process is still running! Killing...`)
+  static async killJob (jobIndex, job, jobsProcess) {
+    logger.error(`[JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Process is still running! Killing...`)
 
-    jobsProcessInfo.killing = true
+    jobsProcess.killing = true
 
-    const pidToKill = jobsProcessInfo.jobProcess.pid
+    const pidToKill = jobsProcess.childProcess.pid
 
     // Prepares callback to restart the process when finished.
-    jobsProcessInfo.jobProcess.once('close', async (code) => {
+    jobsProcess.childProcess.once('close', async () => {
       await this.sleep(0)
-      jobsProcessInfo.killing = false
-      logger.info(`[JOB MANAGER] [${jobInfo.jobName}]  Finished!. Restarting job...`)
+      jobsProcess.killing = false
+      logger.info(`[JOB MANAGER] [${job.jobName}]  Finished!. Restarting job...`)
 
-      await this.forkJob(jobIndex, jobInfo, jobsProcessInfo)
+      this.forkJob(jobIndex, job, jobsProcess)
     })
 
     // Send SIGNIT
-    logger.info(`[JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Send "SIGINT" to process...`)
-    jobsProcessInfo.jobProcess.kill('SIGINT')
+    logger.info(`[JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Send "SIGINT" to process...`)
+    jobsProcess.childProcess.kill('SIGINT')
 
     // Wait for 5 seconds TODO: parameterize this duration.
     await this.sleep(5000)
 
-    if (pidToKill !== jobsProcessInfo.jobProcess.pid || !jobsProcessInfo.jobProcess.connected) return
+    if (pidToKill !== jobsProcess.childProcess.pid || !jobsProcess.childProcess.connected) return
 
-    logger.info(`[JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Send "SIGTERM"" to process...`)
-    jobsProcessInfo.jobProcess.kill('SIGTERM')
+    logger.info(`[JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Send "SIGTERM"" to process...`)
+    jobsProcess.childProcess.kill('SIGTERM')
 
     // Wait for 5 seconds TODO: parameterize this duration.
     await this.sleep(5000)
 
-    if (pidToKill !== jobsProcessInfo.jobProcess.pid || !jobsProcessInfo.jobProcess.connected) return
+    if (pidToKill !== jobsProcess.childProcess.pid || !jobsProcess.childProcess.connected) return
 
-    logger.info(`[JOB MANAGER]  [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Send "SIGKILL"" to process...`)
-    jobsProcessInfo.jobProcess.kill('SIGKILL')
+    logger.info(`[JOB MANAGER]  [${job.jobName}] [${jobsProcess.childProcess.pid}] Send "SIGKILL"" to process...`)
+    jobsProcess.childProcess.kill('SIGKILL')
 
     await this.sleep(5000)
 
-    if (pidToKill !== jobsProcessInfo.jobProcess.pid || !jobsProcessInfo.jobProcess.connected) return
+    if (pidToKill !== jobsProcess.childProcess.pid || !jobsProcess.childProcess.connected) return
 
-    logger.error(`[JOB MANAGER][JOB MANAGER] [${jobInfo.jobName}] [${jobsProcessInfo.jobProcess.pid}] Process is stuck. It cannot be killed. Restart aborted.`)
-    jobsProcessInfo.killing = false
+    logger.error(`[JOB MANAGER][JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Process is stuck. It cannot be killed. Restart aborted.`)
+    jobsProcess.killing = false
   }
 
   /**
-   * Starts a new process to execute a specific job.
-   * It does so by forking the current process, passing a path to a module
-   * and command-line arguments which define the specific job to execute.
+   * Starts a new child process to execute a specific job using fork().
    *
-   * @param {string} jobIndex - The job index.
+   * Run in master
    *
-   * @param jobInfo
-   * @param jobsProcessInfo
-   * @returns {Promise<void>}
+   * @param {string} jobIndex - Unique job identifier.
+   * @param {Job} job - The details of the job.
+   * @param {JobProcess} jobProcess - The process info for the job. This method sets its 'running' flag to true.
+   *
+   * @returns {void}
    *
    * @static
    */
-  static async forkJob (jobIndex, jobInfo, jobsProcessInfo) {
+  static forkJob (jobIndex, job, jobProcess) {
     const args = ['job', jobIndex]
 
-    jobsProcessInfo.jobProcess = fork('./src/run.mjs', args, { silent: true })
-    jobsProcessInfo.running = true
+    // TODO: Parametrizar silent
+    jobProcess.childProcess = fork('./src/run.mjs', args, { silent: false })
+    jobProcess.running = true
 
-    logger.info(`[JOB MANAGER] [${jobInfo.jobName}]  Job "${jobInfo.jobName}" started:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobsProcessInfo.jobProcess.pid}\n\tConnected:\t${jobsProcessInfo.jobProcess.connected}`)
+    logger.info(`[JOB MANAGER] [${job.jobName}]  Job "${job.jobName}" started:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobProcess.childProcess.pid}\n\tConnected:\t${jobProcess.childProcess.connected}`)
 
-    jobsProcessInfo.jobProcess.once('close', (code) => {
-      jobsProcessInfo.running = false
-      logger.info(`[JOB MANAGER] [${jobInfo.jobName}] Job finished:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobsProcessInfo.jobProcess.pid}\n\tConnected:\t${jobsProcessInfo.jobProcess.connected}`)
+    jobProcess.childProcess.once('close', (code) => {
+      jobProcess.running = false
+      logger.info(`[JOB MANAGER] [${job.jobName}] Job finished:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobProcess.childProcess.pid}\n\tConnected:\t${jobProcess.childProcess.connected}\n\tCode:\t\t${code}`)
     })
   }
 
@@ -278,7 +314,9 @@ export default class JobManager {
    * The worker loads all jobs, then finds and executes a specific job
    * that matches the command-line arguments.
    *
-   * @param {Object} application - The application context.
+   * Run in worker
+   *
+   * @param {import('./application.js').Application} application - The application context.
    *
    * @throws Will throw an error if the specific job could not be found.
    *
@@ -289,7 +327,7 @@ export default class JobManager {
   static async runWorker (application) {
     await this.loadJobs(application)
 
-    const job = this.jobsInfo[process.argv[3]]
+    const job = this.jobs[process.argv[3]]
 
     if (!job) {
       throw new Error(`Invalid Job: ${process.argv.slice(3).join(' ')}`)
