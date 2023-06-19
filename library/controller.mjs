@@ -181,15 +181,24 @@ export class Controller {
     this._processRestMethod('patch', ...args)
   }
 
+  // -------------------------------------------------------------------------------------------------------------------
+  // Método dos Jobs
+  // -------------------------------------------------------------------------------------------------------------------
+
   /**
-   * Create a new job
+   * Create a new job.
    *
    * @param {string} jobName - The name of the job.
-   * @param {string} schedule - The schedule for the job in cron format.
+   * @param {string|null} schedule - The schedule for the job in cron format, or null if the job is not scheduled.
    * @param {function} jobFunction - The function that will be executed when the job is processed.
    * @param {Object} [options={}] - Optional settings for the job.
+   * @throws {Error} If a job with the provided name already exists.
    */
   createJob (jobName, schedule, jobFunction, options = {}) {
+    if (this.jobsList.some(job => job.jobName === jobName)) {
+      throw new Error(`Job "${jobName}" already exists.`)
+    }
+
     this.jobsList.push({
       applicationName: this.applicationName,
       appName: this.appName,
@@ -202,20 +211,31 @@ export class Controller {
   }
 
   /**
-   * Tratamento de erro padrão
+   * TODO: Documentar
    *
-   * @param lastCallback  {callback}  Função que define API
-   * @param request       {object}    Objeto Request do Express
-   * @param response      {object}    Objeto Response do Express
-   * @param args          {array}     restante dos argumentos do express, normalmente next e value
+   * @callback requestCallback
    *
+   * @param {object} request - Objeto Request do Express.
+   * @param {object} response - Objeto Response do Express.
+   * @param {...any} args - Argumentos adicionais.
+   *
+   * @returns {Promise<void>}
+   */
+
+  /**
+   * TODO: Documentar
+   *
+   * @param {requestCallback} lastCallback - Função que define API
+   * @param {object} request - Objeto Request do Express.
+   * @param {object} response - Objeto Response do Express.
+   * @param {...any} args - Restante dos argumentos do express, normalmente next e value.
    * @returns {Promise<void>}
    */
   async responseHandler (lastCallback, request, response, ...args) {
     try {
       await lastCallback(request, response, ...args)
     } catch (err) {
-      const { status, errorInfo } = await this.errorHandler(err, request, response)
+      const { status, errorInfo } = await this.errorHandler(err)
       response.status(status).json(errorInfo)
       console.error(err)
       logger.error(JSON.stringify({ message: err.message, stack: err.stack }))
