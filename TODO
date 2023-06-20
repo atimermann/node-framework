@@ -17,6 +17,7 @@
     - documentar cron com suporte segundo
     - documentar onde colocar o código de inicialização dos jobs (em jobs)
     - Documentar como funciona jobSetup e jobTeardown
+    - Documentar que sigint executa teardown
 - Criar 4 funções para serem executadas e documentar:
     - NO MASTER:
         - [OK] createJob -> Renomar job para createJob()
@@ -27,3 +28,4 @@
         - [OK] JobSetup      ->  Executa no worker antes de iniciar o job (Executa no worker)
         - [OK] JobTeardown   ->  Executa no workar antes de finalizar o processo (Executa no worker)
 - implementar comunicação com worker de qualquer lugar, ex: em uma API REST -> onMessaFromJOB X
+- simplificar kill job, quebrar mais métodos, pois só muda o SEGINT, tá com código repetido

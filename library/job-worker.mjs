@@ -77,6 +77,13 @@ export default class JobManager {
     }
 
     await targetController.jobSetup()
+
+    // Se receber SIGINT, finaliza (SIGKILL e SIGTERM devem ser tratado pela aplicação)
+    process.once('SIGINT', async function () {
+      await targetController.jobTeardown()
+      process.exit(0)
+    })
+
     await targetJob.jobFunction()
     await targetController.jobTeardown()
   }
