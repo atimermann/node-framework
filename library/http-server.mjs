@@ -32,6 +32,7 @@ import { createServer } from 'http'
 import figlet from 'figlet'
 import { readFileSync } from 'fs'
 import { sentenceCase } from 'change-case'
+import cors from 'cors'
 
 // const { config } = await import('../vendor/config/lib/config.js') // Fix para funcionar com pkg, projeto config não compatível, copiado para vendor
 import config from 'config'
@@ -154,14 +155,9 @@ export default {
 
     /// /////////////////////////////////////////////////
     // Cors
-    // TODO: https://github.com/expressjs/cors
+    // TODO: Parametrizar: https://expressjs.com/en/resources/middleware/cors.html#installation
     /// /////////////////////////////////////////////////
-    app.use((req, res, next) => {
-      // res.header('Access-Control-Allow-Origin', '*');
-      // res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-      // res.header('Access-Control-Allow-Headers', 'Content-Type');
-      next()
-    })
+    app.use(cors())
 
     /// /////////////////////////////////////////////////
     // TODO: Parametrizar possibilidade de usar CDN ou servidor separado
