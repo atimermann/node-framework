@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@agtm/cli-tool": "^4.0.1",
-    "pkg": "^5.8.1",
-    "eslint": "^8.40.0"
+    "eslint": "^8.40.0",
+    "pkg": "^5.8.1"
   }
 }

@@ -17,8 +17,8 @@ export default class WorkerManager {
   static checking = false
 
   /**
-   * Inicializa workers definido pelo usuario
-   * @param application
+   * Creates user-defined workers.
+   * @param {Object} application - The application object to get controllers from.
    * @returns {Promise<void>}
    */
   static async createUserWorkers (application) {
@@ -31,11 +31,11 @@ export default class WorkerManager {
   }
 
   /**
-   * Cria novo worker
-   * @param name
-   * @param job
-   * @param persistent
-   * @param options
+   * Creates a new worker.
+   * @param {string} name - The name of the worker.
+   * @param {Object} job - The job associated with the worker.
+   * @param {boolean} persistent - Whether the worker is persistent.
+   * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, options = {}) {
     console.log('[WorkerManager]', `Criando Worker: ${name}, JOB: ${job.name}`)
@@ -52,7 +52,8 @@ export default class WorkerManager {
   }
 
   /**
-   * Inicia execução de worksrs persistentes
+   * Starts execution of persistent workers.
+   * @returns {Promise<void>}
    */
   static async startPersistentWorkers () {
     for (const worker of this.workers) {
@@ -63,9 +64,9 @@ export default class WorkerManager {
   }
 
   /**
-   * Executa workers
-   *
-   * @param workerName
+   * Executes workers.
+   * @param {string} workerName - The name of the worker.
+   * @returns {Promise<void>}
    */
   static async startWorkerProcesses (workerName) {
     const worker = this.indexedWorkers[workerName]
@@ -79,6 +80,10 @@ export default class WorkerManager {
       }
     }
   }
+
+  /**
+   * Monitors workers health at regular intervals.
+   */
 
   static async restarWorkersProcesses (worker) {
     for (const jobProcess of worker.jobProcesses) {
@@ -94,6 +99,9 @@ export default class WorkerManager {
     }
   }
 
+  /**
+   * Monitors workers health at regular intervals.
+   */
   static monitorWorkersHealth () {
     // TODO: Parametrizar tempo de verificação
     setInterval(() => {
@@ -102,10 +110,9 @@ export default class WorkerManager {
   }
 
   /**
-   * Executa um processo
-   *
-   * @param job
-   * @param options
+   * Creates a new process.
+   * @param {Object} job - The job for which to create a process.
+   * @param {Object} options - The options for creating the process.
    * @returns {{}}
    */
   static createProcess (job, options) {
@@ -119,6 +126,11 @@ export default class WorkerManager {
     return jobProcess
   }
 
+  /**
+   * Runs a process.
+   * @param {Object} job - The job to run.
+   * @param {Object} jobProcess - The process to run.
+   */
   static runProcess (job, jobProcess) {
     // TODO: Parametrizar silent em options
     console.log('[WorkerManager]', `Criando Processo: ${job.name}`)
@@ -137,7 +149,7 @@ export default class WorkerManager {
   }
 
   /**
-   * Verifica saúde do worker
+   * Checks the health of all workers.
    */
   static verifyWorkerHealth () {
     if (this.checking) return
@@ -158,7 +170,9 @@ export default class WorkerManager {
   }
 
   /**
-   * Verifica saúde dos processos de  jobs persistentes
+   * Verifies the health of persistent job processes.
+   * @param {Object} worker - The worker to check.
+   * @param {Object} jobProcess - The job process to check.
    */
   static verifyPersistentJobHealth (worker, jobProcess) {
     console.log('[WorkerManager]', `PROCESS #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
@@ -177,6 +191,12 @@ export default class WorkerManager {
     // TODO: Verifica jobs está reiniciando muits vezes
   }
 
+  /**
+   * Restarts a job process.
+   * @param {Object} job - The job whose process to restart.
+   * @param {Object} jobProcess - The process to restart.
+   * @returns {Promise<void>}
+   */
   static async restartJobProcess (job, jobProcess) {
     jobProcess.killing = true
 
@@ -204,6 +224,12 @@ export default class WorkerManager {
     jobProcess.killing = false
   }
 
+  /**
+   * Sends a kill signal to a child process.
+   * @param {string} signal - The signal to send.
+   * @param {Object} childProcess - The child process to which to send the signal.
+   * @returns {Promise<void>}
+   */
   static async sendKill (signal, childProcess) {
     // Send SIGNIT
     console.log(`[${childProcess.pid}] Send "${signal}" to process...`)
