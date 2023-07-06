@@ -103,7 +103,11 @@
 
 import pino from 'pino'
 
-const logger = pino({})
+const transport = pino.transport({
+  target: './pinoTransport/console.mjs'
+})
+
+const logger = pino(transport)
 
 export default function createLogger (module) {
   return logger.child({ module })
