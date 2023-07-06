@@ -6,7 +6,6 @@
  *
  */
 import cron from 'node-cron'
-import config from 'config'
 import crypto from 'crypto'
 import WorkerManager from './worker-manager.mjs'
 
@@ -151,7 +150,7 @@ export default class JobManager {
       }
     }, {
       scheduled: true,
-      timezone: config.get('server.timezone')
+      timezone: 'America/Sao_Paulo' // TODO: Parametrizar
     })
   }
 

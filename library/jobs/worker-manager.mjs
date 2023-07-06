@@ -11,7 +11,6 @@
 import { fork } from 'child_process'
 import JobManager from './job-manager.mjs'
 
-
 export default class WorkerManager {
   static workers = []
   static indexedWorkers = {}
@@ -70,7 +69,6 @@ export default class WorkerManager {
    */
   static async startWorkerProcesses (workerName) {
     const worker = this.indexedWorkers[workerName]
-
 
     if (worker.jobProcesses.length > 0) {
       await this.restarWorkersProcesses(worker)
