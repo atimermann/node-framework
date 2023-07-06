@@ -1,0 +1,46 @@
+{
+  "name": "teste",
+  "version": "0.0.1",
+  "bin": "src/run.mjs",
+  "description": "teste",
+  "main": "src/run.mjs",
+  "scripts": {
+    "update": "npm update @agtm/cli-tool @agtm/node-framework",
+    "build": "./scripts/build.sh",
+    "build-debug": "npx pkg -t node14-linux-x64 --out-path build .",
+    "dev": "npx nodemon --loader=./esm-loader.mjs -e mjs,js,yaml,html .",
+    "install-assets": "npx agtm install-assets",
+    "create-app": "npx agtm create-app",
+    "create-controller": "npx agtm create-controller",
+    "lint:test": "npx eslint src",
+    "lint": "npx eslint --fix src",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "André Timermann <andre@timermann.com.br>",
+  "license": "ISC",
+  "_moduleAliases": {
+    "~": "src"
+  },
+  "pkg": {
+    "scripts": "src/apps/**/controllers/*.mjs",
+    "assets": [
+      "src",
+      "node_modules/config",
+      "node_modules/figlet"
+    ]
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@agtm/node-framework": "^3",
+    "config": "^3.3.9",
+    "esm-module-alias": "^2.0.3",
+    "nodemon": "^2.0.22"
+  },
+  "devDependencies": {
+    "@agtm/cli-tool": "^4.0.1",
+    "pkg": "^5.8.1",
+    "eslint": "^8.40.0"
+  }
+}

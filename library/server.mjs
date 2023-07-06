@@ -8,11 +8,11 @@
  *
  */
 
-import Application from './application.js'
+import { config as dotenvConfig } from 'dotenv'
+import Application from './application.mjs'
 import { logger } from './logger.js'
 import HttpServer from './http-server.mjs'
 
-import { config as dotenvConfig } from 'dotenv'
 import JobManager from './job-manager.mjs'
 import JobWorker from './job-worker.mjs'
 
@@ -32,6 +32,8 @@ export default {
         throw new TypeError('application must be instance of Application')
       }
 
+      await application.init()
+
       if (process.argv[2] === 'job') {
         await JobWorker.run(application)
       } else {
@@ -49,5 +51,4 @@ export default {
       JobManager.run(application)
     ])
   }
-
 }

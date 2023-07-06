@@ -3,9 +3,9 @@
   "version": "3.2.6",
   "description": "Framework nodejs baseado no ExpressJs",
   "scripts": {
-    "publish-patch": "npm version patch && npm publish --access public",
-    "publish-minor": "npm version minor && npm publish --access public",
-    "publish-major": "npm version major && npm publish --access public",
+    "publish-patch": "npm version patch && npm publish --access public && git push",
+    "publish-minor": "npm version minor && npm publish --access public && git push",
+    "publish-major": "npm version major && npm publish --access public && git push",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npx eslint --ext .mjs,.js --fix .",
     "lint:test": "npx eslint  --ext .mjs,.js ."

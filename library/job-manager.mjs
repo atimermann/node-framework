@@ -5,12 +5,12 @@
  * @author André Timermann <andre@timermann.com.br>
  *
  */
-import ApplicationController from './application-controller.js'
 import { logger } from './logger.js'
 import cron from 'node-cron'
 import config from 'config'
 import { fork } from 'child_process'
 import crypto from 'crypto'
+import WorkerManager from './worker-manager.mjs'
 
 /**
  * Represents the information related to a child job process.
@@ -19,7 +19,7 @@ import crypto from 'crypto'
  * @property {string} applicationName - The name of the application the job belongs to.
  * @property {string} appName - The name of the app the job belongs to.
  * @property {string} controllerName - The name of the controller the job belongs to.
- * @property {string} jobName - The name of the job.
+ * @property {string} name - The name of the job.
  * @property {function} jobFunction - The function that performs the job.
  * @property {string} schedule - The cron schedule for the job.
  */
@@ -46,7 +46,7 @@ export default class JobManager {
    *     applicationName: 'App1',
    *     appName: 'Application1',
    *     controllerName: 'Controller1',
-   *     jobName: 'Job1',
+   *     name: 'Job1',
    *     jobFunction: function() {...},
    *     schedule: '* * * * *'
    *   },
@@ -61,29 +61,6 @@ export default class JobManager {
   static jobs = {}
 
   /**
-   * A static property containing a collection of child process information.
-   * Each child process information is represented as an object and indexed by a unique job hash.
-   * The object includes the status of the child process such as if it is currently running or being killed,
-   * and a reference to the child process itself.
-   *
-   * @example
-   * {
-   *   "job_hash_1": {
-   *     running: true,
-   *     killing: false,
-   *     jobProcess: ChildProcessObject
-   *   },
-   *   "job_hash_2": {...},
-   *   ...
-   * }
-   *
-   * @type {Object.<string, JobProcess>}
-   *
-   * @static
-   */
-  static jobsProcess = {}
-
-  /**
    * Initializes the Job Manager.
    *
    * @param {import('./application.js').Application} application - The application context.
@@ -93,29 +70,30 @@ export default class JobManager {
    * @static
    */
   static async run (application) {
-    logger.info('[JOB MANAGER] Initializing...')
+    console.log('[JOB MANAGER] Initializing...')
 
-    await this.loadJobs(application)
+    // ============================================
+    // Carrega Jobs e Workers definido pelo usuario
+    // ============================================
+    await this.loadJobsAndWorkers(application)
 
-    /**
-     * @type {Promise<void>[]} promises
-     * An array to hold all promises returned by the schedulingJob or runJob function. Each promise
-     * represents the scheduling or immediate execution of a job. The array is used with Promise.all()
-     * to execute all jobs in parallel and wait until all jobs have been scheduled or run.
-     */
-    const promises = []
-    for (const [jobIndex, job] of Object.entries(this.jobs)) {
-      const jobProcess = this.jobsProcess[jobIndex]
+    // ============================================
+    // Cria Workers
+    // ============================================
+    this.createScheduleWorkers()
+    await WorkerManager.createUserWorkers(application)
 
-      if (job.schedule) {
-        promises.push(this.schedulingJob(jobIndex, job, jobProcess))
-      } else {
-        promises.push(this.runJob(jobIndex, job, jobProcess))
-      }
-    }
-    await Promise.all(promises)
+    // ============================================
+    // Executa Workers
+    // ============================================
+    await this.startScheduleJob()
+    await WorkerManager.startPersistentWorkers()
 
-    logger.debug('Applications Loaded!')
+    // ============================================
+    // Monitora Workers
+    // ============================================
+    await WorkerManager.monitorWorkersHealth()
+    logger.debug('Job Manager Loaded!')
   }
 
   /**
@@ -134,20 +112,46 @@ export default class JobManager {
    *
    * @static
    */
-  static async loadJobs (application) {
-    for (const controller of await ApplicationController.getControllers(application.applications)) {
+  static async loadJobsAndWorkers (application) {
+    console.log('Load Jobs and Workers')
+    for (const controller of await application.getControllers()) {
       await controller.jobs()
 
       for (const job of controller.jobsList) {
-        const uniqueJobId = crypto.createHash('sha1').update(job.applicationName + job.appName + job.controllerName + job.jobName).digest('hex')
-        this.jobs[uniqueJobId] = job
-        this.jobsProcess[uniqueJobId] = {
-          running: false,
-          killing: false,
-          childProcess: undefined
+        job.uuid = this.createJobUUID(job.applicationName, job.appName, job.controllerName, job.name)
+        this.jobs[job.uuid] = job
+
+        console.log(`JOB:\n\tUUID:  ${job.uuid}\n\tName:  ${job.name}`)
+      }
+    }
+  }
+
+  /**
+   * Cria Workers para os jobs agendados
+   */
+  static createScheduleWorkers () {
+    for (const [, job] of Object.entries(this.jobs)) {
+      if (job.schedule) {
+        console.log('createScheduleWorkers:', job.name)
+
+        job.workerName = `${job.name}-${job.uuid}`
+        WorkerManager.createWorker(job.workerName, job, false)
+      }
+    }
+  }
+
+  static async startScheduleJob () {
+    const promises = []
+    for (const [, job] of Object.entries(this.jobs)) {
+      if (job.schedule) {
+        if (job.schedule === 'now') {
+          promises.push(this.runJob(job))
+        } else if (job.schedule) {
+          promises.push(this.schedulingJob(job))
         }
       }
     }
+    await Promise.all(promises)
   }
 
   /**
@@ -165,11 +169,15 @@ export default class JobManager {
    *
    * @static
    */
-  static async schedulingJob (jobIndex, job, jobProcess) {
-    logger.info(`[JOB MANAGER] [${job.jobName}] Scheduling...`)
+  static async schedulingJob (job) {
+    logger.info(`[JOB MANAGER] [${job.name}] Scheduling...`)
 
     cron.schedule(job.schedule, async () => {
-      await this.runJob(jobIndex, job, jobProcess)
+      try {
+        await this.runJob(job)
+      } catch (error) {
+        console.error(error)
+      }
     }, {
       scheduled: true,
       timezone: config.get('server.timezone')
@@ -190,111 +198,32 @@ export default class JobManager {
    *
    * @static
    */
-  static async runJob (jobIndex, job, jobProcess) {
-    if (jobProcess.killing) {
-      logger.error(`[JOB MANAGER] [${job.jobName}] [${jobProcess.childProcess.pid}] Waiting to finish...`)
-      return
+  static async runJob (job) {
+    console.log('[WorkerManager]', `Executando ${job.workerName}`)
+    await WorkerManager.startWorkerProcesses(job.workerName)
+  }
+
+  /**
+   * Obtém uma instancia de Job à partir de atrivutos do worker
+   *
+   * @param applicationName
+   * @param appName
+   * @param controllerName
+   * @param name
+   * @returns {{name: string, schedule: string, jobFunction: Function, appName: string, controllerName: string, applicationName: string}}
+   */
+  static getJob (applicationName, appName, controllerName, name) {
+    const jobUUID = this.createJobUUID(applicationName, appName, controllerName, name)
+    const job = this.jobs[jobUUID]
+
+    if (!job) {
+      throw new Error(`Job "${name}" does not exist in the Application "${applicationName}", App: "${appName}", Controller: "${controllerName}".`)
     }
 
-    logger.info(`[JOB MANAGER] [${job.jobName}] Running...`)
-
-    if (!jobProcess.childProcess || !jobProcess.childProcess.connected) {
-      this.forkJob(jobIndex, job, jobProcess)
-    } else {
-      await this.killJob(jobIndex, job, jobProcess)
-    }
+    return job
   }
 
-  /**
-   * Sleep function for waiting purposes.
-   * TODO: Move this function to a utility module.
-   *
-   * @param {number} ms - Time to wait in milliseconds.
-   * @returns {Promise<void>}
-   */
-  static async sleep (ms) {
-    return new Promise(resolve => setTimeout(resolve, ms))
-  }
-
-  /**
-   * This method is responsible for attempting to kill a running job.
-   * Each termination signal is followed by a time sleep period to allow the process to gracefully terminate.
-   *
-   * @param {string} jobIndex - The index of the job in jobs and jobsProcess.
-   * @param {Job} job - Object containing information about the job.
-   * @param {JobProcess} jobsProcess - Object containing information about the job process.
-   *
-   * @returns {Promise<void>}
-   *
-   * @static
-   */
-  static async killJob (jobIndex, job, jobsProcess) {
-    logger.error(`[JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Process is still running! Killing...`)
-
-    jobsProcess.killing = true
-
-    const pidToKill = jobsProcess.childProcess.pid
-
-    // Prepares callback to restart the process when finished.
-    jobsProcess.childProcess.once('close', async () => {
-      await this.sleep(0)
-      jobsProcess.killing = false
-      logger.info(`[JOB MANAGER] [${job.jobName}]  Finished!. Restarting job...`)
-
-      this.forkJob(jobIndex, job, jobsProcess)
-    })
-
-    // Send SIGNIT
-    logger.info(`[JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Send "SIGINT" to process...`)
-    jobsProcess.childProcess.kill('SIGINT')
-
-    // Wait for 5 seconds TODO: parameterize this duration.
-    await this.sleep(5000)
-
-    if (pidToKill !== jobsProcess.childProcess.pid || !jobsProcess.childProcess.connected) return
-
-    logger.info(`[JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Send "SIGTERM"" to process...`)
-    jobsProcess.childProcess.kill('SIGTERM')
-
-    // Wait for 5 seconds TODO: parameterize this duration.
-    await this.sleep(5000)
-
-    if (pidToKill !== jobsProcess.childProcess.pid || !jobsProcess.childProcess.connected) return
-
-    logger.info(`[JOB MANAGER]  [${job.jobName}] [${jobsProcess.childProcess.pid}] Send "SIGKILL"" to process...`)
-    jobsProcess.childProcess.kill('SIGKILL')
-
-    await this.sleep(5000)
-
-    if (pidToKill !== jobsProcess.childProcess.pid || !jobsProcess.childProcess.connected) return
-
-    logger.error(`[JOB MANAGER][JOB MANAGER] [${job.jobName}] [${jobsProcess.childProcess.pid}] Process is stuck. It cannot be killed. Restart aborted.`)
-    jobsProcess.killing = false
-  }
-
-  /**
-   * Starts a new child process to execute a specific job using fork().
-   *
-   * @param {string} jobIndex - Unique job identifier.
-   * @param {Job} job - The details of the job.
-   * @param {JobProcess} jobProcess - The process info for the job. This method sets its 'running' flag to true.
-   *
-   * @returns {void}
-   *
-   * @static
-   */
-  static forkJob (jobIndex, job, jobProcess) {
-    const args = ['job', job.applicationName, job.appName, job.controllerName, job.jobName]
-
-    // TODO: Parametrizar silent
-    jobProcess.childProcess = fork('./src/run.mjs', args, { silent: false })
-    jobProcess.running = true
-
-    logger.info(`[JOB MANAGER] [${job.jobName}]  Job "${job.jobName}" started:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobProcess.childProcess.pid}\n\tConnected:\t${jobProcess.childProcess.connected}`)
-
-    jobProcess.childProcess.once('close', (code) => {
-      jobProcess.running = false
-      logger.info(`[JOB MANAGER] [${job.jobName}] Job finished:\n\tIndex:\t\t${jobIndex}\n\tPID:\t\t${jobProcess.childProcess.pid}\n\tConnected:\t${jobProcess.childProcess.connected}\n\tCode:\t\t${code}`)
-    })
+  static createJobUUID (applicationName, appName, controllerName, name) {
+    return crypto.createHash('md5').update(applicationName + appName + controllerName + name).digest('hex')
   }
 }

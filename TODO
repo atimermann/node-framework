@@ -8,6 +8,7 @@
 - Estruturar e definir melhor config com DOT ENV (foi atualizado muitas versões)
 - CONVERTER TODA CONFIGURAÇÃO PARA ENV, deixar um padrão e converter para ENV verificar se dá pra chamar this.config('server.timezone') e em .env ser SERVER_TIMEZONE
 - Dupliquei sleep em varios lugares, centralizar no agt/util e puxar de lá ou pensar numa forma melhor
+- Parametrizar Cors
 
 **** JOBS ****
 - Documentar uso da nova funcionalidade jobs
@@ -28,4 +29,5 @@
         - [OK] JobSetup      ->  Executa no worker antes de iniciar o job (Executa no worker)
         - [OK] JobTeardown   ->  Executa no workar antes de finalizar o processo (Executa no worker)
 - implementar comunicação com worker de qualquer lugar, ex: em uma API REST -> onMessaFromJOB X
-- simplificar kill job, quebrar mais métodos, pois só muda o SEGINT, tá com código repetido
+
+- Criar um teste automatizado que englobe criação de projeto execução (em docker)

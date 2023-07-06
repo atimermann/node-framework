@@ -5,7 +5,6 @@
  * @author André Timermann <andre@timermann.com.br>
  *
  */
-import ApplicationController from './application-controller.js'
 
 /**
  * Represents the information related to a child job process.
@@ -19,7 +18,7 @@ import ApplicationController from './application-controller.js'
  * @property {string} schedule - The cron schedule for the job.
  */
 
-export default class JobManager {
+export default class JobWorker {
   /**
    * A static property containing a collection of jobs.
    * Each job is represented as an object and indexed by a name
@@ -66,7 +65,7 @@ export default class JobManager {
     await targetController.jobs()
 
     for (const job of targetController.jobsList) {
-      this.jobs[job.jobName] = job
+      this.jobs[job.name] = job
     }
 
     const targetJobName = process.argv[6]
@@ -92,14 +91,10 @@ export default class JobManager {
    * This method is responsible for finding and returning a specific controller
    * that matches the command-line arguments.
    *
-   * @param {import('./application.js').Application} application - The application context.
-   *
-   * @returns {Promise<Controller>} The matching controller.
-   *
    * @static
    */
   static async getJobController (application) {
-    for (const controller of await ApplicationController.getControllers(application.applications)) {
+    for (const controller of await application.getControllers()) {
       const isTargetController =
         controller.applicationName === process.argv[3] &&
         controller.appName === process.argv[4] &&

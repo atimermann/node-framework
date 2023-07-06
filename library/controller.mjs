@@ -50,14 +50,6 @@ export class Controller {
   controllerName = undefined
 
   /**
-   * Opções definida ao instanciar ou carregar aplicação
-   * Definido em controllerController, não alterar
-   *
-   * @type {{}}
-   */
-  options = {}
-
-  /**
    * Identificador unico da aplicação
    * Definido em controllerController, não alterar
    *
@@ -67,7 +59,7 @@ export class Controller {
 
   /**
    * Objeto Router Express
-   * Definido em kernel, não alterar
+   * Definido em http-server, não alterar
    *
    * @type {{}}
    */
@@ -75,7 +67,7 @@ export class Controller {
 
   /**
    * Objeto com atributo das aplicações
-   * Definido em kernel, não alterar
+   * Definido em http-server, não alterar
    *
    * @type {{}}
    */
@@ -83,7 +75,7 @@ export class Controller {
 
   /**
    * Objeto Express
-   * Definido em kernel, não alterar
+   * Definido em http-server, não alterar
    *
    * @type {{}}
    */
@@ -109,7 +101,7 @@ export class Controller {
    * URL base padrão  para acesso a recursos estáticos.
    * Será usado pelo Helper @asset, que calcula automaticamente a url do recurso que será carregado na página
    *
-   * Definido em kernel
+   * Definido em http-server
    *
    * @type {string}
    */
@@ -133,15 +125,6 @@ export class Controller {
    * @property {function} jobFunction     - The function to be executed for the job.
    * @property {Object}   options         - The options for the job.
    */
-
-  /**
-   * A list of jobs to be executed. Each job in the list is an
-   * instance of Job, which contains 'jobName', 'schedule',
-   * 'jobFunction', and 'options'.
-   *
-   * @type {Job[]}
-   */
-  jobsList = []
 
   constructor () {
     if (new.target === Controller) {
@@ -182,33 +165,73 @@ export class Controller {
   }
 
   // -------------------------------------------------------------------------------------------------------------------
-  // Método dos Jobs
+  // Método dos Workers e Jobs
   // -------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * A list of jobs to be executed. Each job in the list is an
+   * instance of Job, which contains 'jobName', 'schedule',
+   * 'jobFunction', and 'options'.
+   *
+   * @type {Job[]}
+   */
+  jobsList = []
+
+  /**
+   * Lista de Workers
+   * @type {[]}
+   */
+  workersList = []
 
   /**
    * Create a new job.
    *
-   * @param {string} jobName - The name of the job.
+   * @param {string} name - The name of the job.
    * @param {string|null} schedule - The schedule for the job in cron format, or null if the job is not scheduled.
    * @param {function} jobFunction - The function that will be executed when the job is processed.
    * @param {Object} [options={}] - Optional settings for the job.
    * @throws {Error} If a job with the provided name already exists.
    */
-  createJob (jobName, schedule, jobFunction, options = {}) {
-    if (this.jobsList.some(job => job.jobName === jobName)) {
-      throw new Error(`Job "${jobName}" already exists.`)
+  createJob (name, schedule, jobFunction, options = {}) {
+    if (this.jobsList.some(job => job.name === name)) {
+      throw new Error(`Job "${name}" already exists.`)
     }
 
     this.jobsList.push({
       applicationName: this.applicationName,
       appName: this.appName,
       controllerName: this.controllerName,
-      jobName,
+      name,
       schedule,
       jobFunction,
       options
     })
   }
+
+  /**
+   * Cria workees para processar determinado job
+   * @param {string} name Nome do Grupo de workes
+   * @param {string} jobName  Nome da tarefa que será processda
+   * @param options Configuração dos workers
+   */
+  createWorkers (name, jobName, options) {
+    if (this.workersList.some(job => job.workersList === name)) {
+      throw new Error(`Worker "${name}" already exists.`)
+    }
+
+    this.workersList.push({
+      applicationName: this.applicationName,
+      appName: this.appName,
+      controllerName: this.controllerName,
+      name,
+      jobName,
+      options
+    })
+  }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  //
+  // -------------------------------------------------------------------------------------------------------------------
 
   /**
    * TODO: Documentar

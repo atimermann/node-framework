@@ -1,0 +1,12 @@
+root: true
+parserOptions:
+    ecmaVersion: latest
+env:
+    browser: false
+    node: true
+extends:
+    - standard
+rules:
+    quotes:
+        - error
+        - single

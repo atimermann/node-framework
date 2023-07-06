@@ -25,7 +25,6 @@ import morgan from 'morgan'
 import helmet from 'helmet'
 import compression from 'compression'
 import { Writable } from 'stream'
-import ApplicationController from './application-controller.js'
 import os from 'os'
 import { join } from 'path'
 import { createServer } from 'http'
@@ -222,7 +221,7 @@ export default {
     /// ///////////////////////////////////////////////////////////////////////////
     // Carrega Controllers
     /// ///////////////////////////////////////////////////////////////////////////
-    for (const controller of await ApplicationController.getControllers(application.applications)) {
+    for (const controller of await application.getControllers()) {
       /// //////////////////////////////////////////
       // Instancia do Expressjs
       /// //////////////////////////////////////////
