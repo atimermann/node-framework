@@ -18,7 +18,6 @@
  *
  */
 
-import { logger } from './logger.js'
 import express from 'express'
 import bodyParser from 'body-parser'
 import morgan from 'morgan'
@@ -35,6 +34,9 @@ import cors from 'cors'
 
 // const { config } = await import('../vendor/config/lib/config.js') // Fix para funcionar com pkg, projeto config não compatível, copiado para vendor
 import config from 'config'
+
+import createLogger from './logger.mjs'
+const logger = createLogger('Http Server')
 
 export default {
 

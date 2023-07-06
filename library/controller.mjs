@@ -17,10 +17,13 @@
  */
 
 import path from 'path'
-import { logger } from './logger.js'
 
 import consolidate from 'consolidate'
 import { performance } from 'perf_hooks'
+
+import createLogger from './logger.mjs'
+
+const logger = createLogger('Controller')
 
 const paths = {}
 

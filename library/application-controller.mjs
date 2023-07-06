@@ -4,35 +4,33 @@
  * src/library/application-controller.js
  * @author André Timermann <andre@timermann.com.br>
  *
- *   Objeto para Carregar, Controlar as Aplicações
+ *   Object to load and control applications
  *
- *   TODO: Migrar para AsyncGenerator quando disponível no PKG, substituir os arrays por yelds e colocar * depois de async
  *
  */
 
 import path from 'path'
 import { readdir, access } from 'fs/promises'
-import { logger } from './logger.js'
+
+import createLogger from './logger.mjs'
+const logger = createLogger('ApplicationController')
 
 export default class ApplicationController {
   /**
-   * Retorna todos os controladores da aplicação atual e define atributos sobre a aplicação atual
+   * Returns all controllers of the current application and sets attributes about the current application
    *
    * @returns {Promise<Array>}
    */
-  static async getControllers (applications) {
+  static async getControllersInstances (applications) {
     const controllersInstances = []
 
     for (const application of applications) {
-      logger.info(`Carregando aplicação '${application.name}'`)
-      logger.debug(` APPLICATION NAME   : '${application.name}'`)
-      logger.debug(` APPLICATION UUID     : '${application.uuid}'`)
-      logger.debug(` APPLICATION PATH   : '${application.path}'`)
+      logger.info(`Entering application '${application.name}'`)
 
       await this.checkAppsDirectoryExist(application)
 
       for (const controllerInstance of await this._getControllersInstanceByApps(application.appsPath)) {
-        // Define Atributos da Aplicação ao Controller
+        // Defines application attributes to the controller
         controllerInstance.applicationName = application.name
         controllerInstance.applicationPath = application.path
         controllerInstance.applicationId = application.uuid
@@ -45,28 +43,25 @@ export default class ApplicationController {
   }
 
   /**
-   * Retorna todos os controladores do app especificado
+   * Returns all controllers of the specified app
    *
-   * @param appsPath  {string} Caminho físico do diretórios os os apps desta aplicação se encontra
+   * @param appsPath  {string} Physical path of the directory where the apps of this application are located
    *
-   * @returns {Promise<Array>} Lista de controllers já instanciado
+   * @returns {Promise<Array>} List of already instantiated controllers
    * @private
    */
   static async _getControllersInstanceByApps (appsPath) {
     const controllersInstances = []
 
     for (const appName of await readdir(appsPath)) {
-      logger.info(`Carregando app '${appName}'`)
+      logger.info(`Entering App '${appName}'`)
 
       const controllersPath = path.join(appsPath, appName, 'controllers')
       const appPath = path.join(appsPath, appName)
 
-      logger.debug(` APP NAME   : '${appName}'`)
-      logger.debug(` APP PATH   : '${appPath}'`)
-
       if (await this.exists(appsPath)) {
         for (const controllerInstance of await this._getControllersInstanceByControllers(controllersPath)) {
-          // Define Atributos da app ao Controller
+          // Defines app attributes to the Controller
           controllerInstance.appName = appName
           controllerInstance.appPath = appPath
 
@@ -79,11 +74,11 @@ export default class ApplicationController {
   }
 
   /**
-   * Carrega e retorna todos os controladores definido no diretório 'Controllers'
+   * Loads and returns all controllers defined in the 'Controllers' directory
    *
-   * @param controllersPath     {string}  Diretório onde estão os controllers
+   * @param controllersPath     {string}  Directory where the controllers are located
    *
-   * @returns {Promise<Array>}  Lista de controllers já instanciado
+   * @returns {Promise<Array>}  List of already instantiated controllers
    * @private
    */
   static async _getControllersInstanceByControllers (controllersPath) {
@@ -94,9 +89,7 @@ export default class ApplicationController {
       let Controller
 
       if (['.mjs', '.js'].includes(path.extname(controllerPath))) {
-        logger.info(`Carregando controller '${path.basename(controllerName)}'`)
-        logger.debug(` CONTROLLER NAME   : '${controllerName}'`)
-        logger.debug(` CONTROLLER PATH   : '${controllerPath}'`)
+        logger.info(`Loading controller '${path.basename(controllerName)}'`)
 
         Controller = (await import(controllerPath)).default
         const controllerInstance = new Controller()
@@ -109,9 +102,9 @@ export default class ApplicationController {
   }
 
   /**
-   * Retorna Lista com todos os Assets do projeto incluindo dependencia
+   * Returns a list with all assets of the project including dependencies
    *
-   * @param applications  {array} Lista de aplicações
+   * @param applications  {array} List of applications
    *
    * @returns {Promise<Array>}
    */
@@ -132,12 +125,12 @@ export default class ApplicationController {
   }
 
   /**
-   * Retorna lista de todos os assets(arquivos estáticos) de um app
+   * Returns a list of all assets (static files) from an app
    *
-   * Essa lista é composta por: caminho do arquivo, nome da aplicação e nome do app
+   * This list is made up of: file path, application name, and app name
    *
-   * @param appsPath          {string}  Caminho do App
-   * @param applicationName   {string}  Nome da aplicação
+   * @param appsPath          {string}  App path
+   * @param applicationName   {string}  Application name
    *
    * @returns {Promise<Array>}
    *
@@ -147,7 +140,7 @@ export default class ApplicationController {
     const assets = []
 
     for (const appName of await readdir(appsPath)) {
-      logger.debug(`Carregando assets do app: '${appName}'`)
+      logger.debug(`Loading assets from app: '${appName}'`)
 
       const assetsPath = path.join(appsPath, appName, 'assets')
 
@@ -171,9 +164,9 @@ export default class ApplicationController {
   }
 
   // /**
-  //  * Retorna informações sobre todos os apps de todas as aplicação carregadas
+  //  * Returns information about all apps from all loaded applications
   //  *
-  //  * @param applications    {string<Array>}  Lista de aplicações
+  //  * @param applications    {string<Array>}  List of applications
   //  * @returns {Promise<Array>}
   //  */
   // static async getApps (applications) {
@@ -200,12 +193,12 @@ export default class ApplicationController {
     try {
       await access(application.appsPath)
     } catch (err) {
-      throw new Error(`Directory "${application.appsPath}" not exists in application "${application.name}"`)
+      throw new Error(`Directory "${application.appsPath}" does not exist in application "${application.name}"`)
     }
   }
 
   /**
-   * return directory existe
+   * returns if directory exists
    */
   static async exists (directoryPath) {
     try {

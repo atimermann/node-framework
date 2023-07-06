@@ -9,6 +9,9 @@ import cron from 'node-cron'
 import crypto from 'crypto'
 import WorkerManager from './worker-manager.mjs'
 
+import createLogger from '../logger.mjs'
+const logger = createLogger('JobManager')
+
 /**
  * Represents a Job object in the system. This object holds the necessary details
  * required to manage a job in the application.
@@ -43,7 +46,8 @@ export default class JobManager {
    * @static
    */
   static async run (application) {
-    console.log('[JOB MANAGER] Initializing...')
+    logger.info('Initializing...')
+    // console.log('[JOB MANAGER] Initializing...')
 
     // ============================================
     // Carrega Jobs e Workers definido pelo usuario
@@ -66,7 +70,7 @@ export default class JobManager {
     // Monitora Workers
     // ============================================
     await WorkerManager.monitorWorkersHealth()
-    console.log('Job Manager Loaded!')
+    // console.log('Job Manager Loaded!')
   }
 
   /**
@@ -80,7 +84,7 @@ export default class JobManager {
    */
 
   static async loadJobsAndWorkers (application) {
-    console.log('Load Jobs and Workers')
+    // console.log('Load Jobs and Workers')
     for (const controller of await application.getControllers()) {
       await controller.jobs()
 
@@ -88,7 +92,7 @@ export default class JobManager {
         job.uuid = this.createJobUUID(job.applicationName, job.appName, job.controllerName, job.name)
         this.jobs[job.uuid] = job
 
-        console.log(`JOB:\n\tUUID:  ${job.uuid}\n\tName:  ${job.name}`)
+        // console.log(`JOB:\n\tUUID:  ${job.uuid}\n\tName:  ${job.name}`)
       }
     }
   }
@@ -102,7 +106,7 @@ export default class JobManager {
   static createScheduleWorkers () {
     for (const [, job] of Object.entries(this.jobs)) {
       if (job.schedule) {
-        console.log('createScheduleWorkers:', job.name)
+        // console.log('createScheduleWorkers:', job.name)
 
         job.workerName = `${job.name}-${job.uuid}`
         WorkerManager.createWorker(job.workerName, job, false)
@@ -140,7 +144,7 @@ export default class JobManager {
    * @static
    */
   static async schedulingJob (job) {
-    console.log(`[JOB MANAGER] [${job.name}] Scheduling...`)
+    // console.log(`[JOB MANAGER] [${job.name}] Scheduling...`)
 
     cron.schedule(job.schedule, async () => {
       try {
@@ -163,7 +167,7 @@ export default class JobManager {
    * @static
    */
   static async runJob (job) {
-    console.log('[WorkerManager]', `Executando ${job.workerName}`)
+    // console.log('[WorkerManager]', `Executando ${job.workerName}`)
     await WorkerManager.startWorkerProcesses(job.workerName)
   }
 

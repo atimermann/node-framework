@@ -1,32 +1,35 @@
 /**
- * **Created on 20/09/18**
+ * **Created on 09/20/18**
  *
  * src/library/server.js
  * @author André Timermann <andre@timermann.com.br>
  *
- *   Servidor de execução do Sindri
+ *   Bootstrap, server execution
  *
  */
 
 import { config as dotenvConfig } from 'dotenv'
 import Application from './application.mjs'
-import { logger } from './logger.js'
 import HttpServer from './http-server.mjs'
 
 import JobManager from './jobs/job-manager.mjs'
 import JobWorker from './jobs/job-worker.mjs'
+
+import createLogger from './logger.mjs'
+const logger = createLogger('Server')
 
 dotenvConfig()
 
 export default {
 
   /**
-   * Inicializa Servidor
+   * Initializes Server
    *
-   * @param application {Application}
+   * @param {Application} application
    */
   async init (application) {
     try {
+      logger.info('Initializing server')
       if (!(application instanceof Application)) {
         // noinspection ExceptionCaughtLocallyJS
         throw new TypeError('application must be instance of Application')
@@ -45,6 +48,11 @@ export default {
     }
   },
 
+  /**
+   * Initializes Server
+   *
+   * @param {Application} application
+   */
   async initServer (application) {
     await Promise.all([
       HttpServer.run(application),

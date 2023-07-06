@@ -9,9 +9,11 @@
 import Application from './library/application.mjs'
 import ApplicationController from './library/application-controller.mjs'
 import Server from './library/server.mjs'
-import { logger } from './library/logger.js'
 import config from './library/config.js'
+import createLogger from './library/logger.mjs'
+
+const logger = createLogger()
 
 export * from './library/controller.mjs'
 
-export { Application, Server, logger, config, ApplicationController }
+export { Application, Server, createLogger, logger, config, ApplicationController }

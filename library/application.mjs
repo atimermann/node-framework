@@ -11,10 +11,12 @@
  * @updated 29/06/2023
  */
 
-import { logger } from './logger.js'
 import assert from 'node:assert'
 import ApplicationController from './application-controller.mjs'
 import path from 'path'
+
+import createLogger from './logger.mjs'
+const logger = createLogger('Application')
 
 export default class Application {
   /**
@@ -35,7 +37,7 @@ export default class Application {
   uuid = Date.now() + '-' + Math.random().toString(36).substr(2, 9)
 
   /**
-   * indica que apliacação já foi inicializada
+   * indicates that application has already been initialized
    * @type {boolean}
    */
   initialized = false
@@ -47,7 +49,7 @@ export default class Application {
    * @throws {Error} Will throw an error if the path or name parameters are not provided or not of type 'string'.
    */
   constructor (applicationPath, name) {
-    logger.info(`Instantiating application '${name}'...`)
+    logger.info(`Instantiating application "${name}"...`)
 
     assert(name, 'Attribute "name" is required!')
     assert(name, 'Attribute "path" is required!')
@@ -72,7 +74,7 @@ export default class Application {
      */
     this.appsPath = path.join(applicationPath, 'apps')
 
-    // Adiciona sigo mesmo  na lista de aplicações
+    // Adds itself to the list of applications
     this.applications.push(this)
   }
 
@@ -81,7 +83,7 @@ export default class Application {
    * @param {Application} application - An instance of the Application class
    * @throws {TypeError} Will throw an error if the provided application is not an instance of Application.
    */
-  loadAppplication (application) {
+  loadApplication (application) {
     if (!(application instanceof Application)) {
       throw new TypeError('application must be an instance of Application')
     }
@@ -90,18 +92,19 @@ export default class Application {
       throw Error('It is no longer possible to add subapplications, the application has already been initialized.')
     }
 
-    logger.info(`Loading App '${application.name}'. Path: '${application.path}'`)
+    logger.info(`Loading subapplication '${application.name}'. Path: '${application.path}'`)
 
-    for (const definedApplcation of application.applications) {
-      this.applications.push(definedApplcation)
+    for (const definedApplication of application.applications) {
+      this.applications.push(definedApplication)
     }
   }
 
   /**
-   * Inicializa aplicação, não permite mais carregar subaplicação
+   * Initializes application, no longer allows loading subapplication
    */
   async init () {
-    this.controllers = await ApplicationController.getControllers(this.applications)
+    logger.info(`Initializing application "${this.name}"...`)
+    this.controllers = await ApplicationController.getControllersInstances(this.applications)
 
     if (this.controllers.length === 0) {
       throw new Error('No controller loaded')
@@ -109,6 +112,10 @@ export default class Application {
     this.initialized = true
   }
 
+  /**
+   * Returns the loaded controllers.
+   * @returns {Array} The loaded controllers.
+   */
   getControllers () {
     return this.controllers
   }

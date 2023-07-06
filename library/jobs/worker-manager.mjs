@@ -10,6 +10,8 @@
  */
 import { fork } from 'child_process'
 import JobManager from './job-manager.mjs'
+import createLogger from '../logger.mjs'
+const logger = createLogger('JobManager')
 
 export default class WorkerManager {
   static workers = []
@@ -38,7 +40,7 @@ export default class WorkerManager {
    * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, options = {}) {
-    console.log('[WorkerManager]', `Criando Worker: ${name}, JOB: ${job.name}`)
+    // console.log('[WorkerManager]', `Criando Worker: ${name}, JOB: ${job.name}`)
     const newWorker = {
       name,
       job,
@@ -133,12 +135,12 @@ export default class WorkerManager {
    */
   static runProcess (job, jobProcess) {
     // TODO: Parametrizar silent em options
-    console.log('[WorkerManager]', `Criando Processo: ${job.name}`)
+    // console.log('[WorkerManager]', `Criando Processo: ${job.name}`)
     const args = ['job', job.applicationName, job.appName, job.controllerName, job.name]
 
     jobProcess.childProcess = fork('./src/run.mjs', args, { silent: false })
     jobProcess.running = true
-    console.log('[WorkerManager]', `NEW PID #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
+    // console.log('[WorkerManager]', `NEW PID #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
 
     jobProcess.childProcess.once('exit', (code, signal) => {
       jobProcess.running = false
@@ -153,11 +155,14 @@ export default class WorkerManager {
    */
   static verifyWorkerHealth () {
     if (this.checking) return
+
+    logger.info('Checking Health')
+
     this.checking = true
-    console.log('[WorkerManager]', 'Check Workers:')
+    // console.log('[WorkerManager]', 'Check Workers:')
 
     for (const worker of this.workers) {
-      console.log('[WorkerManager]', `Check Worker "${worker.name}" `)
+      // console.log('[WorkerManager]', `Check Worker "${worker.name}" `)
       if (worker.persistent) {
         // Verifica se o Processo finalizou e reinicia
         for (const jobProcess of worker.jobProcesses) {
@@ -175,7 +180,7 @@ export default class WorkerManager {
    * @param {Object} jobProcess - The job process to check.
    */
   static verifyPersistentJobHealth (worker, jobProcess) {
-    console.log('[WorkerManager]', `PROCESS #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
+    // console.log('[WorkerManager]', `PROCESS #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
 
     // Verifica se Job está parado
     if (jobProcess.running === false) {
@@ -204,7 +209,7 @@ export default class WorkerManager {
 
     // Prepares callback to restart the process when finished.
     jobProcess.childProcess.once('exit', async () => {
-      console.log('=============================================>KIll Success!!, restart')
+      // console.log('=============================================>KIll Success!!, restart')
       this.runProcess(job, jobProcess)
       jobProcess.killing = false
     })
@@ -232,7 +237,7 @@ export default class WorkerManager {
    */
   static async sendKill (signal, childProcess) {
     // Send SIGNIT
-    console.log(`[${childProcess.pid}] Send "${signal}" to process...`)
+    // console.log(`[${childProcess.pid}] Send "${signal}" to process...`)
     childProcess.kill('SIGINT')
 
     // Wait for 5 seconds TODO: parameterize this duration.

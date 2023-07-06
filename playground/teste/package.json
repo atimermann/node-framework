@@ -41,6 +41,7 @@
   "devDependencies": {
     "@agtm/cli-tool": "^4.0.1",
     "eslint": "^8.40.0",
+    "pino-pretty": "^10.0.1",
     "pkg": "^5.8.1"
   }
 }
