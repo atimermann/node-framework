@@ -15,8 +15,7 @@ import HttpServer from './http-server.mjs'
 import JobManager from './jobs/job-manager.mjs'
 import JobWorker from './jobs/job-worker.mjs'
 
-import createLogger from './logger.mjs'
-const logger = createLogger('Server')
+import BlessedInterface from './blessed.mjs'
 
 dotenvConfig()
 
@@ -29,7 +28,6 @@ export default {
    */
   async init (application) {
     try {
-      logger.info('Initializing server')
       if (!(application instanceof Application)) {
         // noinspection ExceptionCaughtLocallyJS
         throw new TypeError('application must be instance of Application')
@@ -43,7 +41,7 @@ export default {
         await this.initServer(application)
       }
     } catch (error) {
-      process.env.NODE_ENV === 'development' ? console.log(error) : logger.error(`${error.code}\n${error.stack}`)
+      console.error(error)
       process.exit()
     }
   },
@@ -54,6 +52,10 @@ export default {
    * @param {Application} application
    */
   async initServer (application) {
+    BlessedInterface.init()
+
+    // socketServer()
+
     await Promise.all([
       HttpServer.run(application),
       JobManager.run(application)
