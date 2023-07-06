@@ -13,8 +13,8 @@ import Application from './application.mjs'
 import { logger } from './logger.js'
 import HttpServer from './http-server.mjs'
 
-import JobManager from './job-manager.mjs'
-import JobWorker from './job-worker.mjs'
+import JobManager from './jobs/job-manager.mjs'
+import JobWorker from './jobs/job-worker.mjs'
 
 dotenvConfig()
 

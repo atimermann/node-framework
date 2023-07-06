@@ -47,7 +47,7 @@ export default class JobWorker {
    * This method is responsible for the execution of a worker in a separate process.
    * It loads all jobs and executes the specific job that matches the command-line arguments.
    *
-   * @param {import('./application.js').Application} application - The application context.
+   * @param {import('../application.mjs').Application} application - The application context.
    *
    * @throws Will throw an error if the specific job could not be found.
    *

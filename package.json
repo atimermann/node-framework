@@ -6,7 +6,7 @@
     "publish-patch": "npm version patch && npm publish --access public && git push",
     "publish-minor": "npm version minor && npm publish --access public && git push",
     "publish-major": "npm version major && npm publish --access public && git push",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "lint": "npx eslint --ext .mjs,.js --fix .",
     "lint:test": "npx eslint  --ext .mjs,.js ."
   },
@@ -52,12 +52,14 @@
   ],
   "devDependencies": {
     "babel-eslint": "^10.1.0",
+    "babel-jest": "^29.6.0",
     "eslint": "^8.40.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
-    "eslint-plugin-standard": "^5.0.0"
+    "eslint-plugin-standard": "^5.0.0",
+    "jest": "^29.6.0"
   },
   "repository": {
     "type": "git",
