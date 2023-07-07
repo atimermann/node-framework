@@ -4,14 +4,12 @@
  * src/library/kernel.js
  * @author André Timermann <andre@timermann.com.br>
  *
- *   Nucleo do Framework, onde o servidor é configurado e inicializado.
- *   Inicializa Expressjs, aplicações e sobre o servidor
+ *   The Framework HTTP Server, where the server is configured and initialized.
+ *   Initializes Expressjs, applications and on the server
  *
- *   Pode ser carregado standalone ou através de cluster
+ *   More modules for Express: https://github.com/expressjs
  *
- *   Mais módulos para o Express: https://github.com/expressjs
- *
- *  Antes de alterar leia sobre Segurança:
+ *  Before changing, read about Security:
  *  https://expressjs.com/en/advanced/best-practice-security.html
  *
  *  @typedef {import('./application.mjs').default} Application
@@ -41,15 +39,15 @@ const logger = createLogger('Http Server')
 export default {
 
   /**
-   * Inicializa Servidor
+   * Initializes the server
    *
-   * @param application {Application}    Instancia de application
+   * @param application {Application}    Instance of application
    *
    */
   async run (application) {
-    global.__BASE = join(application.path, '/')
+    // TODO: Verificar pra q serve global.__BASE = join(application.path, '/')
 
-    logger.info('Inicializando Kernel...')
+    logger.info('Initializing HTTP Server...')
 
     if (process.env.NODE_ENV === undefined) throw new Error('Environment is not defined, create an .env file with attribute NODE_ENV.')
 
@@ -62,15 +60,16 @@ export default {
     const packageInfo = JSON.parse(readFileSync(filePath, 'utf8'))
 
     /**
-     * Rota para acesso a recursos estáticos (ex: jpeg, html, js etc...)
-     * Padrão /static
+     * Route for accessing static resources (e.g., jpeg, html, js etc...)
+     * Default is /static
      *
      * @type {string}
      */
     this.staticRoute = process.env.STATIC_ROUTE || Config.get('server.staticRoute')
 
     /**
-     * Habilita o acesso a recursos estáticos via CDN (se True desabilita servidor de arquivos estático do Express)
+     * Enables access to static resources via CDN (if true, it disables Express static file server)
+     * If the CDN environment variable is not set, the value is fetched from configuration.
      *
      * @type {boolean}
      */
@@ -79,9 +78,10 @@ export default {
       : process.env.CDN
 
     /**
-     * Url Base do Servidor CDN
+     * Base URL of the CDN Server
+     * If the CDN_URL environment variable is not set, the value is fetched from configuration.
      *
-     * @type {*|value}
+     * @type {string}
      */
     this.cdnUrl = process.env.CDN_URL || Config.get('server.cdnUrl')
 
@@ -109,19 +109,17 @@ export default {
 
     // Inicializa Servidor HTTP
     this._startHttpServer(httpServer)
-
-    logger.info('Kernel Loaded!')
   },
 
   /**
-   * Configura Servidor Express
+   * Configures the Express server
    *
-   * Nota: Não utilizamos engine de views do express, e sim externo está implementado no controller
+   * Note: We do not use express view engine, but an external one implemented in the controller
    *
-   * @param httpServer  {Object}  Objeto HTTP (Nodejs)
-   * @param application {Object}  Informações sobre a aplicação que está sendo carregada
+   * @param httpServer  {Object}  HTTP object (Nodejs)
+   * @param application {Application}  Information about the application being loaded
    *
-   * @returns {Object}  Objeto Express
+   * @returns {Object}  Express object
    * @private
    */
   _configureExpressHttpServer (httpServer, application) {
@@ -203,10 +201,10 @@ export default {
   },
 
   /**
-   * Carrega Aplicações
+   * Loads Applications
    *
-   * @param app         {Object}    Objeto Expressjs
-   * @param application {Object}    Informações sobre a Aplicação
+   * @param app         {Object}    Expressjs object
+   * @param application {Application}    Information about the Application
    *
    * @private
    */
@@ -223,7 +221,7 @@ export default {
     /// ///////////////////////////////////////////////////////////////////////////
     // Carrega Controllers
     /// ///////////////////////////////////////////////////////////////////////////
-    for (const controller of await application.getControllers()) {
+    for (const controller of application.getControllers()) {
       /// //////////////////////////////////////////
       // Instancia do Expressjs
       /// //////////////////////////////////////////
@@ -300,14 +298,14 @@ export default {
   },
 
   /**
-   * Inicializa Servidor HTTP
+   * Initializes HTTP server
    *
    * @param httpServer
    */
   _startHttpServer (httpServer) {
     const port = process.env.PORT || Config.get('server.port')
 
-    logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)
+    logger.info(`Initializing HTTP_SERVER. Port: ${port}!`)
 
     httpServer.listen(port, () => {
       logger.info('--------------------------------------------------------------')
@@ -315,7 +313,7 @@ export default {
       logger.info('Port   :' + httpServer.address().port)
       logger.info('Family :' + httpServer.address().family)
       logger.info('--------------------------------------------------------------')
-      logger.info('Servidor http iniciado!')
+      logger.info('Http server started!')
     })
   }
 
