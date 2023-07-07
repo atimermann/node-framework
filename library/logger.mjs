@@ -10,16 +10,15 @@
 import { createLogger as winstonCreateLogger } from 'winston'
 // import Transport from 'winston-transport'
 import { Server } from 'socket.io'
-import SocketIoTransport from './winstonTransport/socket.mjs'
-import BlessedTransport from "./winstonTransport/blessed.mjs";
+import BlessedTransport from './winstonTransport/blessed.mjs'
 
-// import Console2Transport from './winstonTransport/console.mjs'
+import Console2Transport from './winstonTransport/console.mjs'
 
 const logger = winstonCreateLogger({
   transports: [
     // new SocketIoTransport()
-    // new Console2Transport()
-    new BlessedTransport()
+    new Console2Transport()
+    // new BlessedTransport()
   ]
 })
 

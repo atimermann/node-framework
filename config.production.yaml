@@ -1,0 +1,51 @@
+---
+# Configuração do Servidor HTTP Express
+# body-parser: https://github.com/expressjs/body-parser
+server:
+  port: 3001
+  urlenconded:
+    limit: '10mb'
+  json:
+    limit: '10mb'
+  log:
+    # Ref: https://github.com/expressjs/morgan
+    format: ':remote-addr - :remote-user ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
+
+  # Rota para acesso a recursos estáticos
+  staticRoute: '/static'
+
+  # Caso utilize um CDN em vez do diretório local estatico, habilitar aqui e definir cdnUrl para url base do CDN
+  cdn: false
+
+  # Url do CDN
+  cdnUrl: ''
+
+  # Acessa arquivos estático do pacote (node-pkg): Necessário adicionar no package: "assets":  ["apps/**/views/*", "public"]
+  # Deve ser desativado para acesso via CDN, ou se for utilizar o diretório public para arquivos enviados pelo usuário (upload)
+  # Em caso de true deve ser empacotado novamente sempre que houver alteração dos arquivos estáticos
+  # Ao desativar não esqueça remover no package.json a entrada "public" em pkg.assets
+  loadStaticFromPackage: true
+
+  timezone: "America/Sao_Paulo"
+
+logger:
+  # Habilita Log em console
+  console:
+    enabled: true
+    handleExceptions: false
+
+  # Habilita envio de log para sistema GrayLog (https://github.com/Buzut/winston-log2gelf)
+  graylog:
+    enabled: false
+    host: 'localhost'
+    port: 12201
+    protocol: 'tcp'
+    handleExceptions: false
+
+  # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
+  level: 'debug'
+
+  # Silencia log
+  silent: false
+
+

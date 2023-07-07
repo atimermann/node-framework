@@ -8,16 +8,14 @@
  *
  */
 
-import { config as dotenvConfig } from 'dotenv'
 import Application from './application.mjs'
-import HttpServer from './http-server.mjs'
+// import HttpServer from './http-server.mjs'
 
 import JobManager from './jobs/job-manager.mjs'
 import JobWorker from './jobs/job-worker.mjs'
 
 import BlessedInterface from './blessed.mjs'
-
-dotenvConfig()
+import Config from './config.mjs'
 
 export default {
 
@@ -28,6 +26,14 @@ export default {
    */
   async init (application) {
     try {
+      Config.init()
+      console.log(Config.config)
+
+      console.log(Config.get('xdg'))
+      console.log(Config.get('xdg.seat'))
+      console.log(Config.get('xdg.seat.path'))
+      process.exit()
+
       if (!(application instanceof Application)) {
         // noinspection ExceptionCaughtLocallyJS
         throw new TypeError('application must be instance of Application')
@@ -52,12 +58,12 @@ export default {
    * @param {Application} application
    */
   async initServer (application) {
-    BlessedInterface.init()
+    // BlessedInterface.init()
 
     // socketServer()
 
     await Promise.all([
-      HttpServer.run(application),
+      // HttpServer.run(application),
       JobManager.run(application)
     ])
   }
