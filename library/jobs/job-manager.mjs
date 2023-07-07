@@ -11,6 +11,7 @@ import WorkerManager from './worker-manager.mjs'
 import Config from '../config.mjs'
 
 import createLogger from '../logger.mjs'
+
 const logger = createLogger('JobManager')
 
 /**
@@ -65,16 +66,19 @@ export default class JobManager {
     this.createScheduleWorkers()
     await WorkerManager.createUserWorkers(application)
 
-    // ============================================
-    // Executa Workers
-    // ============================================
-    await this.startScheduleJob()
-    await WorkerManager.startPersistentWorkers()
+    if (WorkerManager.workers.length > 0) {
+      // ============================================
+      // Executa Workers
+      // ============================================
+      await this.startScheduleJob()
+      await WorkerManager.startPersistentWorkers()
 
-    // ============================================
-    // Monitora Workers
-    // ============================================
-    await WorkerManager.monitorWorkersHealth()
+      // ============================================
+      // Monitora Workers
+      // ============================================
+
+      await WorkerManager.monitorWorkersHealth()
+    }
   }
 
   /**
