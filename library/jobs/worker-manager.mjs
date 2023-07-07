@@ -14,8 +14,6 @@ import createLogger from '../logger.mjs'
 
 const logger = createLogger('WorkerManager')
 
-const childLogger = createLogger('JobThread')
-
 export default class WorkerManager {
   static workers = []
   static indexedWorkers = {}
@@ -84,7 +82,7 @@ export default class WorkerManager {
       const concurrency = worker.options.concurrency || 1
       logger.info(`Starting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}" Concurrency: ${concurrency}`)
       for (let i = 1; i <= concurrency; i++) {
-        worker.jobProcesses.push(this.createProcess(worker.job, worker.options))
+        worker.jobProcesses.push(this.createProcess(worker.job, `#${i}`, worker.options))
       }
     }
   }
@@ -120,14 +118,16 @@ export default class WorkerManager {
   /**
    * Creates a new process.
    * @param {Object} job - The job for which to create a process.
+   * @param {string} id - Identificador do processo
    * @param {Object} options - The options for creating the process.
    * @returns {{}}
    */
-  static createProcess (job, options) {
+  static createProcess (job, id, options) {
     // Criar Classe para jobProcess
     const jobProcess = {
       countClose: 0,
-      killing: false
+      killing: false,
+      id
     }
     this.runProcess(job, jobProcess)
 
@@ -140,20 +140,20 @@ export default class WorkerManager {
    * @param {Object} jobProcess - The process to run.
    */
   static runProcess (job, jobProcess) {
-    // TODO: Parametrizar silent em options
-    // console.log('[WorkerManager]', `Criando Processo: ${job.name}`)
+    logger.info(`Running process: Worker: "${job.workerName}" Job: "${job.name}" Process: "${jobProcess.id}"}`)
     const args = ['job', job.applicationName, job.appName, job.controllerName, job.name]
 
     jobProcess.childProcess = fork('./src/run.mjs', args, { silent: true })
     jobProcess.running = true
-    // console.log('[WorkerManager]', `NEW PID #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
+
+    const childLogger = createLogger(`Job ${job.name} ${jobProcess.id}`)
 
     jobProcess.childProcess.stdout.on('data', (data) => {
-      childLogger.info(data)
+      this.logChildProcess(childLogger, data)
     })
 
     jobProcess.childProcess.stderr.on('data', (data) => {
-      childLogger.error(data)
+      this.logChildProcess(childLogger, data)
     })
 
     jobProcess.childProcess.once('exit', (code, signal) => {
@@ -162,6 +162,18 @@ export default class WorkerManager {
       jobProcess.exitSignal = signal
       jobProcess.countClose++
     })
+  }
+
+  static logChildProcess (childLogger, data) {
+    for (const line of data.toString().split('\n')) {
+      try {
+        const logObj = JSON.parse(line)
+
+        const logModule = logObj.module ? `[${logObj.module}] ` : ''
+        childLogger[logObj.level](`${logModule}${logObj.message}`)
+      } catch (err) { /* Ignora linhas que não podem ser processada pelo JSON */
+      }
+    }
   }
 
   /**
@@ -198,6 +210,7 @@ export default class WorkerManager {
 
     // Verifica se Job está parado
     if (jobProcess.running === false) {
+      logger.error(`Process hangout: Worker: "${worker.name}" Job: "${worker.job.name}" Process: "${jobProcess.id}"}`)
       this.runProcess(worker.job, jobProcess)
     }
 
@@ -220,14 +233,13 @@ export default class WorkerManager {
   static async restartJobProcess (job, jobProcess) {
     jobProcess.killing = true
 
-    logger.warn(`Killing job: "${job.name}" Worker:"${job.workerName}"`)
+    logger.warn(`Killing job: "${job.name}" Worker:"${job.workerName}" ID: "${jobProcess.id}"`)
 
     const pidToKill = jobProcess.childProcess.pid
 
     // Prepares callback to restart the process when finished.
     jobProcess.childProcess.once('exit', async () => {
-      logger.warn(`Killing successful: "${job.name}" Worker:"${job.workerName}"`)
-
+      logger.warn(`Killing successful: "${job.name}" Worker:"${job.workerName}" ID: "${jobProcess.id}" `)
       this.runProcess(job, jobProcess)
       jobProcess.killing = false
     })

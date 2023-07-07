@@ -45,11 +45,11 @@ const purpleColor = '\x1b[35m'
 function getLevelColor (level) {
   switch (level) {
     case 'info': // INFO
-      return greenColor
+      return '\x1b[39m'
     case 'warn': // WARN
       return yellowColor
     case 'error': // ERROR
-      return redColor
+      return '\x1b[31m'
     default:
       return resetColor
   }
@@ -67,11 +67,11 @@ export default class BlessedTransport extends Transport {
     const date = new Date()
     const levelColor = getLevelColor(level)
     const levelText = `${levelColor}${level}${resetColor}`
-    const moduleText = module ? `${blueDarkColor}[ ${module} ]${resetColor}` : ''
-    // const msgColor = `${greenColor}${message}${resetColor}`
+    const moduleText = module ? `${blueDarkColor}[${module}]${resetColor}` : ''
+    const msgColor = `${levelColor}${message}${levelColor}`
     const formattedTime = `${purpleColor}${date.toLocaleTimeString()}.${date.getMilliseconds()}${resetColor}`
 
-    BlessedInterface.log(`${formattedTime} ${levelText} ${moduleText} ${message}`, module)
+    BlessedInterface.log(`${formattedTime} ${levelText} ${moduleText} ${msgColor}`, module)
     callback()
   }
 }

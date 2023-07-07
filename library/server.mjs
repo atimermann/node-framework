@@ -58,8 +58,6 @@ export default {
       BlessedInterface.init()
     }
 
-    // socketServer()
-
     await Promise.all([
       Config.get('server.enabled', 'boolean') ? HttpServer.run(application) : null,
       Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null

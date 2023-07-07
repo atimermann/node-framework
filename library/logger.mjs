@@ -7,45 +7,54 @@
  *
  */
 
-import { createLogger as winstonCreateLogger } from 'winston'
+import { createLogger as winstonCreateLogger, transports, format } from 'winston'
 import Config from './config.mjs'
 // import Transport from 'winston-transport'
-import { Server } from 'socket.io'
+// import { Server } from 'socket.io'
 import BlessedTransport from './winstonTransport/blessed.mjs'
 
 import Console2Transport from './winstonTransport/console.mjs'
 
-const transports = []
+// /**
+//  * Inicia um servidor socket para monitorar log na web
+//  * TODO: Implementar socket
+//  */
+// export function socketServer () {
+//   console.log('NEW SOCKET SERVER')
+//   const io = new Server(4001, {
+//     // options
+//   })
+//
+//   io.on('connection', (socket) => {
+//     console.log('NEW CONNECTION', socket)
+//   })
+// }
 
-if (Config.get('logger.blessed.enabled')) {
-  transports.push(new BlessedTransport())
+const logger = winstonCreateLogger({
+  level: 'info'
+})
+
+const loggerConfig = process.argv[2] === 'job'
+  ? Config.get('jobManager.logger')
+  : Config.get('logger')
+
+// JSON
+if (loggerConfig.json?.enabled) {
+  logger.add(new transports.Console({
+    format: format.json()
+  }))
 }
 
-if (Config.get('logger.console.enabled')) {
-  transports.push(new Console2Transport())
+// BLESSED
+if (loggerConfig.blessed?.enabled) {
+  logger.add(new BlessedTransport())
 }
 
-if (transports.length === 0) {
-  throw new Error('It is mandatory to define at least one transport in the logger (Winston Transport). To define the console transport as enabled in the logger, set the environment variable LOGGER_CONSOLE_ENABLED to true.')
+// CONSOLE
+if (loggerConfig.console?.enabled) {
+  logger.add(new Console2Transport())
 }
-
-const logger = winstonCreateLogger({ transports })
 
 export default function createLogger (module) {
   return logger.child({ module })
-}
-
-/**
- * Inicia um servidor socket para monitorar log na web
- * TODO: Implementar socket
- */
-export function socketServer () {
-  console.log('NEW SOCKET SERVER')
-  const io = new Server(4001, {
-    // options
-  })
-
-  io.on('connection', (socket) => {
-    console.log('NEW CONNECTION', socket)
-  })
 }

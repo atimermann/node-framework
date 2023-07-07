@@ -36,6 +36,9 @@ blessed:
 # Habilita Sistema Gerenciador de Jobs e Worker
 jobManager:
   enabled: true
+  logger:
+    json:
+      enabled: true # Obrigratório para log ser carregado pelo processo pai
 
 logger:
   # Habilita log na interface blesse (necessário ter o blessed ativo)

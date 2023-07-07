@@ -45,7 +45,7 @@ export default class BlessedInterface {
     if (box) {
       box.insertBottom(message)
       box.setScrollPerc(100) // Auto scroll to bottom
-      this.render()
+      // this.render()
     } else {
       console.error('Box index out of bounds')
     }

@@ -7,42 +7,39 @@
  */
 import { Controller, createLogger } from '@agtm/node-framework'
 
-const logger = createLogger('Hello World')
+const logger = createLogger()
 
 export default class HelloWorldController extends Controller {
   jobs () {
-    logger.info('Configuring your project...')
+    logger.info('Configuring Jobs...')
 
-    this.createJob('Teste 1', '*/10 * * * * *', async () => {
-      console.log(' ===> SCHEDULE JOB')
+    this.createJob('JOB SCHEDULE', '*/10 * * * * *', async () => {
+      logger.info(' ===> SCHEDULE JOB')
 
       setInterval(() => {
       }, 1000000)
     })
 
-    this.createJob('Teste 2', 'now', async () => {
-      console.log('====> JOB NOW')
+    this.createJob('JOB NOW', 'now', async () => {
+      logger.info('====> JOB NOW')
     })
 
-    this.createJob('teste 3', null, async () => {
-      console.log('====> JOB WORKER')
+    this.createJob('Job Concorrente', null, async () => {
+      logger.info('Starting Worker...')
 
       setInterval(() => {
-        console.log(`Child process PID: ${process.pid}`)
-
-        if (Math.random() <= 0.05) {
-          console.log('ERROR - PROCESS EXIT')
+        const value = Math.random()
+        if (value <= 0.01) {
+          logger.error(`Sort number ${Math.round(value * 1000) / 1000}: SIMULATED ERROR - HANGOUT`)
           process.exit()
+        } else {
+          logger.info(`Sort number ${Math.round(value * 1000) / 1000}: OK`)
         }
-      }, Math.floor(3000 + Math.random() * (1000)))
-
-      setTimeout(() => {
-        console.log(`Child process PID: ${process.pid}`)
       }, 1000)
     })
 
-    this.createWorkers('Worker Y', 'teste 3', {
-      concurrency: 3
+    this.createWorkers('Worker Y', 'Job Concorrente', {
+      concurrency: 3 + 11
     })
   }
 }
