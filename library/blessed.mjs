@@ -1,4 +1,5 @@
 import blessed from 'blessed'
+import contrib from 'blessed-contrib'
 
 /**
  * Created on 06/07/2023
@@ -45,14 +46,14 @@ export default class BlessedInterface {
     if (box) {
       box.insertBottom(message)
       box.setScrollPerc(100) // Auto scroll to bottom
-      this.render()
+      // this.render()
     } else {
       console.error('Box index out of bounds')
     }
   }
 
   static createBox (boxName) {
-    const newBox = blessed.box({
+    const newBox = contrib.log({
       top: '0',
       left: '0',
       width: '50%',
