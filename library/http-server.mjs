@@ -32,10 +32,10 @@ import { readFileSync } from 'fs'
 import { sentenceCase } from 'change-case'
 import cors from 'cors'
 
-// const { config } = await import('../vendor/config/lib/config.js') // Fix para funcionar com pkg, projeto config não compatível, copiado para vendor
-import config from 'config'
+import Config from './config.mjs'
 
 import createLogger from './logger.mjs'
+
 const logger = createLogger('Http Server')
 
 export default {
@@ -67,7 +67,7 @@ export default {
      *
      * @type {string}
      */
-    this.staticRoute = process.env.STATIC_ROUTE || config.get('server.staticRoute')
+    this.staticRoute = process.env.STATIC_ROUTE || Config.get('server.staticRoute')
 
     /**
      * Habilita o acesso a recursos estáticos via CDN (se True desabilita servidor de arquivos estático do Express)
@@ -75,7 +75,7 @@ export default {
      * @type {boolean}
      */
     this.cdn = (process.env.CDN === undefined)
-      ? config.get('server.cdn')
+      ? Config.get('server.cdn')
       : process.env.CDN
 
     /**
@@ -83,7 +83,7 @@ export default {
      *
      * @type {*|value}
      */
-    this.cdnUrl = process.env.CDN_URL || config.get('server.cdnUrl')
+    this.cdnUrl = process.env.CDN_URL || Config.get('server.cdnUrl')
 
     console.log(figlet.textSync('Node Framework'))
     console.log(figlet.textSync(`\n${sentenceCase(application.name)}`))
@@ -92,7 +92,7 @@ export default {
     logger.info(`Root Path:               ${application.path}`)
     logger.info(`Node Version:            ${process.version}`)
     logger.info(`Environment:             ${process.env.NODE_ENV}`)
-    logger.info(`Port:                    ${process.env.PORT || config.get('server.port')}`)
+    logger.info(`Port:                    ${process.env.PORT || Config.get('server.port')}`)
     logger.info(`Pid:                     ${process.pid}`)
     logger.info(`Hostname:                ${os.hostname()}`)
     logger.info(`Platform:                ${os.platform()}`)
@@ -135,7 +135,7 @@ export default {
     /// /////////////////////////////////////////////////
     app.use(
       morgan(
-        config.get('server.log.format'),
+        Config.get('server.log.format'),
         {
 
           stream: new Writable({
@@ -169,7 +169,7 @@ export default {
       // ref: https://github.com/zeit/pkg#snapshot-filesystem
       let sourceStaticFiles
 
-      if (config.get('server.loadStaticFromPackage')) {
+      if (Config.get('server.loadStaticFromPackage')) {
         sourceStaticFiles = join(application.path, 'public')
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
@@ -186,12 +186,12 @@ export default {
     /// /////////////////////////////////////////////////
     app.use(bodyParser.urlencoded({
       extended: false,
-      limit: config.get('server.urlenconded.limit')
+      limit: Config.get('server.urlenconded.limit')
     }))
 
     // Configurar Json
     app.use(bodyParser.json({
-      limit: config.get('server.json.limit')
+      limit: Config.get('server.json.limit')
     }))
 
     /// /////////////////////////////////////////////////
@@ -305,7 +305,7 @@ export default {
    * @param httpServer
    */
   _startHttpServer (httpServer) {
-    const port = process.env.PORT || config.get('server.port')
+    const port = process.env.PORT || Config.get('server.port')
 
     logger.info(`Inicializando HTTP_SERVER. Porta: ${port}!`)
 

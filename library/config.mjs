@@ -14,6 +14,8 @@ import { fileURLToPath } from 'url'
 
 import fs from 'fs'
 
+import defaultsDeep from 'lodash/defaultsDeep.js'
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
 dotenvConfig()
@@ -41,11 +43,11 @@ export default class Config {
     const envYamlConfig = yaml.load(fs.readFileSync(join(__dirname, '..', `config.${env}.yaml`), 'utf8'))
 
     // Merge defaultYaml, envYaml, process.env, and .env
-    this.config = {
-      ...defaultYamlConfig,
-      ...envYamlConfig,
-      ...this._envToNestedObject(process.env)
-    }
+    this.config = defaultsDeep(
+      this._envToNestedObject(process.env),
+      envYamlConfig,
+      defaultYamlConfig
+    )
   }
 
   /**
@@ -71,18 +73,13 @@ export default class Config {
       current = current.__value
     }
 
-    // If the current value is not a string or doesn't have __value, throw an error
-    if (typeof current !== 'string' && !Array.isArray(current)) {
-      throw new Error(`Cannot convert non-string value or value without __value for key "${key}"`)
-    }
-
     // Convert to the specified type, if provided
     if (type !== undefined) {
       switch (type) {
         case 'number':
           return Number(current)
         case 'boolean':
-          return current.toLowerCase() === 'true'
+          return typeof current === 'boolean' ? current : current.toLowerCase() === 'true'
         case 'string':
           return String(current)
         case 'array':
@@ -133,3 +130,5 @@ export default class Config {
     return result
   }
 }
+
+Config.init()

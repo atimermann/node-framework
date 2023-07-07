@@ -9,7 +9,7 @@
  */
 
 import Application from './application.mjs'
-// import HttpServer from './http-server.mjs'
+import HttpServer from './http-server.mjs'
 
 import JobManager from './jobs/job-manager.mjs'
 import JobWorker from './jobs/job-worker.mjs'
@@ -26,14 +26,6 @@ export default {
    */
   async init (application) {
     try {
-      Config.init()
-      console.log(Config.config)
-
-      console.log(Config.get('xdg'))
-      console.log(Config.get('xdg.seat'))
-      console.log(Config.get('xdg.seat.path'))
-      process.exit()
-
       if (!(application instanceof Application)) {
         // noinspection ExceptionCaughtLocallyJS
         throw new TypeError('application must be instance of Application')
@@ -42,7 +34,11 @@ export default {
       await application.init()
 
       if (process.argv[2] === 'job') {
-        await JobWorker.run(application)
+        if (Config.get('jobManager.enabled', 'boolean')) {
+          await JobWorker.run(application)
+        } else {
+          throw new Error('jobManager disabled')
+        }
       } else {
         await this.initServer(application)
       }
@@ -58,13 +54,15 @@ export default {
    * @param {Application} application
    */
   async initServer (application) {
-    // BlessedInterface.init()
+    if (Config.get('blessed.enabled', 'boolean')) {
+      BlessedInterface.init()
+    }
 
     // socketServer()
 
     await Promise.all([
-      // HttpServer.run(application),
-      JobManager.run(application)
+      Config.get('server.enabled', 'boolean') ? HttpServer.run(application) : null,
+      Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null
     ])
   }
 }

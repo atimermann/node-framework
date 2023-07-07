@@ -8,6 +8,7 @@
 import cron from 'node-cron'
 import crypto from 'crypto'
 import WorkerManager from './worker-manager.mjs'
+import Config from '../config.mjs'
 
 import createLogger from '../logger.mjs'
 const logger = createLogger('JobManager')
@@ -23,6 +24,11 @@ const logger = createLogger('JobManager')
  * @property {string} name - Unique name identifier for the job.
  * @property {function} jobFunction - Function definition that performs the actual job task.
  * @property {string} schedule - A cron-formatted string that represents the job's schedule.
+ * @property {string} uuid - The unique identifier for the job, generated using the job's application name, app name, controller name, and job name.
+ * @property {string} workerName - The name of the worker assigned to execute the job.
+ * @property {boolean} persistent - Whether the job is persistent or not.
+ * @property {Object} options - The options for the job worker.
+ * @property {Array} jobProcesses - Array of job processes associated with this job.
  */
 
 export default class JobManager {
@@ -47,7 +53,6 @@ export default class JobManager {
    */
   static async run (application) {
     logger.info('Initializing...')
-    // console.log('[JOB MANAGER] Initializing...')
 
     // ============================================
     // Carrega Jobs e Workers definido pelo usuario
@@ -70,7 +75,6 @@ export default class JobManager {
     // Monitora Workers
     // ============================================
     await WorkerManager.monitorWorkersHealth()
-    // console.log('Job Manager Loaded!')
   }
 
   /**
@@ -84,15 +88,15 @@ export default class JobManager {
    */
 
   static async loadJobsAndWorkers (application) {
-    // console.log('Load Jobs and Workers')
-    for (const controller of await application.getControllers()) {
+    logger.info('Load jobs and Workers')
+    for (const controller of application.getControllers()) {
       await controller.jobs()
 
       for (const job of controller.jobsList) {
         job.uuid = this.createJobUUID(job.applicationName, job.appName, job.controllerName, job.name)
         this.jobs[job.uuid] = job
 
-        // console.log(`JOB:\n\tUUID:  ${job.uuid}\n\tName:  ${job.name}`)
+        logger.info(`Loading Job: "${job.name}" UUID:  ${job.uuid}`)
       }
     }
   }
@@ -106,9 +110,9 @@ export default class JobManager {
   static createScheduleWorkers () {
     for (const [, job] of Object.entries(this.jobs)) {
       if (job.schedule) {
-        // console.log('createScheduleWorkers:', job.name)
-
         job.workerName = `${job.name}-${job.uuid}`
+
+        logger.info(`Creating Schedule worker: "${job.workerName}"`)
         WorkerManager.createWorker(job.workerName, job, false)
       }
     }
@@ -144,8 +148,6 @@ export default class JobManager {
    * @static
    */
   static async schedulingJob (job) {
-    // console.log(`[JOB MANAGER] [${job.name}] Scheduling...`)
-
     cron.schedule(job.schedule, async () => {
       try {
         await this.runJob(job)
@@ -154,7 +156,7 @@ export default class JobManager {
       }
     }, {
       scheduled: true,
-      timezone: 'America/Sao_Paulo' // TODO: Parametrizar
+      timezone: Config.get('server.timezone')
     })
   }
 
@@ -167,7 +169,7 @@ export default class JobManager {
    * @static
    */
   static async runJob (job) {
-    // console.log('[WorkerManager]', `Executando ${job.workerName}`)
+    logger.info(`Running job: "${job.name}" Schedule: "${job.schedule}" Worker: "${job.workerName}"`)
     await WorkerManager.startWorkerProcesses(job.workerName)
   }
 

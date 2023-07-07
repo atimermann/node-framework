@@ -8,19 +8,28 @@
  */
 
 import { createLogger as winstonCreateLogger } from 'winston'
+import Config from './config.mjs'
 // import Transport from 'winston-transport'
 import { Server } from 'socket.io'
 import BlessedTransport from './winstonTransport/blessed.mjs'
 
 import Console2Transport from './winstonTransport/console.mjs'
 
-const logger = winstonCreateLogger({
-  transports: [
-    // new SocketIoTransport()
-    new Console2Transport()
-    // new BlessedTransport()
-  ]
-})
+const transports = []
+
+if (Config.get('logger.blessed.enabled')) {
+  transports.push(new BlessedTransport())
+}
+
+if (Config.get('logger.console.enabled')) {
+  transports.push(new Console2Transport())
+}
+
+if (transports.length === 0) {
+  throw new Error('It is mandatory to define at least one transport in the logger (Winston Transport). To define the console transport as enabled in the logger, set the environment variable LOGGER_CONSOLE_ENABLED to true.')
+}
+
+const logger = winstonCreateLogger({ transports })
 
 export default function createLogger (module) {
   return logger.child({ module })
@@ -28,6 +37,7 @@ export default function createLogger (module) {
 
 /**
  * Inicia um servidor socket para monitorar log na web
+ * TODO: Implementar socket
  */
 export function socketServer () {
   console.log('NEW SOCKET SERVER')

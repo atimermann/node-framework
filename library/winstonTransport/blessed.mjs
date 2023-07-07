@@ -68,10 +68,10 @@ export default class BlessedTransport extends Transport {
     const levelColor = getLevelColor(level)
     const levelText = `${levelColor}${level}${resetColor}`
     const moduleText = module ? `${blueDarkColor}[ ${module} ]${resetColor}` : ''
-    const msgColor = `${greenColor}${message}${resetColor}`
+    // const msgColor = `${greenColor}${message}${resetColor}`
     const formattedTime = `${purpleColor}${date.toLocaleTimeString()}.${date.getMilliseconds()}${resetColor}`
 
-    BlessedInterface.log(`${formattedTime} ${levelText} ${moduleText} ${msgColor}`, module)
+    BlessedInterface.log(`${formattedTime} ${levelText} ${moduleText} ${message}`, module)
     callback()
   }
 }

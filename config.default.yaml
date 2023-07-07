@@ -2,6 +2,7 @@
 # Configuração do Servidor HTTP Express
 # body-parser: https://github.com/expressjs/body-parser
 server:
+  enabled: true
   port: 3001
   urlenconded:
     limit: '10mb'
@@ -28,22 +29,26 @@ server:
 
   timezone: "America/Sao_Paulo"
 
+# Ativa modo ncurses (Carrega interface ncurse para monitorar aplicação visualmente)
+blessed:
+  enabled: true
+
+# Habilita Sistema Gerenciador de Jobs e Worker
+jobManager:
+  enabled: true
+
 logger:
+  # Habilita log na interface blesse (necessário ter o blessed ativo)
+  blessed:
+    enabled: true
+
   # Habilita Log em console
   console:
-    enabled: true
-    handleExceptions: false
-
-  # Habilita envio de log para sistema GrayLog (https://github.com/Buzut/winston-log2gelf)
-  graylog:
     enabled: false
-    host: 'localhost'
-    port: 12201
-    protocol: 'tcp'
     handleExceptions: false
 
   # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
-  level: 'debug'
+  level: info
 
   # Silencia log
   silent: false

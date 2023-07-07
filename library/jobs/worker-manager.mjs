@@ -11,7 +11,10 @@
 import { fork } from 'child_process'
 import JobManager from './job-manager.mjs'
 import createLogger from '../logger.mjs'
-const logger = createLogger('JobManager')
+
+const logger = createLogger('WorkerManager')
+
+const childLogger = createLogger('JobThread')
 
 export default class WorkerManager {
   static workers = []
@@ -40,7 +43,8 @@ export default class WorkerManager {
    * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, options = {}) {
-    // console.log('[WorkerManager]', `Criando Worker: ${name}, JOB: ${job.name}`)
+    logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}"`)
+
     const newWorker = {
       name,
       job,
@@ -74,9 +78,11 @@ export default class WorkerManager {
     const worker = this.indexedWorkers[workerName]
 
     if (worker.jobProcesses.length > 0) {
+      logger.info(`Restarting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}"`)
       await this.restarWorkersProcesses(worker)
     } else {
       const concurrency = worker.options.concurrency || 1
+      logger.info(`Starting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}" Concurrency: ${concurrency}`)
       for (let i = 1; i <= concurrency; i++) {
         worker.jobProcesses.push(this.createProcess(worker.job, worker.options))
       }
@@ -89,8 +95,8 @@ export default class WorkerManager {
 
   static async restarWorkersProcesses (worker) {
     for (const jobProcess of worker.jobProcesses) {
-      // Processo está sendo tratado
       if (jobProcess.killing) {
+        logger.warn(`Job killing! Waiting... Worker: "${worker.name}" Job: "${worker.job.name}"`)
         continue
       }
       if (jobProcess.running || (jobProcess.childProcess && jobProcess.childProcess.connected)) {
@@ -138,9 +144,17 @@ export default class WorkerManager {
     // console.log('[WorkerManager]', `Criando Processo: ${job.name}`)
     const args = ['job', job.applicationName, job.appName, job.controllerName, job.name]
 
-    jobProcess.childProcess = fork('./src/run.mjs', args, { silent: false })
+    jobProcess.childProcess = fork('./src/run.mjs', args, { silent: true })
     jobProcess.running = true
     // console.log('[WorkerManager]', `NEW PID #${jobProcess.childProcess.pid} RUNNING: "${jobProcess.running}"`)
+
+    jobProcess.childProcess.stdout.on('data', (data) => {
+      childLogger.info(data)
+    })
+
+    jobProcess.childProcess.stderr.on('data', (data) => {
+      childLogger.error(data)
+    })
 
     jobProcess.childProcess.once('exit', (code, signal) => {
       jobProcess.running = false
@@ -198,6 +212,7 @@ export default class WorkerManager {
 
   /**
    * Restarts a job process.
+   *
    * @param {Object} job - The job whose process to restart.
    * @param {Object} jobProcess - The process to restart.
    * @returns {Promise<void>}
@@ -205,11 +220,14 @@ export default class WorkerManager {
   static async restartJobProcess (job, jobProcess) {
     jobProcess.killing = true
 
+    logger.warn(`Killing job: "${job.name}" Worker:"${job.workerName}"`)
+
     const pidToKill = jobProcess.childProcess.pid
 
     // Prepares callback to restart the process when finished.
     jobProcess.childProcess.once('exit', async () => {
-      // console.log('=============================================>KIll Success!!, restart')
+      logger.warn(`Killing successful: "${job.name}" Worker:"${job.workerName}"`)
+
       this.runProcess(job, jobProcess)
       jobProcess.killing = false
     })
@@ -224,7 +242,7 @@ export default class WorkerManager {
     await this.sendKill('SIGKILL', jobProcess.childProcess)
     if (pidToKill !== jobProcess.childProcess.pid || !jobProcess.childProcess.connected) return
 
-    console.error(`[JOB MANAGER][JOB MANAGER] [${job.name}] [${jobProcess.childProcess.pid}] Process is stuck. It cannot be killed. Restart aborted.`)
+    logger.error(`Process is stuck. It cannot be killed. Restart aborted. Job: "${job.name}" Worker:"${job.workerName}" PID: "${jobProcess.childProcess.pid}"`)
     // TODO: Controle de zumbi
     jobProcess.killing = false
   }
@@ -236,10 +254,8 @@ export default class WorkerManager {
    * @returns {Promise<void>}
    */
   static async sendKill (signal, childProcess) {
-    // Send SIGNIT
-    // console.log(`[${childProcess.pid}] Send "${signal}" to process...`)
-    childProcess.kill('SIGINT')
-
+    logger.warn(`SEND KILL... PID: "${childProcess.pid}" SIGNAL: "${signal}"`)
+    childProcess.kill(signal)
     // Wait for 5 seconds TODO: parameterize this duration.
     await this.sleep(5000)
   }
