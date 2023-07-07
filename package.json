@@ -44,14 +44,10 @@
   },
   "files": [
     "library",
-    "esm",
-    "application.js",
-    "config.js",
-    "controller.js",
-    "logger.js",
-    "server.js",
     "index.mjs",
-    "config.default.yaml"
+    "config.default.yaml",
+    "config.development.yaml",
+    "config.production.yaml"
   ],
   "repository": {
     "type": "git",
