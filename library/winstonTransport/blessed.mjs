@@ -62,7 +62,10 @@ export default class BlessedTransport extends Transport {
   }
 
   log (logObj, callback) {
-    const { level, module, message } = logObj
+    let { level, module, message } = logObj
+    if (typeof message === 'object') {
+      message = JSON.stringify(message)
+    }
 
     const date = new Date()
     const levelColor = getLevelColor(level)
