@@ -42,9 +42,17 @@ export default class Config {
     const env = process.env.NODE_ENV || 'development'
     const envYamlConfig = yaml.load(fs.readFileSync(join(__dirname, '..', `config.${env}.yaml`), 'utf8'))
 
+    // Load YAML config from user Project
+    const userYamlConfig = yaml.load(fs.readFileSync(join(process.cwd(), 'config.default.yaml'), 'utf8'))
+
+    // Load YAML config from user Project based on NODE_ENV
+    const envUserYamlConfig = yaml.load(fs.readFileSync(join(process.cwd(), `config.${env}.yaml`), 'utf8'))
+
     // Merge defaultYaml, envYaml, process.env, and .env
     this.config = defaultsDeep(
       this._envToNestedObject(process.env),
+      envUserYamlConfig,
+      userYamlConfig,
       envYamlConfig,
       defaultYamlConfig
     )
