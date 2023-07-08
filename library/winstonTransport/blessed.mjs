@@ -20,18 +20,12 @@ const resetColor = '\x1b[0m'
  * @constant {string}
  */
 const blueDarkColor = '\x1b[1;94m'
-/**
- * @constant {string}
- */
-const greenColor = '\x1b[32m'
+
 /**
  * @constant {string}
  */
 const yellowColor = '\x1b[33m'
-/**
- * @constant {string}
- */
-const redColor = '\x1b[31m'
+
 /**
  * @constant {string}
  */

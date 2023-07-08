@@ -34,11 +34,12 @@ Se você tiver um arquivo `.env`, as variáveis de ambiente definidas nesse arqu
 
 As configurações são carregadas em uma ordem específica para determinar a prioridade. A ordem de prioridade é a seguinte:
 
-1. Configurações definidas no arquivo `.env`. Elas têm a prioridade mais alta.
-2. Variáveis de ambiente do sistema operacional.
-3. Configurações definidas no arquivo `config.production.yaml` (apenas se `NODE_ENV` for definido como "production").
-4. Configurações definidas no arquivo `config.development.yaml` (apenas se `NODE_ENV` for definido como "development").
-5. Configurações definidas no arquivo `config.default.yaml` localizado em `node_modules/@agtm/node-framework`.
+1. Variáveis de ambiente do sistema operacional. Elas têm a prioridade mais alta.
+2. Configurações definidas no arquivo `.env`. 
+3. Configurações definidas no arquivo `config.{NODE_ENV}.yaml` localizado no diretório do projeto
+4. Configurações definidas no arquivo `config.default.yaml` localizado no diretório do projeto 
+5. Configurações definidas no arquivo `config.{NODE_ENV}.yaml`  localizado em `node_modules/@agtm/node-framework`.
+6. Configurações definidas no arquivo `config.default.yaml` localizado em `node_modules/@agtm/node-framework`.
 
 As configurações de uma fonte sobrescrevem as configurações da fonte anterior na lista acima.
 

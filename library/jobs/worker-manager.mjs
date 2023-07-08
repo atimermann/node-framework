@@ -168,10 +168,12 @@ export default class WorkerManager {
     for (const line of data.toString().split('\n')) {
       try {
         const logObj = JSON.parse(line)
-
         const logModule = logObj.module ? `[${logObj.module}] ` : ''
         childLogger[logObj.level](`${logModule}${logObj.message}`)
       } catch (err) { /* Ignora linhas que não podem ser processada pelo JSON */
+        if (line !== '') {
+          childLogger.error(line)
+        }
       }
     }
   }
