@@ -101,92 +101,70 @@ export default class ApplicationController {
     return controllersInstances
   }
 
-  /**
-   * Returns a list with all assets of the project including dependencies
-   *
-   * @param applications  {array} List of applications
-   *
-   * @returns {Promise<Array>}
-   */
-  static async getAssets (applications) {
-    const assets = []
-
-    for (const application of applications) {
-      const appsPath = path.join(application.path, 'apps')
-
-      await this.checkAppsDirectoryExist(application)
-
-      for (const asset of await this._getAssetsByApps(appsPath, application.name)) {
-        assets.push(asset)
-      }
-    }
-
-    return assets
-  }
-
-  /**
-   * Returns a list of all assets (static files) from an app
-   *
-   * This list is made up of: file path, application name, and app name
-   *
-   * @param appsPath          {string}  App path
-   * @param applicationName   {string}  Application name
-   *
-   * @returns {Promise<Array>}
-   *
-   * @private
-   */
-  static async _getAssetsByApps (appsPath, applicationName) {
-    const assets = []
-
-    for (const appName of await readdir(appsPath)) {
-      logger.debug(`Loading assets from app: '${appName}'`)
-
-      const assetsPath = path.join(appsPath, appName, 'assets')
-
-      logger.debug(` APP NAME   : '${appName}'`)
-      logger.debug(` ASSET PATH   : '${assetsPath}'`)
-
-      if (await this.exists(assetsPath)) {
-        const assetsFile = await readdir(assetsPath)
-
-        for (const assetFile of assetsFile) {
-          assets.push({
-            filePath: path.join(assetsPath, assetFile),
-            applicationName,
-            appName
-          })
-        }
-      }
-    }
-
-    return assets
-  }
-
+  // TODO: Parece q não é utilizado em lugar nenhum remover
+  //
   // /**
-  //  * Returns information about all apps from all loaded applications
+  //  * Returns a list with all assets of the project including dependencies
   //  *
-  //  * @param applications    {string<Array>}  List of applications
+  //  * @param applications  {array} List of applications
+  //  *
   //  * @returns {Promise<Array>}
   //  */
-  // static async getApps (applications) {
-  //   const apps = []
+  // static async getAssets (applications) {
+  //   const assets = []
   //
   //   for (const application of applications) {
   //     const appsPath = path.join(application.path, 'apps')
   //
   //     await this.checkAppsDirectoryExist(application)
   //
-  //     for (const appName of await readdir(appsPath)) {
-  //       apps.push({
-  //         path: path.join(appsPath, appName),
-  //         applicationName: application.name,
-  //         appName
-  //       })
+  //     for (const asset of await this._getAssetsByApps(appsPath, application.name)) {
+  //       assets.push(asset)
   //     }
   //   }
   //
-  //   return apps
+  //   return assets
+  // }
+
+  // // TODO: Parece q não é utilizado em lugar nenhum remover
+  //
+  // /**
+  //  * Returns a list of all assets (static files) from an app
+  //  *
+  //  * This list is made up of: file path, application name, and app name
+  //  *
+  //  * @param appsPath          {string}  App path
+  //  * @param applicationName   {string}  Application name
+  //  *
+  //  * @returns {Promise<Array>}
+  //  *
+  //  * @private
+  //  */
+  // static async _getAssetsByApps (appsPath, applicationName) {
+  //   const assets = []
+  //
+  //   for (const appName of await readdir(appsPath)) {
+  //     logger.debug(`Loading assets from app: '${appName}'`)
+  //
+  //     const assetsPath = path.join(appsPath, appName, 'assets')
+  //
+  //     logger.debug(` APP NAME   : '${appName}'`)
+  //     logger.debug(` ASSET PATH   : '${assetsPath}'`)
+  //
+  //     if (await this.exists(assetsPath)) {
+  //       const assetsFile = await readdir(assetsPath)
+  //
+  //       for (const assetFile of assetsFile) {
+  //         assets.push({
+  //           filePath: path.join(assetsPath, assetFile),
+  //           applicationName,
+  //           appName
+  //         })
+  //       }
+  //     }
+  //   }
+  //
+  //   return assets
   // }
 
   static async checkAppsDirectoryExist (application) {

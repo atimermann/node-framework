@@ -14,6 +14,7 @@
 import assert from 'node:assert'
 import ApplicationController from './application-controller.mjs'
 import path from 'path'
+import { readdir } from 'fs/promises'
 
 import createLogger from './logger.mjs'
 
@@ -126,5 +127,30 @@ export default class Application {
    */
   getControllers () {
     return this.controllers
+  }
+
+  /**
+   * Returns information about all apps from all loaded applications
+   *
+   * @returns {Promise<Array>}
+   */
+  async getApps () {
+    const apps = []
+
+    for (const application of this.applications) {
+      const appsPath = path.join(application.path, 'apps')
+
+      await ApplicationController.checkAppsDirectoryExist(application)
+
+      for (const appName of await readdir(appsPath)) {
+        apps.push({
+          path: path.join(appsPath, appName),
+          applicationName: application.name,
+          appName
+        })
+      }
+    }
+
+    return apps
   }
 }
