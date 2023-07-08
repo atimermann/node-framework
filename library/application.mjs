@@ -16,9 +16,17 @@ import ApplicationController from './application-controller.mjs'
 import path from 'path'
 
 import createLogger from './logger.mjs'
+
 const logger = createLogger('Application')
 
 export default class Application {
+  /**
+   * Validate instance
+   * @type {boolean}
+   * @private
+   */
+  _sindriApplicationClass = true
+
   /**
    * Stores a list of loaded applications , include self
    * @type {Array}
