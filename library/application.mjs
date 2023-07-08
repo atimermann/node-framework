@@ -25,7 +25,7 @@ export default class Application {
    * @type {boolean}
    * @private
    */
-  _sindriApplicationClass = true
+  _applicationClass = true
 
   /**
    * Stores a list of loaded applications , include self
