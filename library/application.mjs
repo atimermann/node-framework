@@ -25,7 +25,7 @@ export default class Application {
    * @type {boolean}
    * @private
    */
-  _applicationClass = true
+  static _applicationClass = true
 
   /**
    * Stores a list of loaded applications , include self
