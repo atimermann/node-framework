@@ -1,6 +1,6 @@
 {
   "name": "@agtm/node-framework",
-  "version": "4.2.13",
+  "version": "4.2.14",
   "description": "Framework nodejs baseado no ExpressJs",
   "scripts": {
     "publish-patch": "npm version patch && npm publish --access public && git push",
