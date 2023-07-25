@@ -1,3 +1,5 @@
+# DEPRECATED
+
 
 ## Integração GrayLog
 

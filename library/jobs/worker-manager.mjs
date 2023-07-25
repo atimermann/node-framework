@@ -35,13 +35,14 @@ export default class WorkerManager {
 
   /**
    * Creates a new worker.
+   *
    * @param {string} name - The name of the worker.
    * @param {Object} job - The job associated with the worker.
    * @param {boolean} persistent - Whether the worker is persistent.
    * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, options = {}) {
-    logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}"`)
+    logger.info(`Starting worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
 
     const newWorker = {
       name,

@@ -19,7 +19,7 @@ Use o método `get` para obter valores de configuração. Este método aceita du
 A chave segue o padrão `dot notation`, para representar a profundidade do objeto.
 
 ```javascript
-const serverPort = Config.get('server.port', 'number')
+const serverPort = Config.get('httpServer.port', 'number')
 ```
 
 O exemplo acima vai buscar a configuração "port" dentro do objeto "server". O segundo argumento, 'number', indica que o valor deve ser convertido para um número antes de ser retornado.

@@ -52,7 +52,7 @@ function getLevelColor (level) {
 export default class BlessedTransport extends Transport {
   constructor (opts) {
     super(opts)
-    this.name = 'Console2Transport'
+    this.name = 'BlessedTransport'
   }
 
   log (logObj, callback) {

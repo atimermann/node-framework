@@ -11,7 +11,7 @@ import Transport from 'winston-transport'
 export default class SocketIoTransport extends Transport {
   constructor (opts) {
     super(opts)
-    this.name = 'Console2Transport'
+    this.name = 'SocketTransport'
   }
 
   log (logObj, callback) {

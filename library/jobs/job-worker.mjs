@@ -44,7 +44,7 @@ export default class JobWorker {
   static jobs = {}
 
   /**
-   * This method is responsible for the execution of a worker in a separate process.
+   * This method is execution of a worker in a separate process.
    * It loads all jobs and executes the specific job that matches the command-line arguments.
    *
    * @param {import('../application.mjs').Application} application - The application context.
@@ -56,7 +56,7 @@ export default class JobWorker {
    * @static
    */
   static async run (application) {
-    const targetController = await this.getJobController(application)
+    const targetController = this.getJobController(application)
 
     if (!targetController) {
       throw new Error('Controller not found for the given parameters.')
@@ -93,8 +93,8 @@ export default class JobWorker {
    *
    * @static
    */
-  static async getJobController (application) {
-    for (const controller of await application.getControllers()) {
+  static getJobController (application) {
+    for (const controller of application.getControllers()) {
       const isTargetController =
         controller.applicationName === process.argv[3] &&
         controller.appName === process.argv[4] &&

@@ -1,4 +1,5 @@
-# Projeto Node Framework 3.0
+# DEPRECATED
+# Projeto Node Framework 4.0
 
 Framework minimalista para nodejs com objetivo de disponibilizar uma base de código pronta para o rápido inicio de
 projeto e codificação, utilizando tecnologias já disponíveis.

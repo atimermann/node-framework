@@ -65,7 +65,7 @@ export default {
      *
      * @type {string}
      */
-    this.staticRoute = process.env.STATIC_ROUTE || Config.get('server.staticRoute')
+    this.staticRoute = process.env.STATIC_ROUTE || Config.get('httpServer.staticRoute')
 
     /**
      * Enables access to static resources via CDN (if true, it disables Express static file server)
@@ -74,7 +74,7 @@ export default {
      * @type {boolean}
      */
     this.cdn = (process.env.CDN === undefined)
-      ? Config.get('server.cdn')
+      ? Config.get('httpServer.cdn')
       : process.env.CDN
 
     /**
@@ -83,7 +83,7 @@ export default {
      *
      * @type {string}
      */
-    this.cdnUrl = process.env.CDN_URL || Config.get('server.cdnUrl')
+    this.cdnUrl = process.env.CDN_URL || Config.get('httpServer.cdnUrl')
 
     console.log(figlet.textSync('Node Framework'))
     console.log(figlet.textSync(`\n${sentenceCase(application.name)}`))
@@ -92,7 +92,7 @@ export default {
     logger.info(`Root Path:               ${application.path}`)
     logger.info(`Node Version:            ${process.version}`)
     logger.info(`Environment:             ${process.env.NODE_ENV}`)
-    logger.info(`Port:                    ${process.env.PORT || Config.get('server.port')}`)
+    logger.info(`Port:                    ${process.env.PORT || Config.get('httpServer.port')}`)
     logger.info(`Pid:                     ${process.pid}`)
     logger.info(`Hostname:                ${os.hostname()}`)
     logger.info(`Platform:                ${os.platform()}`)
@@ -133,7 +133,7 @@ export default {
     /// /////////////////////////////////////////////////
     app.use(
       morgan(
-        Config.get('server.log.format'),
+        Config.get('httpServer.log.format'),
         {
 
           stream: new Writable({
@@ -167,7 +167,7 @@ export default {
       // ref: https://github.com/zeit/pkg#snapshot-filesystem
       let sourceStaticFiles
 
-      if (Config.get('server.loadStaticFromPackage')) {
+      if (Config.get('httpServer.loadStaticFromPackage')) {
         sourceStaticFiles = join(application.path, 'public')
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
@@ -184,12 +184,12 @@ export default {
     /// /////////////////////////////////////////////////
     app.use(bodyParser.urlencoded({
       extended: false,
-      limit: Config.get('server.urlenconded.limit')
+      limit: Config.get('httpServer.urlenconded.limit')
     }))
 
     // Configurar Json
     app.use(bodyParser.json({
-      limit: Config.get('server.json.limit')
+      limit: Config.get('httpServer.json.limit')
     }))
 
     /// /////////////////////////////////////////////////
@@ -303,7 +303,7 @@ export default {
    * @param httpServer
    */
   _startHttpServer (httpServer) {
-    const port = process.env.PORT || Config.get('server.port')
+    const port = process.env.PORT || Config.get('httpServer.port')
 
     logger.info(`Initializing HTTP_SERVER. Port: ${port}!`)
 

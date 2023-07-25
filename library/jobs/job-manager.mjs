@@ -116,7 +116,7 @@ export default class JobManager {
       if (job.schedule) {
         job.workerName = `${job.name}-${job.uuid}`
 
-        logger.info(`Creating Schedule worker: "${job.workerName}"`)
+        logger.info(`Creating schedule worker: "${job.workerName}". Schedule: "${job.schedule}"`)
         WorkerManager.createWorker(job.workerName, job, false)
       }
     }
@@ -160,7 +160,7 @@ export default class JobManager {
       }
     }, {
       scheduled: true,
-      timezone: Config.get('server.timezone')
+      timezone: Config.get('httpServer.timezone')
     })
   }
 
