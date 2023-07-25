@@ -12,7 +12,7 @@ import Application from './application.mjs'
 import HttpServer from './http-server.mjs'
 
 import JobManager from './jobs/job-manager.mjs'
-import JobWorker from './jobs/job-worker.mjs'
+import WorkerRunner from './jobs/worker-runner.mjs'
 
 import BlessedInterface from './blessed.mjs'
 import Config from './config.mjs'
@@ -35,7 +35,7 @@ export default {
 
       if (process.argv[2] === 'job') {
         if (Config.get('jobManager.enabled', 'boolean')) {
-          await JobWorker.run(application)
+          await WorkerRunner.run(application)
         } else {
           throw new Error('jobManager disabled')
         }

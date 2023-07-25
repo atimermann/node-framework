@@ -6,6 +6,8 @@
  *
  * TODO: Criar controle de processos zumbis
  * TODO: Parametrizar delay
+ * TODO: Parametrizar options for workers
+ * TODO: Criar classe/objeto/typedef para worker
  *
  */
 import { fork } from 'child_process'
@@ -21,14 +23,30 @@ export default class WorkerManager {
 
   /**
    * Creates user-defined workers.
+   *
    * @param {Object} application - The application object to get controllers from.
-   * @returns {Promise<void>}
+   * @returns {void}
    */
-  static async createUserWorkers (application) {
-    for (const controller of await application.getControllers()) {
+  static createUserWorkers (application) {
+    for (const controller of application.getControllers()) {
       for (const worker of controller.workersList) {
         const job = JobManager.getJob(worker.applicationName, worker.appName, worker.controllerName, worker.jobName)
         this.createWorker(worker.name, job, true, worker.options)
+      }
+    }
+  }
+
+  /**
+   * Creates workers for all the jobs that have been scheduled. Each job is assigned a worker
+   * that will be responsible for executing the job as per its schedule.
+   *
+   * @static
+   */
+  static createScheduledWorkers (jobs) {
+    for (const [, job] of Object.entries(jobs)) {
+      if (job.schedule) {
+        job.workerName = `${job.name}-${job.uuid}`
+        WorkerManager.createWorker(job.workerName, job, false)
       }
     }
   }
@@ -42,7 +60,7 @@ export default class WorkerManager {
    * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, options = {}) {
-    logger.info(`Starting worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
+    logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
 
     const newWorker = {
       name,
@@ -60,20 +78,21 @@ export default class WorkerManager {
    * Starts execution of persistent workers.
    * @returns {Promise<void>}
    */
-  static async startPersistentWorkers () {
+  static async runPersistentWorkers () {
     for (const worker of this.workers) {
       if (worker.persistent) {
-        await this.startWorkerProcesses(worker.name)
+        await this.runWorkerProcesses(worker.name)
       }
     }
   }
 
   /**
    * Executes workers.
+   *
    * @param {string} workerName - The name of the worker.
    * @returns {Promise<void>}
    */
-  static async startWorkerProcesses (workerName) {
+  static async runWorkerProcesses (workerName) {
     const worker = this.indexedWorkers[workerName]
 
     if (worker.jobProcesses.length > 0) {
@@ -91,7 +110,6 @@ export default class WorkerManager {
   /**
    * Monitors workers health at regular intervals.
    */
-
   static async restarWorkersProcesses (worker) {
     for (const jobProcess of worker.jobProcesses) {
       if (jobProcess.killing) {
