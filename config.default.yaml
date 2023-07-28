@@ -61,7 +61,7 @@ logger:
 ################################################
 socket:
   enabled: true
-  port: 4000
+  port: 4001
   # Modo de execução, podendo ser: (REF: https://socket.io/docs/v4/server-initialization/)
   #  - standalone (Servidor simples independente do servidor http)
   #  - http-server (integrado com servidor http-server do framework)

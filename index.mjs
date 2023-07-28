@@ -11,9 +11,10 @@ import ApplicationController from './library/application-controller.mjs'
 import Server from './library/server.mjs'
 import createLogger from './library/logger.mjs'
 import Config from './library/config.mjs'
+import Controller from './library/controller/controller.mjs'
 
 const logger = createLogger()
 
-export * from './library/controller.mjs'
+// export * from './library/controller/index.mjs'
 
-export { Application, Server, createLogger, logger, Config, ApplicationController }
+export { Application, Server, createLogger, logger, Config, ApplicationController, Controller }

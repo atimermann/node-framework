@@ -66,7 +66,7 @@ export default class WorkerRunner {
 
     await targetController.jobs()
 
-    this.loadJobsFromTargetController(targetController)
+    this.loadJobsFromTargetController(targetController.jobsList)
 
     const targetJobName = process.argv[6]
     const targetJob = this.jobs[targetJobName]
