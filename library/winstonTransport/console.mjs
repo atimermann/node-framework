@@ -60,10 +60,12 @@ export default class Console2Transport extends Transport {
   }
 
   log (logObj, callback) {
-    let { level, module, message } = logObj
-    if (typeof message === 'object') {
-      message = JSON.stringify(message)
-    }
+    const { level, module, message } = logObj
+
+    // TODO: Dà pau com referenciar circular, criar função especial
+    // if (typeof message === 'object') {
+    //   message = JSON.stringify(message)
+    // }
 
     const date = new Date()
     const levelColor = getLevelColor(level)

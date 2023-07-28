@@ -10,6 +10,7 @@
 
 import Application from './application.mjs'
 import HttpServer from './http-server.mjs'
+import SocketServer from './socket-server.mjs'
 
 import JobManager from './jobs/job-manager.mjs'
 import WorkerRunner from './jobs/worker-runner.mjs'
@@ -60,7 +61,8 @@ export default {
 
     await Promise.all([
       Config.get('httpServer.enabled', 'boolean') ? HttpServer.run(application) : null,
-      Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null
+      Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null,
+      Config.get('socket.enabled', 'boolean') ? SocketServer.run(application) : null
     ])
   }
 }

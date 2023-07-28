@@ -56,4 +56,21 @@ logger:
   # Silencia log
   silent: false
 
-
+################################################
+# Configuração do servidor socket.io
+################################################
+socket:
+  enabled: true
+  port: 4000
+  # Modo de execução, podendo ser: (REF: https://socket.io/docs/v4/server-initialization/)
+  #  - standalone (Servidor simples independente do servidor http)
+  #  - http-server (integrado com servidor http-server do framework)
+  #  - standalone-http (Integrado a um servidor http
+  #  - standalone-https (integrado a um servidor https com certificado)
+  #     - https://socket.io/docs/v4/server-initialization/#with-an-https-server TODO: complementar configuração client authentication
+  #  - standalone-http2 (Melhor desempenho e eficiência com multiplexação, compactação de cabeçalho e push de servidor.)
+  mode: standalone
+  # Chaves usado no modo https e http2
+  keys:
+    cert: '/path/to/my/cert.pem'
+    key: '/path/to/my/key.pem'

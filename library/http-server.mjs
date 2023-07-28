@@ -33,6 +33,7 @@ import cors from 'cors'
 import Config from './config.mjs'
 
 import createLogger from './logger.mjs'
+import SocketServer from './socket-server.mjs'
 
 const logger = createLogger('Http Server')
 
@@ -126,6 +127,7 @@ export default {
     const app = express()
 
     httpServer.on('request', app)
+    SocketServer.configureExpressHttpServer(httpServer)
 
     /// /////////////////////////////////////////////////
     // Regista log de acesso no express

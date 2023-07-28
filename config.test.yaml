@@ -1,0 +1,15 @@
+---
+# Configuração para ambiente de teste, desabilita blessed
+
+# TODO: Não deixe um grupo vazio se não irá substituir tudo
+
+logger:
+  blessed:
+    enabled: false
+  console:
+    enabled: true
+
+# Ativa modo ncurses (Carrega interface ncurse para monitorar aplicação visualmente)
+blessed:
+  enabled: false
+

@@ -1,0 +1,4 @@
+---
+# Consulte configuração em node_modules/@agtm/node-framework/*.yaml
+jobManager:
+  enabled: false

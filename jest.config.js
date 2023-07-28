@@ -4,6 +4,8 @@
  */
 
 module.exports = {
+  verbose: true,
+  silent: false,
   testEnvironment: 'node',
   testMatch: [
     '<rootDir>/tests/**/*.test.mjs'
@@ -13,6 +15,6 @@ module.exports = {
     '/node_modules/'
   ],
   transform: {
-    '^.+\\.m?js$': 'babel-jest'
+    // '^.+\\.m?js$': 'babel-jest'
   }
 }
