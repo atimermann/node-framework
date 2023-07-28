@@ -118,6 +118,13 @@ export class Controller {
   path = undefined
 
   /**
+   * Holds the instance of the Socket.io server.
+   *
+   * @type {import("socket.io").Server}
+   */
+  io = undefined
+
+  /**
    * @typedef {Object} Job
    * @property {string}   applicationName - The name of the application.
    * @property {string}   appName         - The name of the app.
@@ -229,6 +236,20 @@ export class Controller {
       jobName,
       options
     })
+  }
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // Metodos Socket
+  // -------------------------------------------------------------------------------------------------------------------
+
+  /**
+   * return namespace instance
+   *
+   * @param path  Path of namespace
+   * @returns {Namespace<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>}
+   */
+  namespace (path) {
+    return this.io.of(path)
   }
 
   // -------------------------------------------------------------------------------------------------------------------

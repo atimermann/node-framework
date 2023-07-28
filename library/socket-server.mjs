@@ -4,16 +4,8 @@
  * /socket
  * @author André Timermann <andre@timermann.com.br>
  * TODO:
- *  - Documentar (Documentar lado cliente tb)
- *  - Gerenciar conexão, portas, iniciar novo servidor
- *  - Disponibilizar IO para usuario
- *  - Gerenciar e configurar CORS
- *  - Utilizar namespace igual this.get, usar this.namespace('/abc')
- *  - Opção padrão de comunicação com websocket em vez de requisição(que parece ser padrão) testar performance
- *  - Segurança: Autenticação
- *  - https://socket.io/docs/v4/middlewares/
+ *  - Abstrair middlesares? ?? https://socket.io/docs/v4/middlewares/
  *  - Gerenciamento de erro
- *  - TODO: Implementar Options
  *  https://www.youtube.com/watch?v=0RMYomgf4a8
  *
  * Todas as opções disponivel para serem analisada e implentada: https://socket.io/docs/v4/server-options/
@@ -45,14 +37,18 @@ export default class SocketServer {
    * @static
    * @throws {Error} When an invalid socket mode is provided
    */
-  static run () {
+  static run (application) {
     logger.info('Initializing Socket Server...')
 
     this._loadConfiguration()
 
     logger.info('==============================================================')
-    logger.info(`Mode:  ${this.mode}`)
-    logger.info(`Port:  ${this.mode === 'http-server' ? Config.get('httpServer.port') : this.port}`)
+    logger.info(`Mode:      ${this.mode}`)
+    logger.info(`Port:      ${this.mode === 'http-server' ? Config.get('httpServer.port') : this.port}`)
+    logger.info(`Cors:      ${JSON.stringify(this._getOptions().cors)}`)
+    logger.info(`Transport: ${this._getOptions().transports}`)
+    logger.debug('Options:')
+    logger.debug(this._getOptions())
     logger.info('==============================================================')
 
     // NOTE: In http-server mode, the server setup is initiated in the http-server module and called in
@@ -74,10 +70,12 @@ export default class SocketServer {
         throw new Error(`Invalid socket mode: ${this.mode}`)
     }
 
-    this.io.on('connection', (socket) => {
-      logger.info(socket)
-      logger.info('New connection')
+    this.io.on('connection', socket => {
+      logger.info('New connection.')
+      logger.debug(socket)
     })
+
+    this._loadApplications(application)
 
     logger.info('Socket Server started.')
   }
@@ -88,7 +86,25 @@ export default class SocketServer {
    * @param {Object} httpServer - The HTTP server instance to configure.
    */
   static configureExpressHttpServer (httpServer) {
-    this.io = new Server(httpServer, { /* options */})
+    if (Config.get('socket.enabled', 'boolean') && this.mode === 'http-server') {
+      this.io = new Server(httpServer, this._getOptions())
+    }
+  }
+
+  /**
+   * Loads Applications
+   * @param application {Application}    Information about the Application
+   *
+   * @private
+   */
+  static _loadApplications (application) {
+    for (const controller of application.getControllers()) {
+      controller.io = this.io
+      controller.socket()
+
+      logger.info('Socket applications loaded!')
+      logger.debug(`Controller loaded: "${controller.applicationName}/${controller.appName}/${controller.controllerName}"`)
+    }
   }
 
   /**
@@ -111,7 +127,7 @@ export default class SocketServer {
    * @returns {Server} - The newly created Socket Server
    */
   static _createStandaloneServer () {
-    return new Server(this.port, { /* options */})
+    return new Server(this.port, this._getOptions())
   }
 
   /**
@@ -122,7 +138,7 @@ export default class SocketServer {
    */
   static _createStandaloneHttpServer () {
     const httpServer = createServer()
-    const io = new Server(httpServer, { /* options */})
+    const io = new Server(httpServer, this._getOptions())
     httpServer.listen(this.port)
     return io
   }
@@ -135,7 +151,7 @@ export default class SocketServer {
    */
   static _createStandaloneHttpsServer () {
     const httpsServer = createHttpsServer(this._getHttpsOptions())
-    const io = new Server(httpsServer, { /* options */})
+    const io = new Server(httpsServer, this._getOptions())
     httpsServer.listen(this.port)
     return io
   }
@@ -148,7 +164,7 @@ export default class SocketServer {
    */
   static _createStandaloneHttp2Server () {
     const httpsServer = createSecureServer({ allowHTTP1: true, ...this._getHttpsOptions() })
-    const io = new Server(httpsServer, { /* options */})
+    const io = new Server(httpsServer, this._getOptions())
     httpsServer.listen(this.port)
     return io
   }
@@ -162,6 +178,20 @@ export default class SocketServer {
   static _getHttpsOptions () {
     return {
       key: readFileSync(this.keys.key), cert: readFileSync(this.keys.cert)
+    }
+  }
+
+  /**
+   * Genreate Socket config options
+   *
+   * @returns {Object}
+   * @private
+   */
+  static _getOptions () {
+    return {
+      ...Config.get('socket.options'),
+      cors: Config.get('socket.cors'),
+      transports: Config.get('socket.transports')
     }
   }
 }

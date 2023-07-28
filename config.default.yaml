@@ -51,7 +51,7 @@ logger:
     handleExceptions: false
 
   # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
-  level: info
+  level: debug
 
   # Silencia log
   silent: false
@@ -74,3 +74,13 @@ socket:
   keys:
     cert: '/path/to/my/cert.pem'
     key: '/path/to/my/key.pem'
+  # https://socket.io/docs/v4/handling-cors/
+  cors:
+    origin: '*'
+  # https://socket.io/docs/v4/how-it-works/#upgrade-mechanism
+  transports: ["polling", "websocket"]
+  # Demais opções https://socket.io/docs/v4/server-options
+  options: {}
+
+
+

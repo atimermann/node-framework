@@ -8,6 +8,7 @@
  */
 
 import Transport from 'winston-transport'
+import { inspect } from 'node:util'
 
 // Defining colors as constants
 /**
@@ -60,16 +61,14 @@ export default class Console2Transport extends Transport {
   }
 
   log (logObj, callback) {
-    const { level, module, message } = logObj
-
-    // TODO: Dà pau com referenciar circular, criar função especial
-    // if (typeof message === 'object') {
-    //   message = JSON.stringify(message)
-    // }
+    let { level, module, message } = logObj
+    if (typeof message === 'object') {
+      message = inspect(message)
+    }
 
     const date = new Date()
     const levelColor = getLevelColor(level)
-    const levelText = `${levelColor}${level}${resetColor}`
+    const levelText = `${levelColor}${level.padEnd(5)}${resetColor}`
     const moduleText = module ? `${blueDarkColor}[ ${module} ]${resetColor}` : ''
     const msgColor = `${greenColor}${message}${resetColor}`
     const formattedTime = `${purpleColor}${date.toLocaleTimeString()}.${date.getMilliseconds()}${resetColor}`

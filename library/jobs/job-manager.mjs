@@ -44,14 +44,14 @@ export default class JobManager {
   static jobs = {}
 
   /**
-     * Initializes the Job Manager. This involves setting up the worker environment
-     * and starting the job schedules.
-     *
-     * @param {import('../application.mjs').Application} application - The application context within which the job manager operates.
-     *
-     * @returns {Promise<void>} A promise that resolves when the Job Manager has been initialized.
-     * @static
-     */
+  * Initializes the Job Manager. This involves setting up the worker environment
+  * and starting the job schedules.
+  *
+  * @param {import('../application.mjs').Application} application - The application context within which the job manager operates.
+  *
+  * @returns {Promise<void>} A promise that resolves when the Job Manager has been initialized.
+  * @static
+  */
   static async run (application) {
     logger.info('Initializing...')
 

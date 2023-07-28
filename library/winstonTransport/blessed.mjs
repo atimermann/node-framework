@@ -8,8 +8,8 @@
  */
 
 import Transport from 'winston-transport'
-
 import BlessedInterface from '../blessed.mjs'
+import { inspect } from 'node:util'
 
 // Defining colors as constants
 /**
@@ -58,12 +58,12 @@ export default class BlessedTransport extends Transport {
   log (logObj, callback) {
     let { level, module, message } = logObj
     if (typeof message === 'object') {
-      message = JSON.stringify(message)
+      message = inspect(message)
     }
 
     const date = new Date()
     const levelColor = getLevelColor(level)
-    const levelText = `${levelColor}${level}${resetColor}`
+    const levelText = `${levelColor}${level.padEnd(5)}${resetColor}`
     const moduleText = module ? `${blueDarkColor}[${module}]${resetColor}` : ''
     const msgColor = `${levelColor}${message}${levelColor}`
     const formattedTime = `${purpleColor}${date.toLocaleTimeString()}.${date.getMilliseconds()}${resetColor}`

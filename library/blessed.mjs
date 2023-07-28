@@ -15,8 +15,6 @@ export default class BlessedInterface {
   static ready = false
 
   static init () {
-    console.log('Class Init')
-
     // Create a screen
     this.screen = blessed.screen({
       smartCSR: true

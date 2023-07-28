@@ -10,6 +10,9 @@ logger:
   console:
     enabled: false
     handleExceptions: true
+  # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
+  level: info
+
 
 # Ativa modo ncurses (Carrega interface ncurse para monitorar aplicação visualmente)
 blessed:

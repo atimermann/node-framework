@@ -31,7 +31,7 @@ import Console2Transport from './winstonTransport/console.mjs'
 // }
 
 const logger = winstonCreateLogger({
-  level: 'info'
+  level: Config.get('logger.level')
 })
 
 const loggerConfig = process.argv[2] === 'job'

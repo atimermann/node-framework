@@ -22,19 +22,15 @@ import morgan from 'morgan'
 import helmet from 'helmet'
 import compression from 'compression'
 import { Writable } from 'stream'
-import os from 'os'
+
 import { join } from 'path'
 import { createServer } from 'http'
-import figlet from 'figlet'
-import { readFileSync } from 'fs'
-import { sentenceCase } from 'change-case'
+
 import cors from 'cors'
-
 import Config from './config.mjs'
-
-import createLogger from './logger.mjs'
 import SocketServer from './socket-server.mjs'
 
+import createLogger from './logger.mjs'
 const logger = createLogger('Http Server')
 
 export default {
@@ -56,9 +52,6 @@ export default {
     // let application = JSON.parse(serializedApplication)
 
     const httpServer = createServer()
-
-    const filePath = new URL('../package.json', import.meta.url)
-    const packageInfo = JSON.parse(readFileSync(filePath, 'utf8'))
 
     /**
      * Route for accessing static resources (e.g., jpeg, html, js etc...)
@@ -86,20 +79,8 @@ export default {
      */
     this.cdnUrl = process.env.CDN_URL || Config.get('httpServer.cdnUrl')
 
-    console.log(figlet.textSync('Node Framework'))
-    console.log(figlet.textSync(`\n${sentenceCase(application.name)}`))
     logger.info('==============================================================')
-    logger.info(`Project:                 ${application.name}`)
-    logger.info(`Root Path:               ${application.path}`)
-    logger.info(`Node Version:            ${process.version}`)
-    logger.info(`Environment:             ${process.env.NODE_ENV}`)
-    logger.info(`Port:                    ${process.env.PORT || Config.get('httpServer.port')}`)
-    logger.info(`Pid:                     ${process.pid}`)
-    logger.info(`Hostname:                ${os.hostname()}`)
-    logger.info(`Platform:                ${os.platform()}`)
-    logger.info(`Arch:                    ${os.arch()}`)
-    logger.info(`Node Framework Version:  ${packageInfo.version}`)
-    logger.info(`Application Version:     ${process.env.npm_package_version}`)
+    logger.info(`Port: ${process.env.PORT || Config.get('httpServer.port')}`)
     logger.info('==============================================================')
 
     // Configura ExpressJs
