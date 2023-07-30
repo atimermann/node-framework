@@ -30,6 +30,10 @@ export default class BlessedInterface {
       ignoreDockContrast: true
     })
 
+    this.screen.on('resize', () => {
+      this._resizeBoxes(null, -2)
+    })
+
     this._setShortcuts()
 
     this._createStatusBar()
