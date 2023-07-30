@@ -4,6 +4,8 @@
  * /console.mjs
  * @author André Timermann <andre@timermann.com.br>
  *
+ * TODO: migrar para chalk
+ *
  * COLOR: https://misc.flogisoft.com/bash/tip_colors_and_formatting
  */
 
@@ -44,6 +46,8 @@ function getLevelColor (level) {
       return yellowColor
     case 'error': // ERROR
       return '\x1b[31m'
+    case 'debug': // ERROR
+      return '\x1b[92m'
     default:
       return resetColor
   }

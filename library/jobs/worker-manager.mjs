@@ -9,6 +9,8 @@
  * TODO: Parametrizar options for workers
  * TODO: Criar classe/objeto/typedef para worker
  *
+ * TODO: URGENTE - URGENTE - REFACTORUNG - Criar CLsses para Worker, Jobs, JobProcess e documentar relacionamento entre eles, migrar métodos
+ *
  */
 import { fork } from 'child_process'
 import JobManager from './job-manager.mjs'
@@ -29,8 +31,10 @@ export default class WorkerManager {
    */
   static createUserWorkers (application) {
     for (const controller of application.getControllers()) {
+      logger.debug(`Loading controller: ${controller.completeIndentification}`)
       for (const worker of controller.workersList) {
         const job = JobManager.getJob(worker.applicationName, worker.appName, worker.controllerName, worker.jobName)
+        job.workerName = worker.name
         this.createWorker(worker.name, job, true, worker.options)
       }
     }
@@ -46,7 +50,7 @@ export default class WorkerManager {
     for (const [, job] of Object.entries(jobs)) {
       if (job.schedule) {
         job.workerName = `${job.name}-${job.uuid}`
-        WorkerManager.createWorker(job.workerName, job, false)
+        this.createWorker(job.workerName, job, false)
       }
     }
   }
@@ -97,7 +101,7 @@ export default class WorkerManager {
 
     if (worker.jobProcesses.length > 0) {
       logger.info(`Restarting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}"`)
-      await this.restarWorkersProcesses(worker)
+      await this.restartWorkerProcesses(worker)
     } else {
       const concurrency = worker.options.concurrency || 1
       logger.info(`Starting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}" Concurrency: ${concurrency}`)
@@ -108,9 +112,9 @@ export default class WorkerManager {
   }
 
   /**
-   * Monitors workers health at regular intervals.
+   * Restart jobs for a specific worker.
    */
-  static async restarWorkersProcesses (worker) {
+  static async restartWorkerProcesses (worker) {
     for (const jobProcess of worker.jobProcesses) {
       if (jobProcess.killing) {
         logger.warn(`Job killing! Waiting... Worker: "${worker.name}" Job: "${worker.job.name}"`)
@@ -136,13 +140,14 @@ export default class WorkerManager {
 
   /**
    * Creates a new process.
+   *
    * @param {Object} job - The job for which to create a process.
    * @param {string} id - Identificador do processo
    * @param {Object} options - The options for creating the process.
    * @returns {{}}
    */
   static createProcess (job, id, options) {
-    // Criar Classe para jobProcess
+    // TODO: Criar Classe para jobProcess
     const jobProcess = {
       countClose: 0,
       killing: false,
@@ -155,6 +160,7 @@ export default class WorkerManager {
 
   /**
    * Runs a process.
+   *
    * @param {Object} job - The job to run.
    * @param {Object} jobProcess - The process to run.
    */
@@ -237,7 +243,7 @@ export default class WorkerManager {
 
     // TODO: Verifica se Job está respondendo ping/pong (com timeout)
 
-    // TODO: Veriica se jog está conectado
+    // TODO: Veriica se job está conectado
 
     // TODO: Verifica consumo de memoria do Job
 

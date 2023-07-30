@@ -8,6 +8,8 @@
  *
  */
 
+import { logger } from '../../index.mjs'
+
 /**
  * Represents the information related to a child job process.
  *
@@ -22,28 +24,34 @@
 
 export default class WorkerRunner {
   /**
-     * A static property containing a collection of jobs.
-     * Each job is represented as an object and indexed by a name
-     *
-     * @example
-     * {
-     *   "job_name_1": {
-     *     applicationName: 'App1',
-     *     appName: 'Application1',
-     *     controllerName: 'Controller1',
-     *     jobName: 'Job1',
-     *     jobFunction: function() {...},
-     *     schedule: '* * * * *'
-     *   },
-     *   "job_name_2": {...},
-     *   ...
-     * }
-     *
-     * @type {Object.<string, Job>}
-     *
-     * @static
-     */
+   * A static property containing a collection of jobs.
+   * Each job is represented as an object and indexed by a name
+   *
+   * @example
+   * {
+   *   "job_name_1": {
+   *     applicationName: 'App1',
+   *     appName: 'Application1',
+   *     controllerName: 'Controller1',
+   *     jobName: 'Job1',
+   *     jobFunction: function() {...},
+   *     schedule: '* * * * *'
+   *   },
+   *   "job_name_2": {...},
+   *   ...
+   * }
+   *
+   * @type {Object.<string, Job>}
+   *
+   * @static
+   */
   static jobs = {}
+
+  /**
+   * Pid of parent process
+   * @type {*}
+   */
+  static parentPid = undefined
 
   /**
      * This method is execution of a worker in a separate process.
@@ -58,7 +66,9 @@ export default class WorkerRunner {
      * @static
      */
   static async run (application) {
-    const targetController = this.getJobController(application)
+    this.parentPid = process.ppid
+
+    const targetController = this._getJobController(application)
 
     if (!targetController) {
       throw new Error('Controller not found for the given parameters.')
@@ -66,7 +76,7 @@ export default class WorkerRunner {
 
     await targetController.jobs()
 
-    this.loadJobsFromTargetController(targetController.jobsList)
+    this._loadJobsFromTargetController(targetController.jobsList)
 
     const targetJobName = process.argv[6]
     const targetJob = this.jobs[targetJobName]
@@ -77,52 +87,82 @@ export default class WorkerRunner {
 
     await targetController.jobSetup()
 
-    this.createSigintListener(targetController)
+    this._createProcessListeners(targetController)
 
     await targetJob.jobFunction()
     await targetController.jobTeardown()
   }
 
   /**
-     * Loads jobs from the given controller into the static jobs property of the class.
-     * This method expects the controller to have a jobs method that returns a list of jobs.
-     * Each job in the list is then added to the jobs property.
-     *
-     * @param {Array<Object>} jobsList - List of jobs to be loaded.
-     *
-     * @static
-     */
-  static loadJobsFromTargetController (jobsList) {
+   * Loads jobs from the given controller into the static jobs property of the class.
+   * This method expects the controller to have a jobs method that returns a list of jobs.
+   * Each job in the list is then added to the jobs property.
+   *
+   * @param {Array<Object>} jobsList - List of jobs to be loaded.
+   *
+   * @private
+   * @static
+   */
+  static _loadJobsFromTargetController (jobsList) {
     for (const job of jobsList) {
       this.jobs[job.name] = job
     }
   }
 
   /**
-     * Sets up a listener for the SIGINT event, which is triggered when the user presses Ctrl+C.
-     * The application then calls the 'jobTeardown' method of the controller and finally terminates itself.
-     * SIGKILL and SIGTERM should be handled by the application.
-     *
-     * @param {Object} targetController - The controller that needs to be cleaned up.
-     *
-     * @returns {void}
-     *
-     * @static
-     */
-  static createSigintListener (targetController) {
-    process.once('SIGINT', async function () {
-      await targetController.jobTeardown()
-      process.exit(0)
+   * Sets up a listener for the SIGINT event, which is triggered when the user presses Ctrl+C.
+   * The application then calls the 'jobTeardown' method of the controller and finally terminates itself.
+   * SIGKILL and SIGTERM should be handled by the application.
+   *
+   * @param {Object} targetController - The controller that needs to be cleaned up.
+   *
+   * @returns {void}
+   *
+   * @static
+   */
+  static _createProcessListeners (targetController) {
+    process.once('SIGINT', async () => {
+      await this._exitProcess(targetController)
     })
+
+    // Close if disconnected from parent
+    process.on('disconnect', async () => {
+      logger.error('Parent disconnected. Closing...')
+      await this._exitProcess(targetController)
+    })
+
+    // check if parent is active
+    setInterval(async () => {
+      try {
+        logger.debug('Check parent...')
+        // Transmit a neutral signal (0) to verify if the parent responds
+        process.kill(this.parentPid, 0)
+      } catch (err) {
+        logger.error('Parent disconnected. Closing...')
+        await this._exitProcess()
+      }
+    }, 10000) // Check every second
+  }
+
+  static async _exitProcess (targetController) {
+    try {
+      await targetController.jobTeardown()
+    } catch (error) {
+      console.error('Error during teardown:', error)
+    } finally {
+      process.exit(0)
+    }
   }
 
   /**
-     * This method is responsible for finding and returning a specific controller
-     * that matches the command-line arguments.
-     *
-     * @static
-     */
-  static getJobController (application) {
+   * This method is responsible for finding and returning a specific controller
+   * that matches the command-line arguments.
+   *
+   * @private
+   *
+   * @static
+   */
+  static _getJobController (application) {
     for (const controller of application.getControllers()) {
       const isTargetController =
                 controller.applicationName === process.argv[3] &&

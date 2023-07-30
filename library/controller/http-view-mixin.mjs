@@ -9,8 +9,7 @@
 import path from 'path'
 import consolidate from 'consolidate'
 
-const HttpViewMixin = {
-
+export default class HttpViewMixin {
   /**
    * URL base padrão  para acesso a recursos estáticos.
    * Será usado pelo Helper @asset, que calcula automaticamente a url do recurso que será carregado na página
@@ -19,7 +18,7 @@ const HttpViewMixin = {
    *
    * @type {string}
    */
-  staticBaseUrl: undefined,
+  staticBaseUrl = undefined
 
   /**
    * Renderiza um template usando a biblioteca Consolidate. (Usada pelo express internamente)
@@ -38,7 +37,7 @@ const HttpViewMixin = {
   async view (templatePath, locals = {}, engine = 'handlebars') {
     const viewPath = path.join(this.appPath, 'views', templatePath)
     return this._renderView(viewPath, locals, engine)
-  },
+  }
 
   /**
    * Permite Carregar View de outra aplicação/app
@@ -63,7 +62,7 @@ const HttpViewMixin = {
     const viewPath = path.join(this.applicationsPath[applicationName][appName], 'views', templatePath)
 
     return this._renderView(viewPath, locals, engine)
-  },
+  }
 
   /**
    * Renderiza uma View
@@ -117,7 +116,4 @@ const HttpViewMixin = {
 
     return templateEngine(viewPath, locals)
   }
-
 }
-
-export default HttpViewMixin

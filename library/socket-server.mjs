@@ -18,9 +18,9 @@ import { createServer as createHttpsServer } from 'https'
 import { createSecureServer } from 'http2'
 import { Server } from 'socket.io'
 import Config from './config.mjs'
+import chalk from 'chalk'
 
 import createLogger from './logger.mjs'
-
 const logger = createLogger('Socket')
 
 /**
@@ -71,8 +71,11 @@ export default class SocketServer {
     }
 
     this.io.on('connection', socket => {
-      logger.info('New connection.')
-      logger.debug(socket)
+      logger.info(`${chalk.bold('New connection:')} ID: "${socket.id}" Path: "${socket.nsp.name}"`)
+
+      socket.on('disconnect', (reason) => {
+        logger.info(`${chalk.bold('Disconnection: ID:')} "${socket.id}" Path: "${socket.nsp.name}" Reason: "${reason}"`)
+      })
     })
 
     this._loadApplications(application)

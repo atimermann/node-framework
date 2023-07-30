@@ -12,14 +12,13 @@
 import createLogger from '../../library/logger.mjs'
 const logger = createLogger('Controller')
 
-const SocketMixin = {
-
+export default class SocketMixin {
   /**
    * Holds the instance of the Socket.io server.
    *
    * @type {import("socket.io").Server}
    */
-  io: undefined,
+  io = undefined
 
   /**
    * Returns a namespace instance from the Socket.io server.
@@ -29,7 +28,7 @@ const SocketMixin = {
    */
   namespace (path) {
     return this.io.of(path)
-  },
+  }
 
   /**
    * Method that should be overridden by the user, implementing the application's logic.
@@ -40,5 +39,3 @@ const SocketMixin = {
     logger.debug(`Socket pre not implemented in ${this.completeIndentification}.`)
   }
 }
-
-export default SocketMixin

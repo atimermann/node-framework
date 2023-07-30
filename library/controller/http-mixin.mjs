@@ -14,15 +14,14 @@ const logger = createLogger('Controller')
 
 const paths = {}
 
-const HttpMixin = {
-
+export default class HttpMixin {
   /**
    * Objeto Router Express
    * Definido em http-server, não alterar
    *
    * @type {{}}
    */
-  router: undefined,
+  router = undefined
 
   /**
    * Base path of the application, ex: /api/v1/clients
@@ -30,7 +29,7 @@ const HttpMixin = {
    *
    * @type {string}
    */
-  path: undefined,
+  path = undefined
 
   // -------------------------------------------------------------------------------------------------------------------
   // Helper Methods for Route and REST API Creation
@@ -38,31 +37,31 @@ const HttpMixin = {
   // -------------------------------------------------------------------------------------------------------------------
   all (...args) {
     this._processRestMethod('all', ...args)
-  },
+  }
 
   use (...args) {
     this._processRestMethod('use', ...args)
-  },
+  }
 
   post (...args) {
     this._processRestMethod('post', ...args)
-  },
+  }
 
   get (...args) {
     this._processRestMethod('get', ...args)
-  },
+  }
 
   put (...args) {
     this._processRestMethod('put', ...args)
-  },
+  }
 
   delete (...args) {
     this._processRestMethod('delete', ...args)
-  },
+  }
 
   patch (...args) {
     this._processRestMethod('patch', ...args)
-  },
+  }
 
   /**
    * Asynchronous function designed to handle the responses of the Express.js framework.
@@ -91,7 +90,7 @@ const HttpMixin = {
       console.error(err)
       logger.error(JSON.stringify({ message: err.message, stack: err.stack }))
     }
-  },
+  }
 
   /**
    * Standardized error handling of the API, can be extended by the user to standardize or select errors that
@@ -108,7 +107,7 @@ const HttpMixin = {
         message: err.message
       }
     }
-  },
+  }
 
   /**
    * TODO: migrar para ser executado em route  this.pre(<function>)
@@ -117,7 +116,7 @@ const HttpMixin = {
    */
   async pre () {
     logger.debug(`Pre Middleware not implemented in ${this.completeIndentification}.`)
-  },
+  }
 
   /**
    * TODO: migrar para ser executado em route  this.pos(<function>)
@@ -125,21 +124,21 @@ const HttpMixin = {
    */
   async pos () {
     logger.debug(`Post Middleware not implemented in ${this.completeIndentification}.`)
-  },
+  }
 
   /**
    * Abstract Setup method, used for initial execution
    */
   async setup () {
     logger.debug(`Setup not implemented in ${this.completeIndentification}.`)
-  },
+  }
 
   /**
    * Abstract Router method, used to configure Routes
    */
   async routes () {
     logger.debug(`No route configured in ${this.completeIndentification}.`)
-  },
+  }
 
   /**
    * TODO: Refactoring
@@ -188,7 +187,7 @@ const HttpMixin = {
 
     // finally creates route
     this.router[httpMethod](...args)
-  },
+  }
 
   /**
    * Logs information about the request such as execution time
@@ -203,7 +202,7 @@ const HttpMixin = {
     const [request, response] = args
 
     logger.info(`[REQUEST_INFO] ${request.method} ${request.url} ${response.statusCode} +${durationMeasure.toFixed(2)}ms`)
-  },
+  }
 
   /**
    * Validates defined url
@@ -233,7 +232,4 @@ const HttpMixin = {
       }
     }
   }
-
 }
-
-export default HttpMixin

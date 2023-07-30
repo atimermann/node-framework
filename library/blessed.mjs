@@ -1,6 +1,5 @@
 import blessed from 'blessed'
 import { filesize } from 'filesize'
-import Config from './config.mjs'
 
 /**
  * Created on 06/07/2023

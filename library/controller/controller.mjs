@@ -15,13 +15,15 @@
  *
  */
 
+import { Multi } from '@agtm/util'
+
 // Mixins
 import SocketMixin from './socket-mixin.mjs'
 import JobsMixin from './jobs-mixin.mjs'
 import HttpMixin from './http-mixin.mjs'
 import HttpViewMixin from './http-view-mixin.mjs'
 
-class Controller {
+class Controller extends Multi.inherit(SocketMixin, JobsMixin, HttpMixin, HttpViewMixin) {
   /**
    * Nome da aplicação que este controller pertence
    * Definido em controllerController, não alterar
@@ -87,22 +89,15 @@ class Controller {
   applicationsPath = undefined
 
   constructor () {
+    super()
     if (new.target === Controller) {
       throw new TypeError('Cannot construct Abstract instances directly')
     }
   }
 
   get completeIndentification () {
-    return `application: ${this.applications}, app: ${this.app}, controller: ${this.controllerName}`
+    return `application: ${this.applicationName}, app: ${this.appName}, controller: ${this.controllerName}`
   }
 }
-
-Object.assign(
-  Controller.prototype,
-  SocketMixin,
-  JobsMixin,
-  HttpMixin,
-  HttpViewMixin
-)
 
 export default Controller

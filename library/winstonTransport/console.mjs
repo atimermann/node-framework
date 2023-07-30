@@ -49,6 +49,8 @@ function getLevelColor (level) {
       return yellowColor
     case 'error': // ERROR
       return redColor
+    case 'debug': // ERROR
+      return '\x1b[92m'
     default:
       return resetColor
   }

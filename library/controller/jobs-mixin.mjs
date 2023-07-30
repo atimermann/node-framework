@@ -20,7 +20,7 @@ const logger = createLogger('Controller')
  * @property {Object}   options         - The options for the job.
  */
 
-const JobsMixin = {
+export default class JobsMixin {
   /**
    * A list of jobs to be executed. Each job in the list is an
    * instance of Job, which contains 'jobName', 'schedule',
@@ -28,13 +28,13 @@ const JobsMixin = {
    *
    * @type {Job[]}
    */
-  jobsList: [],
+  jobsList = []
 
   /**
    * Lista de Workers
    * @type {[]}
    */
-  workersList: [],
+  workersList = []
 
   /**
    * Create a new job.
@@ -59,7 +59,7 @@ const JobsMixin = {
       jobFunction,
       options
     })
-  },
+  }
 
   /**
    * Cria workees para processar determinado job
@@ -81,7 +81,7 @@ const JobsMixin = {
       jobName,
       options
     })
-  },
+  }
 
   /**
    * Loading jobs
@@ -92,7 +92,7 @@ const JobsMixin = {
    */
   async jobs () {
     logger.debug(`No jobs configured in ${this.completeIndentification}.`)
-  },
+  }
 
   /**
    * Inicialização, executado para todos os jobs
@@ -102,7 +102,7 @@ const JobsMixin = {
    */
   async jobSetup () {
     logger.debug(`No jobsSetup configured in ${this.completeIndentification}.`)
-  },
+  }
 
   /**
    * Executado depois do job finalizar
@@ -114,5 +114,3 @@ const JobsMixin = {
     logger.debug(`No jobTeardown configured in ${this.completeIndentification}.`)
   }
 }
-
-export default JobsMixin
