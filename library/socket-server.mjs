@@ -28,9 +28,38 @@ const logger = createLogger('Socket')
  * @class
  */
 export default class SocketServer {
-  static mode = null
-  static port = null
-  static keys = null
+  /**
+   * The mode of the socket server. Determines the type of server to create (e.g., standalone, standalone-http, etc.).
+   * Loaded from the configuration file.
+   *
+   * @type {string}
+   * @static
+   */
+  static mode = undefined
+
+  /**
+   * The port number on which the socket server will run. Loaded from the configuration file.
+   *
+   * @type {number}
+   * @static
+   */
+  static port = undefined
+
+  /**
+   * The SSL key pair for the server, used when creating an HTTPS or HTTP2 server. Loaded from the configuration file.
+   * Contains paths to the key and certificate files.
+   *
+   * @type {Object}
+   * @static
+   */
+  static keys = undefined
+
+  /**
+   * Holds the instance of the Socket.io server.
+   *
+   * @type {import("socket.io").Server}
+   */
+  static io = undefined
 
   /**
    * Runs the Socket Server based on the configuration mode
@@ -95,6 +124,19 @@ export default class SocketServer {
   }
 
   /**
+   * Loads the configuration for the Socket Server from the Config module.
+   * This method should be called before creating the server.
+   * The configuration includes the server mode, port, and SSL key pair.
+   * @private
+   * @static
+   */
+  static _loadConfiguration () {
+    this.mode = Config.get('socket.mode')
+    this.port = Config.get('socket.port')
+    this.keys = Config.get('socket.keys')
+  }
+
+  /**
    * Loads Applications
    * @param application {Application}    Information about the Application
    *
@@ -108,19 +150,6 @@ export default class SocketServer {
       logger.info('Socket applications loaded!')
       logger.debug(`Controller loaded: "${controller.applicationName}/${controller.appName}/${controller.controllerName}"`)
     }
-  }
-
-  /**
-   * Loads the configuration for the Socket Server from the Config module.
-   * This method should be called before creating the server.
-   * The configuration includes the server mode, port, and SSL key pair.
-   * @private
-   * @static
-   */
-  static _loadConfiguration () {
-    this.mode = Config.get('socket.mode')
-    this.port = Config.get('socket.port')
-    this.keys = Config.get('socket.keys')
   }
 
   /**

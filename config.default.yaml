@@ -29,10 +29,6 @@ httpServer:
 
   timezone: "America/Sao_Paulo"
 
-# Ativa modo ncurses (Carrega interface ncurse para monitorar aplicação visualmente)
-blessed:
-  enabled: true
-
 # Habilita Sistema Gerenciador de Jobs e Worker
 jobManager:
   enabled: true
@@ -40,18 +36,25 @@ jobManager:
     json:
       enabled: true # Obrigratório para log ser carregado pelo processo pai
 
+
+# Carrega monitor automaticamente (necessário servidor socket e transport socket ativo)
+monitor:
+  enabled: false
+  socketServer: 'http://localhost:4001/logger'
+
 logger:
-  # Habilita log na interface blesse (necessário ter o blessed ativo)
-  blessed:
+  # Habilita envio de log por socket (Web e monitor)
+  socket:
     enabled: true
+    namespace: '/logger'
 
   # Habilita Log em console
   console:
-    enabled: false
+    enabled: true
     handleExceptions: false
 
   # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
-  level: debug
+  level: info
 
   # Silencia log
   silent: false

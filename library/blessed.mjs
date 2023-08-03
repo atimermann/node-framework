@@ -1,5 +1,13 @@
 import blessed from 'blessed'
 import { filesize } from 'filesize'
+import { io } from 'socket.io-client'
+import Config from './config.mjs'
+import { inspect } from 'node:util'
+
+const RESET_COLOR = '\x1b[0m'
+const BLUE_DARK_COLOR = '\x1b[1;94m'
+const YELLOW_COLOR = '\x1b[33m'
+const PURLE_COLOR = '\x1b[35m'
 
 /**
  * Created on 06/07/2023
@@ -38,6 +46,79 @@ export default class BlessedInterface {
     this._createStatusBar()
     this.screen.render()
     this.ready = true
+
+    this.connectSocketServer()
+  }
+
+  /**
+   * Connect to socket server
+   */
+  static connectSocketServer () {
+    const socketAddress = Config.get('monitor.socketServer')
+
+    this.log(`Establishing connection to the log server: ${socketAddress}...`, 'Monitor')
+    const socketLoggerClient = io(socketAddress)
+
+    socketLoggerClient.on('connect', () => {
+      this.log('Connected!', 'Monitor')
+    })
+
+    socketLoggerClient.on('disconnect', reason => {
+      this.log('Disconnected from the log server.', 'Monitor')
+      this.log(`Socket id: "${socketLoggerClient.id}"`, 'Monitor')
+      this.log(`Reason: "${reason}"`, 'Monitor')
+    })
+
+    socketLoggerClient.on('connect_error', error => {
+      this.log('Error connecting to the log server', 'Monitor')
+      this.log(error.message, 'Monitor')
+      this.log('Tip: Check if the socket server and the socket transport are active.', 'Monitor')
+    })
+
+    socketLoggerClient.on('log', logObj => {
+      const { message, module } = this._parselogObj(logObj)
+      this.log(message, module)
+    })
+  }
+
+  static _getLevelColor (level) {
+    switch (level) {
+      case 'info': // INFO
+        return '\x1b[39m'
+      case 'warn': // WARN
+        return YELLOW_COLOR
+      case 'error': // ERROR
+        return '\x1b[31m'
+      case 'debug': // ERROR
+        return '\x1b[92m'
+      default:
+        return RESET_COLOR
+    }
+  }
+
+  /**
+   * Formatting raw message received from the server
+   *
+   * @param logObj
+   * @returns {string}
+   */
+  static _parselogObj (logObj) {
+    let { level, module, message } = logObj
+    if (typeof message === 'object') {
+      message = inspect(message)
+    }
+
+    const date = new Date()
+    const levelColor = this._getLevelColor(level)
+    const levelText = `${levelColor}${level.padEnd(5)}${RESET_COLOR}`
+    const moduleText = module ? `${BLUE_DARK_COLOR}[${module}]${RESET_COLOR}` : ''
+    const msgColor = `${levelColor}${message}${levelColor}`
+    const formattedTime = `${PURLE_COLOR}${date.toLocaleTimeString()}.${date.getMilliseconds()}${RESET_COLOR}`
+
+    return {
+      message: `${formattedTime} ${levelText} ${moduleText} ${msgColor}`,
+      module
+    }
   }
 
   /**

@@ -3,18 +3,3 @@
 # body-parser: https://github.com/expressjs/body-parser
 
 # TODO: Não deixe um grupo vazio se não irá substituir tudo
-
-logger:
-  blessed:
-    enabled: false
-  console:
-    enabled: false
-    handleExceptions: true
-  # Menor prioridade de log que será processado (emerg, alert, crit, error, warnin, notice, info, debug)
-  level: info
-
-
-# Ativa modo ncurses (Carrega interface ncurse para monitorar aplicação visualmente)
-blessed:
-  enabled: false
-

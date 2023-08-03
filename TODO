@@ -31,3 +31,6 @@
 - implementar comunicação com worker de qualquer lugar, ex: em uma API REST -> onMessaFromJOB X
 
 - Criar um teste automatizado que englobe criação de projeto execução (em docker)
+
+*** LOGS ***
+- Melhorar segurança da conexão socket de log em produção

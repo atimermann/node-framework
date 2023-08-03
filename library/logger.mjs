@@ -11,7 +11,7 @@ import { createLogger as winstonCreateLogger, transports, format } from 'winston
 import Config from './config.mjs'
 // import Transport from 'winston-transport'
 // import { Server } from 'socket.io'
-import BlessedTransport from './winstonTransport/blessed.mjs'
+import SocketIoTransport from './winstonTransport/socket.mjs'
 
 import Console2Transport from './winstonTransport/console.mjs'
 
@@ -45,9 +45,9 @@ if (loggerConfig.json?.enabled) {
   }))
 }
 
-// BLESSED
-if (loggerConfig.blessed?.enabled) {
-  logger.add(new BlessedTransport())
+// Socket
+if (loggerConfig.socket?.enabled) {
+  logger.add(new SocketIoTransport())
 }
 
 // CONSOLE

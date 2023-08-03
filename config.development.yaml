@@ -2,3 +2,12 @@
 # Configuração do Servidor HTTP Express
 # body-parser: https://github.com/expressjs/body-parser
 # TODO: Não deixe um grupo vazio se não irá substituir tudo
+# Carrega monitor automaticamente (necessário logger socket ativo)
+monitor:
+  enabled: true
+logger:
+  console:
+    enabled: false
+    handleExceptions: false
+  level: debug
+  silent: false

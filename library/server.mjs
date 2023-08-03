@@ -63,7 +63,7 @@ export default {
    * @param {Application} application
    */
   async initServer (application) {
-    if (Config.get('blessed.enabled', 'boolean')) {
+    if (Config.get('monitor.enabled', 'boolean')) {
       BlessedInterface.init()
     }
 

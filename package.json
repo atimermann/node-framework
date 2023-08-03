@@ -2,6 +2,9 @@
   "name": "@agtm/node-framework",
   "version": "4.5.2",
   "description": "Framework nodejs baseado no ExpressJs",
+  "bin": {
+    "nf-monitor": "scripts/monitor.mjs"
+  },
   "scripts": {
     "publish-patch": "npm version patch && npm publish --access public && git push",
     "publish-minor": "npm version minor && npm publish --access public && git push",
