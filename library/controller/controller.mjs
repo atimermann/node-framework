@@ -23,6 +23,9 @@ import JobsMixin from './jobs-mixin.mjs'
 import HttpMixin from './http-mixin.mjs'
 import HttpViewMixin from './http-view-mixin.mjs'
 
+/**
+ * @mixes JobsMixin
+ */
 class Controller extends Multi.inherit(SocketMixin, JobsMixin, HttpMixin, HttpViewMixin) {
   /**
    * Nome da aplicação que este controller pertence

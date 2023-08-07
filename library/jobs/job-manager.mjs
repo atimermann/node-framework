@@ -78,11 +78,29 @@ export default class JobManager {
      */
 
   static async loadJobsAndWorkersDefinedByUser (application) {
+    const applicationEnabled = Config.get('jobManager.applicationsEnabled', 'array')
+    const appsEnabled = Config.get('jobManager.appsEnabled', 'array')
+    const controllersEnabled = Config.get('jobManager.controllersEnabled', 'array')
+
     logger.info('Load jobs and Workers')
     for (const controller of application.getControllers()) {
+      logger.debug(`Loading "${controller.completeIndentification}"...`)
+      if (applicationEnabled && Array.isArray(applicationEnabled) && !applicationEnabled.includes(controller.applicationName)) {
+        logger.debug(`Application "${controller.applicationName}" disabled!`)
+        continue
+      }
+      if (appsEnabled && Array.isArray(appsEnabled) && !appsEnabled.includes(controller.appName)) {
+        logger.debug(`App "${controller.appName}" disabled!`)
+        continue
+      }
       await controller.jobs()
 
       for (const job of controller.jobsList) {
+        if (controllersEnabled && Array.isArray(controllersEnabled) && !controllersEnabled.includes(controller.controllerName)) {
+          logger.debug(`Controller "${controller.controllerName}" disabled!`)
+          continue
+        }
+
         job.uuid = this.createJobUUID(job.applicationName, job.appName, job.controllerName, job.name)
         this.jobs[job.uuid] = job
 

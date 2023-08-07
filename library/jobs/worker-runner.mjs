@@ -22,6 +22,7 @@ import { logger } from '../../index.mjs'
  * @property {string} schedule - The cron schedule for the job.
  */
 
+
 export default class WorkerRunner {
   /**
    * A static property containing a collection of jobs.
@@ -53,6 +54,8 @@ export default class WorkerRunner {
    */
   static parentPid = undefined
 
+  static targetController = undefined
+
   /**
      * This method is execution of a worker in a separate process.
      * It loads all jobs and executes the specific job that matches the command-line arguments.
@@ -68,15 +71,15 @@ export default class WorkerRunner {
   static async run (application) {
     this.parentPid = process.ppid
 
-    const targetController = this._getJobController(application)
+    this.targetController = this._getJobController(application)
 
-    if (!targetController) {
+    if (!this.targetController) {
       throw new Error('Controller not found for the given parameters.')
     }
 
-    await targetController.jobs()
+    await this.targetController.jobs()
 
-    this._loadJobsFromTargetController(targetController.jobsList)
+    this._loadJobsFromTargetController(this.targetController.jobsList)
 
     const targetJobName = process.argv[6]
     const targetJob = this.jobs[targetJobName]
@@ -85,12 +88,13 @@ export default class WorkerRunner {
       throw new Error(`Job '${targetJobName}' not found.`)
     }
 
-    await targetController.jobSetup()
-
-    this._createProcessListeners(targetController)
-
+    await this.targetController.jobSetup()
+    this._createProcessListeners(this.targetController)
     await targetJob.jobFunction()
-    await targetController.jobTeardown()
+  }
+
+  static async exitProcess (exitCode = 0) {
+    await this._exitProcess(this.targetController, exitCode)
   }
 
   /**
@@ -144,13 +148,14 @@ export default class WorkerRunner {
     }, 10000) // Check every second
   }
 
-  static async _exitProcess (targetController) {
+  static async _exitProcess (targetController, exitCode = 0) {
     try {
       await targetController.jobTeardown()
     } catch (error) {
       console.error('Error during teardown:', error)
     } finally {
-      process.exit(0)
+      logger.info(`Process closed! PID: ${process.pid}`)
+      process.exit(exitCode)
     }
   }
 

@@ -32,6 +32,10 @@ httpServer:
 # Habilita Sistema Gerenciador de Jobs e Worker
 jobManager:
   enabled: true
+  # Array com lista de aplicações, apps e controlers habilitados, null para todos
+  applicationsEnabled: null
+  appsEnabled: null
+  controllersEnabled: null
   logger:
     json:
       enabled: true # Obrigratório para log ser carregado pelo processo pai

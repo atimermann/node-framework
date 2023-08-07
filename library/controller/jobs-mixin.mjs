@@ -7,19 +7,33 @@
  *
  */
 import createLogger from '../../library/logger.mjs'
+import WorkerRunner from '../jobs/worker-runner.mjs'
 const logger = createLogger('Controller')
 
 /**
  * @typedef {Object} Job
+ * @property {string}   name         - The name of the job.
  * @property {string}   applicationName - The name of the application.
  * @property {string}   appName         - The name of the app.
  * @property {string}   controllerName  - The name of the controller
- * @property {string}   jobName         - The name of the job.
  * @property {string}   schedule        - The schedule of the job in cron format.
  * @property {function} jobFunction     - The function to be executed for the job.
  * @property {Object}   options         - The options for the job.
  */
 
+/**
+ * Provides job-related functionality for extending classes.
+ *
+ * This mixin encapsulates logic related to job management and execution. Classes
+ * that need job-related capabilities can extend this mixin to inherit its methods
+ * and properties.
+ *
+ * @mixin
+ *
+ * @requires {string} Controller#appName          - Expected to be defined in the base class.
+ * @requires {string} Controller#applicationName  - Expected to be defined in the base class.
+ * @requires {string} Controller#controllerName   - Expected to be defined in the base class. *
+ */
 export default class JobsMixin {
   /**
    * A list of jobs to be executed. Each job in the list is an
@@ -81,6 +95,11 @@ export default class JobsMixin {
       jobName,
       options
     })
+  }
+
+  async exit (exitCode) {
+    logger.debug(`Exiting controller "${this.completeIndentification}..."`)
+    await WorkerRunner.exitProcess(exitCode)
   }
 
   /**

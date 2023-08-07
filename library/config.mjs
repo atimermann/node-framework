@@ -60,6 +60,7 @@ export default class Config {
 
   /**
    * Get a configuration value by its key.
+   *
    * @param {string} key - The configuration key.
    * @param {string} [type] - The expected type of the configuration value.
    * @throws Will throw an error if the configuration key is not found.
@@ -77,7 +78,7 @@ export default class Config {
     }
 
     // Check for "__value" only at the end
-    if (current.__value) {
+    if (current?.__value) {
       current = current.__value
     }
 
@@ -91,7 +92,9 @@ export default class Config {
         case 'string':
           return String(current)
         case 'array':
-          return Array.isArray(current) ? current : current.split(':')
+          return Array.isArray(current)
+            ? current
+            : current?.split(':')
         default:
           throw new Error(`Unknown type "${type}"`)
       }
