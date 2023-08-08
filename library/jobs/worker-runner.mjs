@@ -22,7 +22,6 @@ import { logger } from '../../index.mjs'
  * @property {string} schedule - The cron schedule for the job.
  */
 
-
 export default class WorkerRunner {
   /**
    * A static property containing a collection of jobs.

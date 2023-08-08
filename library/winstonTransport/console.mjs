@@ -8,7 +8,6 @@
  */
 
 import Transport from 'winston-transport'
-import { inspect } from 'node:util'
 
 // Defining colors as constants
 /**
@@ -63,10 +62,7 @@ export default class Console2Transport extends Transport {
   }
 
   log (logObj, callback) {
-    let { level, module, message } = logObj
-    if (typeof message === 'object') {
-      message = inspect(message)
-    }
+    const { level, module, message } = logObj
 
     const date = new Date()
     const levelColor = getLevelColor(level)

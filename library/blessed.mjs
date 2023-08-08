@@ -2,7 +2,6 @@ import blessed from 'blessed'
 import { filesize } from 'filesize'
 import { io } from 'socket.io-client'
 import Config from './config.mjs'
-import { inspect } from 'node:util'
 
 const RESET_COLOR = '\x1b[0m'
 const BLUE_DARK_COLOR = '\x1b[1;94m'
@@ -103,10 +102,7 @@ export default class BlessedInterface {
    * @returns {string}
    */
   static _parselogObj (logObj) {
-    let { level, module, message } = logObj
-    if (typeof message === 'object') {
-      message = inspect(message)
-    }
+    const { level, module, message } = logObj
 
     const date = new Date()
     const levelColor = this._getLevelColor(level)
