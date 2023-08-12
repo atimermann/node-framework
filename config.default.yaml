@@ -12,6 +12,16 @@ httpServer:
     # Ref: https://github.com/expressjs/morgan
     format: ':remote-addr - :remote-user ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'
 
+  # Diretório de onde os arquivos estáticos serão carregados ao acessar rota definida em staticRoute.
+  # Ao executar npm run install-assets os arquivos localizados em:
+  #  src/apps/myApp/myAplication/assets  são copiados para src/public/myApp/myApplication
+  # Por padrão o arquivo estático poderá ser acessado em http://DOMAIN:PORT/static/myApp/myApplication
+  #   Exemplo: http://DOMAIN:PORT/static/myApp/myApplication/image.png
+  #          : http://DOMAIN:PORT/static/myApp/myApplication/index.html
+  # Alterando staticPath, ao acessar http://DOMAIN:PORT/static os arquivos estáticos serão carregados diretamente do diretório especificado em staticPath
+  #   Exemplo staticPath: 'public/myApp/myApplication' e staticRoute: '/' ao acessar http://DOMAIN:PORT/ index.html será carregado diretamente
+  staticPath: 'public'
+
   # Rota para acesso a recursos estáticos
   staticRoute: '/static'
 
@@ -72,7 +82,7 @@ socket:
   # Modo de execução, podendo ser: (REF: https://socket.io/docs/v4/server-initialization/)
   #  - standalone (Servidor simples independente do servidor http)
   #  - http-server (integrado com servidor http-server do framework)
-  #  - standalone-http (Integrado a um servidor http
+  #  - standalone-http (Integrado a um servidor http)
   #  - standalone-https (integrado a um servidor https com certificado)
   #     - https://socket.io/docs/v4/server-initialization/#with-an-https-server TODO: complementar configuração client authentication
   #  - standalone-http2 (Melhor desempenho e eficiência com multiplexação, compactação de cabeçalho e push de servidor.)

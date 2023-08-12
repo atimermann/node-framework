@@ -25,7 +25,7 @@ export default class ApplicationController {
     const controllersInstances = []
 
     for (const application of applications) {
-      logger.info(`Entering application '${application.name}'`)
+      logger.debug(`Entering application '${application.name}'`)
 
       await this.checkAppsDirectoryExist(application)
 
@@ -54,7 +54,7 @@ export default class ApplicationController {
     const controllersInstances = []
 
     for (const appName of await readdir(appsPath)) {
-      logger.info(`Entering App '${appName}'`)
+      logger.debug(`Entering App '${appName}'`)
 
       const controllersPath = path.join(appsPath, appName, 'controllers')
       const appPath = path.join(appsPath, appName)
@@ -89,7 +89,7 @@ export default class ApplicationController {
       let Controller
 
       if (['.mjs', '.js'].includes(path.extname(controllerPath))) {
-        logger.info(`Loading controller '${path.basename(controllerName)}'`)
+        logger.debug(`Loading controller '${path.basename(controllerName)}'`)
 
         Controller = (await import(controllerPath)).default
         const controllerInstance = new Controller()
@@ -100,72 +100,6 @@ export default class ApplicationController {
 
     return controllersInstances
   }
-
-  // TODO: Parece q não é utilizado em lugar nenhum remover
-  //
-  // /**
-  //  * Returns a list with all assets of the project including dependencies
-  //  *
-  //  * @param applications  {array} List of applications
-  //  *
-  //  * @returns {Promise<Array>}
-  //  */
-  // static async getAssets (applications) {
-  //   const assets = []
-  //
-  //   for (const application of applications) {
-  //     const appsPath = path.join(application.path, 'apps')
-  //
-  //     await this.checkAppsDirectoryExist(application)
-  //
-  //     for (const asset of await this._getAssetsByApps(appsPath, application.name)) {
-  //       assets.push(asset)
-  //     }
-  //   }
-  //
-  //   return assets
-  // }
-
-  // // TODO: Parece q não é utilizado em lugar nenhum remover
-  //
-  // /**
-  //  * Returns a list of all assets (static files) from an app
-  //  *
-  //  * This list is made up of: file path, application name, and app name
-  //  *
-  //  * @param appsPath          {string}  App path
-  //  * @param applicationName   {string}  Application name
-  //  *
-  //  * @returns {Promise<Array>}
-  //  *
-  //  * @private
-  //  */
-  // static async _getAssetsByApps (appsPath, applicationName) {
-  //   const assets = []
-  //
-  //   for (const appName of await readdir(appsPath)) {
-  //     logger.debug(`Loading assets from app: '${appName}'`)
-  //
-  //     const assetsPath = path.join(appsPath, appName, 'assets')
-  //
-  //     logger.debug(` APP NAME   : '${appName}'`)
-  //     logger.debug(` ASSET PATH   : '${assetsPath}'`)
-  //
-  //     if (await this.exists(assetsPath)) {
-  //       const assetsFile = await readdir(assetsPath)
-  //
-  //       for (const assetFile of assetsFile) {
-  //         assets.push({
-  //           filePath: path.join(assetsPath, assetFile),
-  //           applicationName,
-  //           appName
-  //         })
-  //       }
-  //     }
-  //   }
-  //
-  //   return assets
-  // }
 
   static async checkAppsDirectoryExist (application) {
     try {

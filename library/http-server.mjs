@@ -59,7 +59,14 @@ export default {
      *
      * @type {string}
      */
-    this.staticRoute = process.env.STATIC_ROUTE || Config.get('httpServer.staticRoute')
+    this.staticRoute = Config.get('httpServer.staticRoute')
+
+
+    /**
+     *
+     * @type {*}
+     */
+    this.staticPath = Config.get('httpServer.staticPath')
 
     /**
      * Enables access to static resources via CDN (if true, it disables Express static file server)

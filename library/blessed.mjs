@@ -9,6 +9,17 @@ const YELLOW_COLOR = '\x1b[33m'
 const PURLE_COLOR = '\x1b[35m'
 
 /**
+ * Tamanho do historico diminuir se travando
+ * @type {number}
+ */
+const LOG_HISTORY_SIZE = 20
+/**
+ * Intervalo de atualização dos logs, aumentar se travando
+ * @type {number}
+ */
+const LOG_UPDATE_INTERVAL = 1000
+
+/**
  * Created on 06/07/2023
  *
  * /blessed.mjs
@@ -19,8 +30,20 @@ export default class BlessedInterface {
   static indexedBoxes = {}
   static boxes = []
   static activeBox = null
-
   static ready = false
+
+  /**
+   * Representa cada linha da caixa de log, será convertido para texto e será o conteudo do box
+   * Indexado pelo nome do box
+   * @type {{}}
+   */
+  static boxesLines = {}
+
+  /**
+   * Boxs para serem atualizados (quando tem novo log)
+   * @type {{}}
+   */
+  static boxesForUpdate = {}
 
   /**
    * Initializes the application. This function prepares the screen, sets shortcuts and creates a status bar.
@@ -47,6 +70,8 @@ export default class BlessedInterface {
     this.ready = true
 
     this.connectSocketServer()
+
+    setInterval(() => this._updateLogs(), LOG_UPDATE_INTERVAL)
   }
 
   /**
@@ -131,13 +156,31 @@ export default class BlessedInterface {
       this._createBox(boxName)
     }
 
+    if (!this.boxesLines[boxName]) {
+      this.boxesLines[boxName] = []
+    }
+
+    // indica q o box precisa ser atualizado
+    this.boxesForUpdate[boxName] = true
+
     const box = this.indexedBoxes[boxName]
+    const boxLines = this.boxesLines[boxName]
     if (box) {
-      box.insertBottom(message)
-      box.setScrollPerc(100) // Auto scroll to bottom
-      // this.screen.render()
+      if (boxLines.length >= LOG_HISTORY_SIZE) {
+        boxLines.shift()
+      }
+      boxLines.push(message)
     } else {
-      console.error('Box index out of bounds')
+      console.error(`Box "${boxName}" not found!`)
+    }
+  }
+
+  static _updateLogs () {
+    for (const boxName of Object.keys(this.indexedBoxes)) {
+      if (this.boxesForUpdate[boxName]) {
+        this.indexedBoxes[boxName].setContent(this.boxesLines[boxName].join('\n'))
+        delete this.boxesForUpdate[boxName]
+      }
     }
   }
 

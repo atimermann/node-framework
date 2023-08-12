@@ -144,3 +144,12 @@ Onde o primeiro argumento é o nome do evento e os demais são atributos para se
 
 ### No cliente:
 
+Para inicializar um namespace no cliente utilizar o caminho completo:
+
+```javascript
+  const socket = io("https://example.com"); // or io("https://example.com/"), the main namespace
+  const orderSocket = io("https://example.com/orders"); // the "orders" namespace
+  const userSocket = io("https://example.com/users"); // the "users" namespace
+```
+
+O restante é similar
