@@ -2,15 +2,6 @@
 
 A classe `Config` é um utilitário para gerenciar configurações do sistema a partir de várias fontes, incluindo arquivos .env, variáveis de ambiente do sistema e arquivos YAML.
 
-## Inicialização
-
-Antes de usar a classe Config, você precisa inicializá-la com o método estático `init`.
-
-```javascript
-import Config from './config.mjs'
-
-Config.init()
-```
 
 ## Obtendo valores de configuração
 
@@ -21,8 +12,16 @@ A chave segue o padrão `dot notation`, para representar a profundidade do objet
 ```javascript
 const serverPort = Config.get('httpServer.port', 'number')
 ```
-
 O exemplo acima vai buscar a configuração "port" dentro do objeto "server". O segundo argumento, 'number', indica que o valor deve ser convertido para um número antes de ser retornado.
+
+Os tipos possíveis são: 
+
+* number
+* boolean
+* string
+* array
+
+Quando definido tipo array, a string "abcd:efg:hij" será convertido para ["abcd", "efg", "hij"]
 
 ## Variáveis de ambiente
 
@@ -45,6 +44,12 @@ As configurações de uma fonte sobrescrevem as configurações da fonte anterio
 
 É importante notar que as configurações definidas nas etapas superiores têm prioridade sobre as etapas inferiores. Portanto, as configurações definidas em um arquivo YAML terão prioridade sobre as configurações definidas no arquivo `.env`, por exemplo.
 
+## Maiusculo e minisculoa
+
+Configuração não é "case-sensitive" ou seja, não faz diferenta chamar:
+
+    Config.get('minhaConfigura.x') ou Config.get('MINHACONFIGURACAO.X')  
+
 ## Caso de configuração aninhada no ENV
 
 No exemplo dado:
@@ -54,6 +59,6 @@ HTTP_SERVER="123"
 HTTP_SERVER_PORT="456
 ```
 
-* Se você solicitar C**onfig.get("http.server")**, o valor retornado será **"123"**. Isso ocorre porque a chave **HTTP_SERVER** é uma configuração específica para o atributo **http.server**, então ela tem prioridade sobre o subatributo **port** que está abaixo dela.
+* Se você solicitar **Config.get("http.server")**, o valor retornado será **"123"**. Isso ocorre porque a chave **HTTP_SERVER** é uma configuração específica para o atributo **http.server**, então ela tem prioridade sobre o subatributo **port** que está abaixo dela.
 
 * Por outro lado, se não houver um atributo **HTTP_SERVER** definido e você solicitar **Config.get("http.server")**, o valor retornado será **{ port: 456 }**. Nesse caso, como o atributo **HTTP_SERVER** não está presente, o valor padrão do subatributo **port** é usado, que é definido como **456**.

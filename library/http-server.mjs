@@ -61,7 +61,6 @@ export default {
      */
     this.staticRoute = Config.get('httpServer.staticRoute')
 
-
     /**
      *
      * @type {*}

@@ -15,6 +15,9 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 
 import defaultsDeep from 'lodash/defaultsDeep.js'
+import transform from 'lodash/transform.js'
+import toLower from 'lodash/toLower.js'
+import isPlainObject from 'lodash/isPlainObject.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
@@ -36,26 +39,35 @@ export default class Config {
    */
   static init () {
     // Load default YAML config
-    const defaultYamlConfig = yaml.load(fs.readFileSync(join(__dirname, '..', 'config.default.yaml'), 'utf8'))
+    const defaultYamlConfig = this._transformToLowerKeys(
+      yaml.load(fs.readFileSync(join(__dirname, '..', 'config.default.yaml'), 'utf8'))
+    )
 
     // Load the appropriate YAML config based on NODE_ENV
     const env = process.env.NODE_ENV || 'development'
-    const envYamlConfig = yaml.load(fs.readFileSync(join(__dirname, '..', `config.${env}.yaml`), 'utf8'))
+    const envYamlConfig = this._transformToLowerKeys(
+      yaml.load(fs.readFileSync(join(__dirname, '..', `config.${env}.yaml`), 'utf8'))
+    )
 
     // Load YAML config from user Project
-    const userYamlConfig = yaml.load(fs.readFileSync(join(process.cwd(), 'config.default.yaml'), 'utf8'))
+    const userYamlConfig = this._transformToLowerKeys(
+      yaml.load(fs.readFileSync(join(process.cwd(), 'config.default.yaml'), 'utf8'))
+    )
 
     // Load YAML config from user Project based on NODE_ENV
-    const envUserYamlConfig = yaml.load(fs.readFileSync(join(process.cwd(), `config.${env}.yaml`), 'utf8'))
+    const envUserYamlConfig = this._transformToLowerKeys(
+      yaml.load(fs.readFileSync(join(process.cwd(), `config.${env}.yaml`), 'utf8'))
+    )
 
     // Merge defaultYaml, envYaml, process.env, and .env
-    this.config = defaultsDeep(
-      this._envToNestedObject(process.env),
-      envUserYamlConfig,
-      userYamlConfig,
-      envYamlConfig,
-      defaultYamlConfig
-    )
+    this.config =
+          defaultsDeep(
+            this._transformToLowerKeys(this._envToNestedObject(process.env)),
+            envUserYamlConfig,
+            userYamlConfig,
+            envYamlConfig,
+            defaultYamlConfig
+          )
   }
 
   /**
@@ -67,7 +79,7 @@ export default class Config {
    * @returns {*} The configuration value.
    */
   static get (key, type) {
-    const parts = key.split('.')
+    const parts = key.toLowerCase().split('.')
     let current = this.config
 
     for (const part of parts) {
@@ -140,6 +152,25 @@ export default class Config {
 
     return result
   }
+
+  /**
+   * Transforms all keys of an object to lowercase.
+   * If the object contains nested objects, the keys of those objects will also be transformed.
+   *
+   * @param {Object} obj - The object whose keys should be transformed.
+   * @return {Object} A new object with all keys transformed to lowercase.
+   *
+   * @private
+   */
+  static _transformToLowerKeys (obj) {
+    return transform(obj, (result, value, key) => {
+      const newKey = toLower(key)
+
+      result[newKey] = isPlainObject(value)
+        ? this._transformToLowerKeys(value)
+        : value
+    })
+  };
 }
 
 Config.init()
