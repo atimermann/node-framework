@@ -37,11 +37,11 @@ httpServer:
   # Deve ser desativado para acesso via CDN, ou se for utilizar o diretório public para arquivos enviados pelo usuário (upload)
   # Em caso de true deve ser empacotado novamente sempre que houver alteração dos arquivos estáticos
   # Ao desativar não esqueça remover no package.json a entrada "public" em pkg.assets
-  loadStaticFromPackage: true
+  loadStaticFromPackage: false
 
-  helmet:
-    contentSecurityPolicy:
-      reportOnly: true
+  helmet: {}
+
+  customStaticRoutes: []
 
   timezone: "America/Sao_Paulo"
 

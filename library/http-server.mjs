@@ -180,11 +180,21 @@ export default {
         sourceStaticFiles = join(application.path, this.staticPath)
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
-        sourceStaticFiles = join(process.cwd(), this.staticPath)
+        sourceStaticFiles = join(application.path, this.staticPath)
         logger.info(`Carregando arquivos estáticos do local (${sourceStaticFiles})`)
       }
 
       app.use(this.staticRoute, express.static(sourceStaticFiles))
+    }
+
+    const customStaticRoutes = Config.getYaml('httpServer.customStaticRoutes', 'array')
+
+    if (customStaticRoutes) {
+      for (const customStaticRoute of customStaticRoutes) {
+        const sourceStaticFiles = join(application.path, customStaticRoute.staticPath)
+        logger.info(`Loading custom static route: "${customStaticRoute.staticRoute}" path "${sourceStaticFiles}'`)
+        app.use(customStaticRoute.staticRoute, express.static(sourceStaticFiles))
+      }
     }
 
     /// /////////////////////////////////////////////////
