@@ -82,22 +82,22 @@ export default class JobManager {
     const appsEnabled = Config.get('jobManager.appsEnabled', 'array')
     const controllersEnabled = Config.get('jobManager.controllersEnabled', 'array')
 
-    logger.info('Load jobs and Workers')
+    logger.info('Loading jobs and Workers...')
     for (const controller of application.getControllers()) {
-      logger.debug(`Loading "${controller.completeIndentification}"...`)
+      logger.info(`Loading "${controller.completeIndentification}"...`)
       if (applicationEnabled && Array.isArray(applicationEnabled) && !applicationEnabled.includes(controller.applicationName)) {
-        logger.debug(`Application "${controller.applicationName}" disabled!`)
+        logger.info(`Application "${controller.applicationName}" disabled!`)
         continue
       }
       if (appsEnabled && Array.isArray(appsEnabled) && !appsEnabled.includes(controller.appName)) {
-        logger.debug(`App "${controller.appName}" disabled!`)
+        logger.info(`App "${controller.appName}" disabled!`)
         continue
       }
       await controller.jobs()
 
       for (const job of controller.jobsList) {
         if (controllersEnabled && Array.isArray(controllersEnabled) && !controllersEnabled.includes(controller.controllerName)) {
-          logger.debug(`Controller "${controller.controllerName}" disabled!`)
+          logger.info(`Controller "${controller.controllerName}" disabled!`)
           continue
         }
 
