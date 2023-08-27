@@ -38,36 +38,44 @@ export default class Config {
    * configurations from various sources.
    */
   static init () {
+    const env = process.env.NODE_ENV || 'development'
+
     // Load default YAML config
-    const defaultYamlConfig = this._transformToLowerKeys(
-      yaml.load(fs.readFileSync(join(__dirname, '..', 'config.default.yaml'), 'utf8'))
-    )
+    const defaultYamlConfig = yaml.load(fs.readFileSync(join(__dirname, '..', 'config.default.yaml'), 'utf8'))
 
     // Load the appropriate YAML config based on NODE_ENV
-    const env = process.env.NODE_ENV || 'development'
-    const envYamlConfig = this._transformToLowerKeys(
-      yaml.load(fs.readFileSync(join(__dirname, '..', `config.${env}.yaml`), 'utf8'))
-    )
+    const envYamlConfig = yaml.load(fs.readFileSync(join(__dirname, '..', `config.${env}.yaml`), 'utf8'))
 
     // Load YAML config from user Project
-    const userYamlConfig = this._transformToLowerKeys(
-      yaml.load(fs.readFileSync(join(process.cwd(), 'config.default.yaml'), 'utf8'))
-    )
+    const userYamlConfig = yaml.load(fs.readFileSync(join(process.cwd(), 'config.default.yaml'), 'utf8'))
 
     // Load YAML config from user Project based on NODE_ENV
-    const envUserYamlConfig = this._transformToLowerKeys(
-      yaml.load(fs.readFileSync(join(process.cwd(), `config.${env}.yaml`), 'utf8'))
+    const envUserYamlConfig = yaml.load(fs.readFileSync(join(process.cwd(), `config.${env}.yaml`), 'utf8'))
+
+    this.yamlConfig = defaultsDeep(
+      envUserYamlConfig,
+      userYamlConfig,
+      envYamlConfig,
+      defaultYamlConfig
     )
 
     // Merge defaultYaml, envYaml, process.env, and .env
     this.config =
-          defaultsDeep(
-            this._transformToLowerKeys(this._envToNestedObject(process.env)),
-            envUserYamlConfig,
-            userYamlConfig,
-            envYamlConfig,
-            defaultYamlConfig
-          )
+        defaultsDeep(
+          this._transformToLowerKeys(this._envToNestedObject(process.env)),
+          this._transformToLowerKeys(this.yamlConfig)
+        )
+  }
+
+  /**
+   * Returns configuration exclusively from yaml (ignores ENV) and keeps case
+   *
+   * @param key The configuration key.
+   * @param type The expected type of the configuration value.
+   * @returns {*}
+   */
+  static getYaml (key, type) {
+    return this.get(key, type, true)
   }
 
   /**
@@ -75,12 +83,19 @@ export default class Config {
    *
    * @param {string} key - The configuration key.
    * @param {string} [type] - The expected type of the configuration value.
+   * @param {boolean} yamlOnly  - Force load configuration from yaml configuration without losing case
+   *
    * @throws Will throw an error if the configuration key is not found.
    * @returns {*} The configuration value.
    */
-  static get (key, type) {
-    const parts = key.toLowerCase().split('.')
-    let current = this.config
+  static get (key, type, yamlOnly = false) {
+    const parts = yamlOnly
+      ? key.split('.')
+      : key.toLowerCase().split('.')
+
+    let current = yamlOnly
+      ? this.yamlConfig
+      : this.config
 
     for (const part of parts) {
       if (current[part] === undefined) {

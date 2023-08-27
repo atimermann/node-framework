@@ -3,6 +3,8 @@
 # body-parser: https://github.com/expressjs/body-parser
 httpServer:
   enabled: true
+  # Para servidor ficar acessivel em todas as redes incluindo internet use 0.0.0.0
+  hostname: '127.0.0.1'
   port: 3001
   urlenconded:
     limit: '10mb'
@@ -36,6 +38,10 @@ httpServer:
   # Em caso de true deve ser empacotado novamente sempre que houver alteração dos arquivos estáticos
   # Ao desativar não esqueça remover no package.json a entrada "public" em pkg.assets
   loadStaticFromPackage: true
+
+  helmet:
+    contentSecurityPolicy:
+      reportOnly: true
 
   timezone: "America/Sao_Paulo"
 

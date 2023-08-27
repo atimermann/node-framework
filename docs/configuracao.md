@@ -23,6 +23,18 @@ Os tipos possíveis são:
 
 Quando definido tipo array, a string "abcd:efg:hij" será convertido para ["abcd", "efg", "hij"]
 
+## Obtendo valores mantendo maiusculo-minusculo e ignorando .env
+
+Em alguns casos pode ser necessário obter configuração utilizando case-sensitive, para isso podemos utilizar:
+
+```javascript
+const serverPort = Config.getYaml('httpServer.helmet', 'number')
+```
+
+**IMPORTANTE:** Neste caso, as configuranções vindas das váriaveis de ambiente serão ignorado.
+
+Útil também quando precisamos obter um objeto de configuração e precisamos manter na chave maiusculo e minusculo 
+
 ## Variáveis de ambiente
 
 Todas as variáveis de ambiente disponíveis serão convertidas para o formato "abc.def" para corresponder à estrutura das chaves de configuração. Por exemplo, uma variável de ambiente chamada HTTP_SERVER_PORT será convertida para http.server.port nas configurações.
@@ -44,7 +56,7 @@ As configurações de uma fonte sobrescrevem as configurações da fonte anterio
 
 É importante notar que as configurações definidas nas etapas superiores têm prioridade sobre as etapas inferiores. Portanto, as configurações definidas em um arquivo YAML terão prioridade sobre as configurações definidas no arquivo `.env`, por exemplo.
 
-## Maiusculo e minisculoa
+## Maiusculo e minisculo
 
 Configuração não é "case-sensitive" ou seja, não faz diferenta chamar:
 

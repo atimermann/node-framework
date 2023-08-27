@@ -22,8 +22,8 @@ import morgan from 'morgan'
 import helmet from 'helmet'
 import compression from 'compression'
 import { Writable } from 'stream'
-
 import { join } from 'path'
+
 import { createServer } from 'http'
 
 import cors from 'cors'
@@ -78,16 +78,29 @@ export default {
       : process.env.CDN
 
     /**
+     * The port on which the HTTP server will listen for incoming requests.
+     * The value is fetched from the configuration.
+     *
+     * @type {number}
+     */
+    this.port = Config.get('httpServer.port')
+
+    /**
+     * The hostname or IP address on which the HTTP server will listen.
+     * It determines the network interface where the server will be accessible.
+     * The value is fetched from the configuration.
+     *
+     * @type {string}
+     */
+    this.hostname = Config.get('httpServer.hostname')
+
+    /**
      * Base URL of the CDN Server
      * If the CDN_URL environment variable is not set, the value is fetched from configuration.
      *
      * @type {string}
      */
     this.cdnUrl = process.env.CDN_URL || Config.get('httpServer.cdnUrl')
-
-    logger.info('==============================================================')
-    logger.info(`Port: ${process.env.PORT || Config.get('httpServer.port')}`)
-    logger.info('==============================================================')
 
     // Configura ExpressJs
     const app = this._configureExpressHttpServer(httpServer, application)
@@ -97,6 +110,13 @@ export default {
 
     // Inicializa Servidor HTTP
     this._startHttpServer(httpServer)
+
+    logger.info('==============================================================')
+    logger.info(`Hostname:         ${this.hostname}`)
+    logger.info(`Port:             ${this.port}`)
+    logger.info(`Static route:     http://${this.hostname}${this.port === 80 ? `:${this.port}` : ''}${this.staticRoute}`)
+    logger.info(`Static root path: ${join(process.cwd(), this.staticPath)}`)
+    logger.info('==============================================================')
   },
 
   /**
@@ -139,7 +159,7 @@ export default {
     // Segurança
     // Ref: https://helmetjs.github.io/
     /// /////////////////////////////////////////////////
-    app.use(helmet())
+    app.use(helmet(Config.getYaml('httpServer.helmet')))
 
     /// /////////////////////////////////////////////////
     // Cors
@@ -157,10 +177,10 @@ export default {
       let sourceStaticFiles
 
       if (Config.get('httpServer.loadStaticFromPackage')) {
-        sourceStaticFiles = join(application.path, 'public')
+        sourceStaticFiles = join(application.path, this.staticPath)
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
-        sourceStaticFiles = join(process.cwd(), 'public')
+        sourceStaticFiles = join(process.cwd(), this.staticPath)
         logger.info(`Carregando arquivos estáticos do local (${sourceStaticFiles})`)
       }
 
@@ -292,15 +312,13 @@ export default {
    * @param httpServer
    */
   _startHttpServer (httpServer) {
-    const port = process.env.PORT || Config.get('httpServer.port')
+    logger.info('Initializing HTTP_SERVER...')
 
-    logger.info(`Initializing HTTP_SERVER. Port: ${port}!`)
-
-    httpServer.listen(port, () => {
+    httpServer.listen(this.port, this.hostname, () => {
       logger.info('--------------------------------------------------------------')
-      logger.info('Address:' + httpServer.address().address)
-      logger.info('Port   :' + httpServer.address().port)
-      logger.info('Family :' + httpServer.address().family)
+      logger.info('Address: ' + httpServer.address().address)
+      logger.info('Port:    ' + httpServer.address().port)
+      logger.info('Family:  ' + httpServer.address().family)
       logger.info('--------------------------------------------------------------')
       logger.info('Http server started!')
     })
