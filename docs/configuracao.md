@@ -74,3 +74,7 @@ HTTP_SERVER_PORT="456
 * Se você solicitar **Config.get("http.server")**, o valor retornado será **"123"**. Isso ocorre porque a chave **HTTP_SERVER** é uma configuração específica para o atributo **http.server**, então ela tem prioridade sobre o subatributo **port** que está abaixo dela.
 
 * Por outro lado, se não houver um atributo **HTTP_SERVER** definido e você solicitar **Config.get("http.server")**, o valor retornado será **{ port: 456 }**. Nesse caso, como o atributo **HTTP_SERVER** não está presente, o valor padrão do subatributo **port** é usado, que é definido como **456**.
+
+## Aplicações externas carregadas
+
+Configurações definidas em outras aplicações carregadas em main.mjs serão ignoradas.

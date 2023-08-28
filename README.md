@@ -1,24 +1,23 @@
-# DEPRECATED
-# Projeto Node Framework 4.0
+# Projeto Node Framework
 
 Framework minimalista para nodejs com objetivo de disponibilizar uma base de código pronta para o rápido inicio de
 projeto e codificação, utilizando tecnologias já disponíveis.
 
 ## Instalação
 
-Para facilitar execução de tarefas repetitivas temos uma ferramenta de linha de comando chamada tools-cli, que pode ser
+Para facilitar execução de tarefas repetitivas temos uma ferramenta de linha de comando chamada ncli, que pode ser
 chamada pelo comando agtm
 
 Instale com o seguinte comando:
 
 ```bash
-$ npm i -g @agtm/cli-tool
+$ npm i -g @agtm/ncli
 ```
 
 Podemos criar um novo projeto à partir de um template já configurado usando o comando:
 
 ```bash
-$ agtm create
+$ ncli-create
 ```
 
 Responda as perguntas conforme abaixo:
@@ -45,7 +44,7 @@ Pronto, este script irá:
 Carregue assets (como imagens) no diretório public:  
 
 ```bash
-$ agtm install-assets
+$ npm run install-assets
 ```
 
 e execute a aplicação com:
@@ -63,7 +62,7 @@ Você deverá ver algo como isto
 
 ## Entendendo o Framework
 
-[Clique aqui para entender como o framework funciona](./docs/entendendo_o_sindri_framework.md)
+[Clique aqui para entender como o framework funciona](./docs/entendendo_o_node_framework.md)
 
 ## Objetivos e Funcionalidades
 
@@ -71,21 +70,18 @@ Os principais objetivos deste projeto são:
 
 * Exclusivo para Backend(nodejs)
 * Utilização do framework ExpressJs
-* Padrão ES6 ou mais novo
+* Padrão ES6 com suporte ESM ou mais novo
+* Suporte a jobs simples (Agendamento e execução continua) 
+* Suporte a socket com socket.io
 
 Suporte Integrado à
 
 * Apps - Possibilidade de importar outros modulos desenvolvido no Framework, como por exemplo um painel
   administrativo completo ou um simples gerenciador de erros. Apps funcionam como plugins que podem ser facilmente
   integrados ao framework.
-* Compilação binária (Intergração com o pacote [pkg](https://www.npmjs.com/package/pkg) )
+* [Não funcional] Compilação binária (Intergração com o pacote [pkg](https://www.npmjs.com/package/pkg) )
 * Log Robusto (Integração com [Winstonjs](https://github.com/winstonjs/winston) e [GrayLog](https://www.graylog.org/) )
-* Configuração - (Integrado com o [config](https://www.npmjs.com/package/config) )
-    * https://itnext.io/node-js-configuration-and-secrets-management-acd84375ca7
-    * https://github.com/schikin/example-node-config
-    * Remoção do suporta a passar parâmetros via argumentos (argv). Não funciona no docker e não é recomendável. Deve
-      ser
-      implementado pela aplicação.
+* Gestão de configuração    
 
 Outras funcionalidades podem ser facilmente implementada através de apps.
 
@@ -109,10 +105,8 @@ export default class HelloWorldController extends Controller {
 ## Gerando Versão
 
 ```bash  
-  git commit
-  git push
-  npm version patch|minor|major
-  npm publish  
+  git commit  
+  npm run publis-[major|minor|patch]  
 ```
 
 ## Guia de Estilo
@@ -122,7 +116,7 @@ Disponibiliza um guia de estilo para melhorar qualidade e padronização de codi
 [Clique Aqui](./docs/guia_de_estilo.md)
 
 ### Versões Nodejs:
-
+[NÃO FUNCIONAL]
 Um dos objetivos do framework é a possibilidade de criar versões comerciais (binario) com a ferramenta pkg.
 
 A ferramenta PKG utiliza uma versão própria do nodejs para gerar o binário e infelizmente nem sempre a ultima versão
@@ -153,7 +147,3 @@ histórico e sempre atualize a versão minor do Node Framework.
 Guia para desenvolvedores do Node Framework:
 
 [Guia de Desenvolvimento](./docs/guia_de_desenvolvimento.md)
-
-## TODOs
-
-
