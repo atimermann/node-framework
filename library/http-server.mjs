@@ -181,7 +181,7 @@ export default {
         logger.info(`Carregando arquivos estáticos do pacote (${sourceStaticFiles})`)
       } else {
         sourceStaticFiles = join(application.path, this.staticPath)
-        logger.info(`Carregando arquivos estáticos do local (${sourceStaticFiles})`)
+        logger.info(`Loading static route: "${this.staticRoute}" path "${sourceStaticFiles}"`)
       }
 
       app.use(this.staticRoute, express.static(sourceStaticFiles))

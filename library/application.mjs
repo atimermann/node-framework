@@ -53,6 +53,7 @@ export default class Application {
 
   /**
    * The constructor of the Application class.
+   *
    * @param {string} applicationPath - The physical path of the application. This should be defined using __dirname.
    * @param {string} name - The name of the application that will be loaded. This is mandatory.
    * @throws {Error} Will throw an error if the path or name parameters are not provided or not of type 'string'.
@@ -89,6 +90,7 @@ export default class Application {
 
   /**
    * Loads a sub-application (a dependency of the main application)
+   *
    * @param {Application} application - An instance of the Application class
    * @throws {TypeError} Will throw an error if the provided application is not an instance of Application.
    */
