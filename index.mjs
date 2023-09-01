@@ -13,6 +13,7 @@ import createLogger from './library/logger.mjs'
 import Config from './library/config.mjs'
 import Controller from './library/controller/controller.mjs'
 import checkExecution from './library/check-execution.mjs'
+import JobManager from './library/jobs/job-manager.mjs'
 
 const logger = createLogger()
 
@@ -24,5 +25,6 @@ export {
   Config,
   ApplicationController,
   Controller,
-  checkExecution
+  checkExecution,
+  JobManager
 }

@@ -35,7 +35,7 @@ export default class WorkerManager {
       for (const worker of controller.workersList) {
         const job = JobManager.getJob(worker.applicationName, worker.appName, worker.controllerName, worker.jobName)
         job.workerName = worker.name
-        this.createWorker(worker.name, job, true, worker.options)
+        this.createWorker(worker.name, job, true, false, worker.options)
       }
     }
   }
@@ -50,7 +50,7 @@ export default class WorkerManager {
     for (const [, job] of Object.entries(jobs)) {
       if (job.schedule) {
         job.workerName = `${job.name}-${job.uuid}`
-        this.createWorker(job.workerName, job, false)
+        this.createWorker(job.workerName, job, false, true, {})
       }
     }
   }
@@ -61,9 +61,10 @@ export default class WorkerManager {
    * @param {string} name - The name of the worker.
    * @param {Object} job - The job associated with the worker.
    * @param {boolean} persistent - Whether the worker is persistent.
+   * @param {boolean }auto  - automatically created
    * @param {Object} options - The options for the worker.
    */
-  static createWorker (name, job, persistent, options = {}) {
+  static createWorker (name, job, persistent, auto, options = {}) {
     logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
 
     const newWorker = {
@@ -71,6 +72,7 @@ export default class WorkerManager {
       job,
       persistent,
       options,
+      auto,
       jobProcesses: []
     }
 
@@ -308,5 +310,13 @@ export default class WorkerManager {
    */
   static async sleep (ms) {
     return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  /**
+   * returns worker information for monitoring
+   * @returns {{}}
+   */
+  static getWorkersInformation () {
+    return this.indexedWorkers
   }
 }

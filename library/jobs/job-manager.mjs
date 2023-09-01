@@ -9,6 +9,7 @@ import cron from 'node-cron'
 import crypto from 'crypto'
 import WorkerManager from './worker-manager.mjs'
 import Config from '../config.mjs'
+import cloneDeep from 'lodash/cloneDeep.js'
 
 import createLogger from '../logger.mjs'
 
@@ -202,5 +203,53 @@ export default class JobManager {
   static createJobUUID (applicationName, appName, controllerName, name) {
     const uniqueString = `${applicationName}${appName}${controllerName}${name}`
     return crypto.createHash('md5').update(uniqueString).digest('hex')
+  }
+
+  /**
+   * Returns information about jobs for monitoring
+   *
+   * TODO: Assume apenas um worker pro job, se tiver mais de um pega ultimo necessario fazer tratativa
+   *
+   * @returns {{}}
+   */
+  static getJobsInformation () {
+    const clonedJobs = cloneDeep(this.jobs)
+
+    const workers = WorkerManager.getWorkersInformation()
+
+    // Associates job with the list of workers that process it
+    Object.keys(workers).forEach((key) => {
+      const worker = workers[key]
+
+      if (!worker.job) return
+      const relationJob = clonedJobs[worker.job.uuid]
+
+      // Init Vars
+      if (!relationJob.workers) relationJob.workers = []
+      if (relationJob.concurrency === undefined) relationJob.concurrency = 0
+
+      if (!relationJob) return
+
+      if (worker.auto) {
+        relationJob.workers.push('-')
+      } else {
+        relationJob.workers.push(worker.name)
+      }
+
+      relationJob.persistent = worker.persistent
+
+      // Adiciona apenas o ultimo
+      relationJob.concurrency = worker.options?.concurrency
+      if (relationJob.concurrency === undefined) {
+        relationJob.concurrency = 1
+      }
+
+      // Status
+      worker.jobProcesses.length === 0
+        ? relationJob.status = 'Aguardando'
+        : relationJob.status = `Executando[${worker.jobProcesses.length}]`
+    })
+
+    return clonedJobs
   }
 }
