@@ -11,3 +11,6 @@ logger:
     handleExceptions: false
   level: debug
   silent: false
+
+resourceMonitor:
+  enabled: true

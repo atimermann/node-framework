@@ -82,7 +82,7 @@ export default class Config {
    * Get a configuration value by its key.
    *
    * @param {string} key - The configuration key.
-   * @param {string} [type] - The expected type of the configuration value.
+   * @param {string} [type] - The expected type of the configuration value: number, boolean, string, array
    * @param {boolean} yamlOnly  - Force load configuration from yaml configuration without losing case
    *
    * @throws Will throw an error if the configuration key is not found.
@@ -115,6 +115,9 @@ export default class Config {
         case 'number':
           return Number(current)
         case 'boolean':
+          if (!['boolean', 'string'].includes(typeof current)) {
+            throw new TypeError(`Attribute "${key}" must be of type boolean or string`)
+          }
           return typeof current === 'boolean' ? current : current.toLowerCase() === 'true'
         case 'string':
           return String(current)

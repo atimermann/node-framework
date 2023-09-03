@@ -8,6 +8,7 @@
  */
 
 import Transport from 'winston-transport'
+import ResourceMonitor from '../resource-monitor.mjs'
 
 // Defining colors as constants
 /**
@@ -64,14 +65,19 @@ export default class Console2Transport extends Transport {
   log (logObj, callback) {
     const { level, module, message } = logObj
 
+    const memoryInformation = ResourceMonitor.getMemoryInfo()
+
     const date = new Date()
     const levelColor = getLevelColor(level)
     const levelText = `${levelColor}${level.padEnd(5)}${resetColor}`
     const moduleText = module ? `${blueDarkColor}[ ${module} ]${resetColor}` : ''
     const msgColor = `${greenColor}${message}${resetColor}`
     const formattedTime = `${purpleColor}${date.toLocaleTimeString()}.${date.getMilliseconds()}${resetColor}`
+    const memoryText = memoryInformation
+      ? `${memoryInformation.memoryUsed} (${memoryInformation.memoryUsedPercent})`
+      : ''
 
-    console.log(`${formattedTime} ${levelText} ${moduleText} ${msgColor}`)
+    console.log(`${formattedTime} ${memoryText} ${levelText} ${moduleText} ${msgColor}`)
     callback()
   }
 }

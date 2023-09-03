@@ -24,6 +24,7 @@ import { sentenceCase } from 'change-case'
 
 import createLogger from './logger.mjs'
 import { readFileSync } from 'fs'
+import ResourceMonitor from "./resource-monitor.mjs";
 const logger = createLogger('Init')
 
 export default {
@@ -65,6 +66,10 @@ export default {
   async initServer (application) {
     if (Config.get('monitor.enabled', 'boolean')) {
       BlessedInterface.init()
+    }
+
+    if (Config.get('resourceMonitor.enabled', 'boolean')) {
+      ResourceMonitor.init()
     }
 
     this.logInfo(application)

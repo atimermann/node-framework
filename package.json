@@ -20,6 +20,7 @@
   "main": "./index.mjs",
   "dependencies": {
     "@agtm/util": "^4.0.2",
+    "@airbnb/node-memwatch": "^2.0.0",
     "blessed": "^0.1.81",
     "body-parser": "^1.19.0",
     "chalk": "^5.3.0",
