@@ -3,3 +3,5 @@
 # body-parser: https://github.com/expressjs/body-parser
 
 # TODO: Não deixe um grupo vazio se não irá substituir tudo
+httpServer:
+  hostname: '0.0.0.0'

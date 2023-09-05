@@ -9,6 +9,8 @@ Quando habilitado exibe no log informação de memoria consumida.
 
 Se  dumpMemory estiver ativo, exibe detalhes (operação demorada).
 
+Faz uso da biblioteca https://github.com/airbnb/node-memwatch
+
 ## Configuração
 
 ```yaml
