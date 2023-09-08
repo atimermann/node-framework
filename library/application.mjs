@@ -15,18 +15,21 @@ import assert from 'node:assert'
 import ApplicationController from './application-controller.mjs'
 import path from 'path'
 import { readdir } from 'fs/promises'
-
 import createLogger from './logger.mjs'
+import { readFileSync } from 'fs'
+
+const filePath = new URL('../package.json', import.meta.url)
+const packageInfo = JSON.parse(readFileSync(filePath, 'utf8'))
 
 const logger = createLogger('Application')
 
 export default class Application {
   /**
-   * Validate instance
-   * @type {boolean}
+   * Package version for Validate instance
+   * @type {string}
    * @private
    */
-  static _applicationClass = true
+  static _nodeFrameworkVersion = packageInfo.version
 
   /**
    * Stores a list of loaded applications , include self
@@ -95,8 +98,12 @@ export default class Application {
    * @throws {TypeError} Will throw an error if the provided application is not an instance of Application.
    */
   loadApplication (application) {
-    if (!(application instanceof Application)) {
-      throw new TypeError('application must be an instance of Application')
+    if (!application.constructor._nodeFrameworkVersion) {
+      throw new TypeError('Application must be an instance of Application')
+    }
+
+    if (!application.constructor._nodeFrameworkVersion !== this.constructor._nodeFrameworkVersion) {
+      console.warn(`Node framework version mismatch ${application.constructor._nodeFrameworkVersion} <> ${this.constructor._nodeFrameworkVersion}`)
     }
 
     if (this.initialized) {
