@@ -102,7 +102,7 @@ export default class Application {
       throw new TypeError('Application must be an instance of Application')
     }
 
-    if (!application.constructor._nodeFrameworkVersion !== this.constructor._nodeFrameworkVersion) {
+    if (application.constructor._nodeFrameworkVersion !== this.constructor._nodeFrameworkVersion) {
       console.warn(`Node framework version mismatch ${application.constructor._nodeFrameworkVersion} <> ${this.constructor._nodeFrameworkVersion}`)
     }
 

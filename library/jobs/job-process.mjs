@@ -146,6 +146,9 @@ export default class JobProcess extends EventEmitter {
       this.worker.job.name
     ]
 
+    // Clean errors
+    this.errorsMessage.splice(0, this.errorsMessage.length)
+
     this.childProcess = fork('./src/run.mjs', args, { silent: this.options.silent })
     this.running = true
 
@@ -165,7 +168,6 @@ export default class JobProcess extends EventEmitter {
       this.exitCode = code
       this.exitSignal = signal
       this.countClose++
-
 
       if (code !== 0) {
         this.emit('processError', this)

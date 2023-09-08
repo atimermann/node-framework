@@ -23,7 +23,7 @@ export default class WorkerManager {
   static workers = []
   static indexedWorkers = {}
   static checking = false
-  static eventEmitter = new EventEmitter()
+  static events = new EventEmitter()
 
   /**
    * Creates user-defined workers.
@@ -113,7 +113,7 @@ export default class WorkerManager {
         const jobProcess = JobProcess.create(worker, `#${i}`, worker.options)
 
         jobProcess.on('processError', jobProcess => {
-          this.eventEmitter.emit('processError', jobProcess)
+          this.events.emit('processError', jobProcess)
         })
 
         worker.jobProcesses.push(jobProcess)
@@ -178,6 +178,6 @@ export default class WorkerManager {
    * @returns {module:events.EventEmitter}
    */
   static event () {
-    return this.eventEmitter
+    return this.events
   }
 }
