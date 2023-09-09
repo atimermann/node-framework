@@ -106,6 +106,15 @@ export default class Application {
       console.warn(`Node framework version mismatch ${application.constructor._nodeFrameworkVersion} <> ${this.constructor._nodeFrameworkVersion}`)
     }
 
+    // TODO: JobProcess perde os valores quando subaplicação utiliza versão diferente, no futuro analisar e verificar
+    //  o motivo deste problema, ao utilizar versão diferente ambos importam JOBProcess de arquivos diferente,entender
+    //  o motivo e como resolver
+    if (!(application instanceof Application)) {
+      throw new TypeError('Application must be an instance of Application. If you are importing a sub-application ' +
+          'of a module, make sure that both are using the same version of the node-framework, you must use the same ' +
+          'instance, import from the same file.')
+    }
+
     if (this.initialized) {
       throw Error('It is no longer possible to add subapplications, the application has already been initialized.')
     }
