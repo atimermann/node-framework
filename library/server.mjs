@@ -24,7 +24,7 @@ import { sentenceCase } from 'change-case'
 
 import createLogger from './logger.mjs'
 import { readFileSync } from 'fs'
-import ResourceMonitor from "./resource-monitor.mjs";
+import ResourceMonitor from './resource-monitor.mjs'
 const logger = createLogger('Init')
 
 export default {
@@ -76,9 +76,11 @@ export default {
 
     await Promise.all([
       Config.get('httpServer.enabled', 'boolean') ? HttpServer.run(application) : null,
-      Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null,
-      Config.get('socket.enabled', 'boolean') ? SocketServer.run(application) : null
+      Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null
     ])
+
+    // Wait for http-server to load
+    if (Config.get('socket.enabled', 'boolean')) await SocketServer.run(application)
   },
 
   logInfo (application) {

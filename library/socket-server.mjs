@@ -35,7 +35,7 @@ export default class SocketServer {
    * @type {string}
    * @static
    */
-  static mode = undefined
+  static mode
 
   /**
    * The port number on which the socket server will run. Loaded from the configuration file.
@@ -43,7 +43,7 @@ export default class SocketServer {
    * @type {number}
    * @static
    */
-  static port = undefined
+  static port
 
   /**
    * The SSL key pair for the server, used when creating an HTTPS or HTTP2 server. Loaded from the configuration file.
@@ -52,14 +52,14 @@ export default class SocketServer {
    * @type {Object}
    * @static
    */
-  static keys = undefined
+  static keys
 
   /**
    * Holds the instance of the Socket.io server.
    *
    * @type {import("socket.io").Server}
    */
-  static io = undefined
+  static io
 
   /**
    * Runs the Socket Server based on the configuration mode
@@ -83,6 +83,9 @@ export default class SocketServer {
     // NOTE: In http-server mode, the server setup is initiated in the http-server module and called in
     //   configureExpressHttpServer
     switch (this.mode) {
+      case 'http-server':
+        if (!this.io) throw new Error('In this mode Http server must be initialized before starting Socket Server.')
+        break
       case 'standalone':
         this.io = this._createStandaloneServer()
         break
@@ -113,17 +116,6 @@ export default class SocketServer {
   }
 
   /**
-   * Configures an existing Express HTTP Server for use with socket.io
-   * @static
-   * @param {Object} httpServer - The HTTP server instance to configure.
-   */
-  static configureExpressHttpServer (httpServer) {
-    if (Config.get('socket.enabled', 'boolean') && this.mode === 'http-server') {
-      this.io = new Server(httpServer, this._getOptions())
-    }
-  }
-
-  /**
    * Loads the configuration for the Socket Server from the Config module.
    * This method should be called before creating the server.
    * The configuration includes the server mode, port, and SSL key pair.
@@ -149,6 +141,17 @@ export default class SocketServer {
 
       logger.info('Socket applications loaded!')
       logger.debug(`Controller loaded: "${controller.applicationName}/${controller.appName}/${controller.controllerName}"`)
+    }
+  }
+
+  /**
+   * Configures an existing Express HTTP Server for use with socket.io
+   * @static
+   * @param {Object} httpServer - The HTTP server instance to configure.
+   */
+  static configureExpressHttpServer (httpServer) {
+    if (Config.get('socket.enabled', 'boolean') && Config.get('socket.mode') === 'http-server') {
+      this.io = new Server(httpServer, this._getOptions())
     }
   }
 
