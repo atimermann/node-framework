@@ -1,6 +1,6 @@
 {
   "name": "@agtm/node-framework",
-  "version": "4.9.6",
+  "version": "4.9.7",
   "description": "Framework nodejs baseado no ExpressJs",
   "bin": {
     "nf-monitor": "scripts/monitor.mjs"
