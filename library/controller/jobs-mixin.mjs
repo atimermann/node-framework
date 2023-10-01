@@ -9,12 +9,12 @@
 import createLogger from '../../library/logger.mjs'
 import WorkerRunner from '../jobs/worker-runner.mjs'
 
-const logger = createLogger('Controller')
-
 import JobManager from '../jobs/job-manager.mjs'
 import Job from '../jobs/job.mjs'
 import Worker from '../jobs/worker.mjs'
 import WorkerManager from '../jobs/worker-manager.mjs'
+
+const logger = createLogger('Controller')
 
 /**
  * Provides job-related functionality for extending classes.
@@ -30,7 +30,6 @@ import WorkerManager from '../jobs/worker-manager.mjs'
  * @requires {string} Controller#controllerName   - Expected to be defined in the base class. *
  */
 export default class JobsMixin {
-
   /**
    * Create a new job.
    *
@@ -41,7 +40,6 @@ export default class JobsMixin {
    * @throws {Error} If a job with the provided name already exists.
    */
   createJob (name, schedule, jobFunction, options = {}) {
-
     const newJob = Job.create({
       applicationName: this.applicationName,
       appName: this.appName,
@@ -53,7 +51,6 @@ export default class JobsMixin {
     })
 
     JobManager.addJob(newJob)
-
   }
 
   /**
@@ -64,7 +61,6 @@ export default class JobsMixin {
    * @param options Configuração dos workers
    */
   createWorkers (name, jobName, options) {
-
     const job = JobManager.getJob(this.applicationName, this.appName, this.controllerName, jobName)
     const newWorker = Worker.create({
       name,
@@ -86,12 +82,11 @@ export default class JobsMixin {
    * @param {boolean} allControllers     Executes all jobs on all controllers in this app
    */
   jobSetup (jobSetupFunction, allApplications = false, allApps = false, allControllers = false) {
-
     JobManager.setSetupFunction(
       jobSetupFunction,
       allApplications ? null : this.applicationName,
       allApps ? null : this.appName,
-      allControllers ? null : this.controllerName,
+      allControllers ? null : this.controllerName
     )
   }
 
@@ -105,7 +100,6 @@ export default class JobsMixin {
    * @param {boolean} allControllers     Executes all jobs on all controllers in this app
    */
   jobTeardown (jobTeardownFunction, allApplications = false, allApps = false, allControllers = false) {
-
     JobManager.setTeardownFunction(
       jobTeardownFunction,
       allApplications ? null : this.applicationName,
@@ -128,5 +122,4 @@ export default class JobsMixin {
   async jobs () {
     logger.debug(`No jobs configured in ${this.completeIndentification}.`)
   }
-
 }

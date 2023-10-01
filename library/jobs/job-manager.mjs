@@ -64,7 +64,6 @@ export default class JobManager {
 
     await this.startScheduleJob()
     await WorkerManager.run()
-
   }
 
   /**
@@ -77,7 +76,6 @@ export default class JobManager {
    * @param controllerName
    */
   static setSetupFunction (jobSetupFunction, applicationName, appName, controllerName) {
-
     this.jobSetupAndTeadDownFunctions.push({
       type: SETUP_FUNCTION,
       jobSetupFunction,
@@ -85,7 +83,6 @@ export default class JobManager {
       appName,
       controllerName
     })
-
   }
 
   /**
@@ -100,7 +97,6 @@ export default class JobManager {
    * @param controllerName
    */
   static setTeardownFunction (jobTeardownFunction, applicationName, appName, controllerName) {
-
     this.jobSetupAndTeadDownFunctions.push({
       type: TEARDOWN_FUNCTION,
       jobTeardownFunction,
@@ -108,7 +104,6 @@ export default class JobManager {
       appName,
       controllerName
     })
-
   }
 
   /**
@@ -116,7 +111,6 @@ export default class JobManager {
    * @private
    */
   static _configureSetupAndTeardownFunctions () {
-
     for (const [, job] of Object.entries(this.jobs)) {
       const jobSetupAndTeadDownFunctions = this._filterFunctiontoJob(job)
 
@@ -126,11 +120,8 @@ export default class JobManager {
         } else if (jobSetupAndTeadDownFunction.type === TEARDOWN_FUNCTION) {
           job.teardownFunctions.push(jobSetupAndTeadDownFunction.jobTeardownFunction)
         }
-
       }
-
     }
-
   }
 
   /**
@@ -141,7 +132,6 @@ export default class JobManager {
    * @private
    */
   static _filterFunctiontoJob (job) {
-
     return this.jobSetupAndTeadDownFunctions.filter(jobSetupFunction => {
       if (jobSetupFunction.applicationName && jobSetupFunction.applicationName !== job.applicationName) {
         return false
@@ -154,7 +144,6 @@ export default class JobManager {
       }
       return true
     })
-
   }
 
   /**
@@ -178,14 +167,13 @@ export default class JobManager {
    * @param {Job} job
    */
   static addJob (job) {
-
     logger.info(`Add new Job: ${job}`)
 
     if (this.jobs[job.name]) {
-      throw new Error(`Job "${name}" already exists.`)
+      throw new Error(`Job "${job.name}" already exists.`)
     }
 
-    //Does not load if set not to load
+    // Does not load if set not to load
     if (applicationEnabled && (!Array.isArray(applicationEnabled) || !applicationEnabled.includes(job.applicationName))) {
       logger.info(`Application "${job.applicationName}" disabled!`)
       return
@@ -203,7 +191,6 @@ export default class JobManager {
 
     this.jobs[job.uuid] = job
     logger.info(`Loading Job: "${job.name}" UUID:  ${job.uuid}`)
-
   }
 
   /**

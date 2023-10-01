@@ -16,7 +16,6 @@ import JobProcess from './job-process.mjs'
 const logger = createLogger('WorkerManager')
 
 export default class Worker extends EventEmitter {
-
   /**
    * The name of the worker.
    *
@@ -71,7 +70,6 @@ export default class Worker extends EventEmitter {
     auto,
     options = {}
   }) {
-
     logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
 
     const worker = new this()
@@ -90,7 +88,6 @@ export default class Worker extends EventEmitter {
    * @returns {Promise<void>}
    */
   async runProcess () {
-
     if (this.jobProcesses.length > 0) {
       logger.info(`Restarting Worker: "${this.name}" Job: "${this.job.name}" Persistent: "${this.persistent}"`)
       await this.restartProcesses()
@@ -128,5 +125,4 @@ export default class Worker extends EventEmitter {
       }
     }
   }
-
 }

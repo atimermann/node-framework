@@ -19,7 +19,6 @@ const logger = createLogger('WorkerManager')
  * @extends EventEmitter
  */
 export default class Job extends EventEmitter {
-
   /**
    * The unique identifier for the job, generated using the job's application name,
    * app name, controller name, and job name.
@@ -108,7 +107,6 @@ export default class Job extends EventEmitter {
     jobFunction,
     options = {}
   }) {
-
     logger.info(`Creating job "${name}"`)
 
     const job = new this()

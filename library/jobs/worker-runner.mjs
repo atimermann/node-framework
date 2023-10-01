@@ -67,7 +67,6 @@ export default class WorkerRunner {
       logger.info(`Running job teaddown from  "${this.job.name}" `)
       await teardownFunction()
     }
-
   }
 
   static async exitProcess (exitCode = 0) {
@@ -130,5 +129,4 @@ export default class WorkerRunner {
       process.exit(exitCode)
     }
   }
-
 }

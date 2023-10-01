@@ -12,7 +12,6 @@
  *
  *
  */
-import JobManager from './job-manager.mjs'
 import createLogger from '../logger.mjs'
 import { EventEmitter } from 'events'
 import Worker from './worker.mjs'
@@ -36,12 +35,10 @@ export default class WorkerManager {
   static events = new EventEmitter()
 
   static async run () {
-
     if (this.workers.length > 0) {
       await this.runPersistentWorkers()
       await this.monitorWorkersHealth()
     }
-
   }
 
   /**
@@ -49,11 +46,10 @@ export default class WorkerManager {
    * @param {Worker} worker
    */
   static addWorker (worker) {
-
     logger.info(`Add new Worker: ${worker}`)
 
     if (this.indexedWorkers[worker.name]) {
-      throw new Error(`Worker "${name}" already exists.`)
+      throw new Error(`Worker "${worker.name}" already exists.`)
     }
 
     worker.on('processError', jobProcess => {
@@ -62,7 +58,6 @@ export default class WorkerManager {
 
     this.workers.push(worker)
     this.indexedWorkers[worker.name] = worker
-
   }
 
   /**
@@ -75,7 +70,6 @@ export default class WorkerManager {
    * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, auto, options = {}) {
-
     const newWorker = Worker.create({
       name,
       job,
