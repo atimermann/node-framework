@@ -5,12 +5,14 @@
  * @author André Timermann <andre@timermann.com.br>
  *
  *   @typedef {import('./job-process.mjs').default} JobProcess
+ *   @typedef {import('./job.mjs').default} Job
  *
  */
 
 import createLogger from '../logger.mjs'
 import { EventEmitter } from 'events'
 import JobProcess from './job-process.mjs'
+
 const logger = createLogger('WorkerManager')
 
 export default class Worker extends EventEmitter {
@@ -24,7 +26,7 @@ export default class Worker extends EventEmitter {
 
   /**
    * The job associated with the worker.
-   * TODO: Colocar aqui a instancia do JOB
+   * @type {Job}
    */
   job
 
@@ -52,7 +54,23 @@ export default class Worker extends EventEmitter {
    */
   jobProcesses = []
 
-  static create (name, job, persistent, auto,  options = {}) {
+  /**
+   *  Instancia um novo worker
+   *
+   * @param name
+   * @param job
+   * @param persistent
+   * @param auto
+   * @param options
+   * @returns {Worker}
+   */
+  static create ({
+    name,
+    job,
+    persistent,
+    auto,
+    options = {}
+  }) {
 
     logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
 
@@ -71,7 +89,7 @@ export default class Worker extends EventEmitter {
    *
    * @returns {Promise<void>}
    */
-  async runProcess(){
+  async runProcess () {
 
     if (this.jobProcesses.length > 0) {
       logger.info(`Restarting Worker: "${this.name}" Job: "${this.job.name}" Persistent: "${this.persistent}"`)
@@ -103,13 +121,10 @@ export default class Worker extends EventEmitter {
   /**
    * Checks the health of processes (if they are running)
    */
-  checkHealth(){
-    // console.log('[WorkerManager]', `Check Worker "${worker.name}" `)
+  checkHealth () {
     if (this.persistent) {
-      // Verifica se o Processo finalizou e reinicia
       for (const jobProcess of this.jobProcesses) {
         jobProcess.checkHealth()
-        // this.verifyPersistentJobHealth(worker, jobProcess)
       }
     }
   }

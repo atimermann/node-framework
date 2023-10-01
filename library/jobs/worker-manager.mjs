@@ -10,7 +10,6 @@
  * TODO: Parametrizar delay
  * TODO: Parametrizar options for workers
  *
- * TODO: URGENTE - URGENTE - REFACTORUNG - Criar CLsses para Worker, Jobs e documentar relacionamento entre eles, migrar métodos
  *
  */
 import JobManager from './job-manager.mjs'
@@ -36,37 +35,34 @@ export default class WorkerManager {
   static checking = false
   static events = new EventEmitter()
 
-  /**
-   * Creates user-defined workers.
-   *
-   * @param {Object} application - The application object to get controllers from.
-   * @returns {void}
-   */
-  static createUserWorkers (application) {
-    for (const controller of application.getControllers()) {
-      logger.debug(`Loading controller: ${controller.completeIndentification}`)
-      for (const workerInfo of controller.workersList) {
-        const job = JobManager.getJob(workerInfo.applicationName, workerInfo.appName, workerInfo.controllerName, workerInfo.jobName)
-        job.workerName = workerInfo.name
-        this.createWorker(workerInfo.name, job, true, false, workerInfo.options)
-      }
+  static async run () {
+
+    if (this.workers.length > 0) {
+      await this.runPersistentWorkers()
+      await this.monitorWorkersHealth()
     }
+
   }
 
   /**
-   * Creates workers for all the jobs that have been scheduled. Each job is assigned a worker
-   * that will be responsible for executing the job as per its schedule.
-   *
-   * TODO: Verificar necessidade de um metodo para isso, talvez criar por demanda
-   * @static
+   * Add a new Worker
+   * @param {Worker} worker
    */
-  static createScheduledWorkers (jobs) {
-    for (const [, job] of Object.entries(jobs)) {
-      if (job.schedule) {
-        job.workerName = `${job.name}-${job.uuid}`
-        this.createWorker(job.workerName, job, false, true, {})
-      }
+  static addWorker (worker) {
+
+    logger.info(`Add new Worker: ${worker}`)
+
+    if (this.indexedWorkers[worker.name]) {
+      throw new Error(`Worker "${name}" already exists.`)
     }
+
+    worker.on('processError', jobProcess => {
+      this.events.emit('processError', jobProcess)
+    })
+
+    this.workers.push(worker)
+    this.indexedWorkers[worker.name] = worker
+
   }
 
   /**
@@ -80,14 +76,14 @@ export default class WorkerManager {
    */
   static createWorker (name, job, persistent, auto, options = {}) {
 
-    const newWorker = Worker.create(name, job, persistent, auto, options)
-
-    newWorker.on('processError', jobProcess => {
-      this.events.emit('processError', jobProcess)
+    const newWorker = Worker.create({
+      name,
+      job,
+      persistent,
+      auto,
+      options
     })
-
-    this.workers.push(newWorker)
-    this.indexedWorkers[newWorker.name] = newWorker
+    this.addWorker(newWorker)
   }
 
   /**
@@ -113,8 +109,6 @@ export default class WorkerManager {
     await worker.runProcess()
   }
 
-
-
   /**
    * Monitors workers health at regular intervals.
    */
@@ -134,7 +128,6 @@ export default class WorkerManager {
     logger.info('Checking Health')
 
     this.checking = true
-    // console.log('[WorkerManager]', 'Check Workers:')
 
     for (const worker of this.workers) {
       worker.checkHealth()

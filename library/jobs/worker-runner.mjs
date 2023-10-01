@@ -6,46 +6,20 @@
  *
  * Class responsible for execution in a separate process.
  *
+ * @typedef {import('./job.mjs').default} Job
+ *
  */
 
 import { logger } from '../../index.mjs'
-
-/**
- * Represents the information related to a child job process.
- *
- * @typedef {Object} Job
- * @property {string} applicationName - The name of the application the job belongs to.
- * @property {string} appName - The name of the app the job belongs to.
- * @property {string} controllerName - The name of the controller the job belongs to.
- * @property {string} jobName - The name of the job.
- * @property {function} jobFunction - The function that performs the job.
- * @property {string} schedule - The cron schedule for the job.
- */
+import JobManager from './job-manager.mjs'
 
 export default class WorkerRunner {
   /**
-   * A static property containing a collection of jobs.
-   * Each job is represented as an object and indexed by a name
-   *
-   * @example
-   * {
-   *   "job_name_1": {
-   *     applicationName: 'App1',
-   *     appName: 'Application1',
-   *     controllerName: 'Controller1',
-   *     jobName: 'Job1',
-   *     jobFunction: function() {...},
-   *     schedule: '* * * * *'
-   *   },
-   *   "job_name_2": {...},
-   *   ...
-   * }
-   *
-   * @type {Object.<string, Job>}
-   *
+   * Job running
+   * @type {Job}
    * @static
    */
-  static jobs = {}
+  static job = {}
 
   /**
    * Pid of parent process
@@ -53,63 +27,51 @@ export default class WorkerRunner {
    */
   static parentPid = undefined
 
-  static targetController = undefined
-
   /**
-     * This method is execution of a worker in a separate process.
-     * It loads all jobs and executes the specific job that matches the command-line arguments.
-     *
-     * @param {import('../application.mjs').Application} application - The application context.
-     *
-     * @throws Will throw an error if the specific job could not be found.
-     *
-     * @returns {Promise<void>}
-     *
-     * @static
-     */
+   * This method is execution of a worker in a separate process.
+   * It loads all jobs and executes the specific job that matches the command-line arguments.
+   *
+   * @param {import('../application.mjs').Application} application - The application context.
+   *
+   * @throws Will throw an error if the specific job could not be found.
+   *
+   * @returns {Promise<void>}
+   *
+   * @static
+   */
   static async run (application) {
     this.parentPid = process.ppid
 
-    this.targetController = this._getJobController(application)
+    const [, , , applicationName, appName, controllerName, jobName] = process.argv
 
-    if (!this.targetController) {
-      throw new Error('Controller not found for the given parameters.')
+    await JobManager.load(application)
+
+    this.job = JobManager.getJob(
+      applicationName,
+      appName,
+      controllerName,
+      jobName
+    )
+
+    this._createProcessListeners(this.job)
+
+    for (const setupFunction of this.job.setupFunctions) {
+      logger.info(`Running job setup from "${this.job.name}" `)
+      await setupFunction()
     }
 
-    await this.targetController.jobs()
+    logger.info(`Running job "${this.job.name}" `)
+    await this.job.jobFunction()
 
-    this._loadJobsFromTargetController(this.targetController.jobsList)
-
-    const targetJobName = process.argv[6]
-    const targetJob = this.jobs[targetJobName]
-
-    if (!targetJob) {
-      throw new Error(`Job '${targetJobName}' not found.`)
+    for (const teardownFunction of this.job.teardownFunctions) {
+      logger.info(`Running job teaddown from  "${this.job.name}" `)
+      await teardownFunction()
     }
 
-    await this.targetController.jobSetup()
-    this._createProcessListeners(this.targetController)
-    await targetJob.jobFunction()
   }
 
   static async exitProcess (exitCode = 0) {
-    await this._exitProcess(this.targetController, exitCode)
-  }
-
-  /**
-   * Loads jobs from the given controller into the static jobs property of the class.
-   * This method expects the controller to have a jobs method that returns a list of jobs.
-   * Each job in the list is then added to the jobs property.
-   *
-   * @param {Array<Object>} jobsList - List of jobs to be loaded.
-   *
-   * @private
-   * @static
-   */
-  static _loadJobsFromTargetController (jobsList) {
-    for (const job of jobsList) {
-      this.jobs[job.name] = job
-    }
+    await this._exitProcess(this.job, exitCode)
   }
 
   /**
@@ -117,21 +79,21 @@ export default class WorkerRunner {
    * The application then calls the 'jobTeardown' method of the controller and finally terminates itself.
    * SIGKILL and SIGTERM should be handled by the application.
    *
-   * @param {Object} targetController - The controller that needs to be cleaned up.
+   * @param {Job} job - The Job in execution
    *
    * @returns {void}
    *
    * @static
    */
-  static _createProcessListeners (targetController) {
+  static _createProcessListeners (job) {
     process.once('SIGINT', async () => {
-      await this._exitProcess(targetController)
+      await this._exitProcess(job)
     })
 
     // Close if disconnected from parent
     process.on('disconnect', async () => {
       logger.error('Parent disconnected. Closing...')
-      await this._exitProcess(targetController)
+      await this._exitProcess(job)
     })
 
     // check if parent is active
@@ -142,14 +104,25 @@ export default class WorkerRunner {
         process.kill(this.parentPid, 0)
       } catch (err) {
         logger.error('Parent disconnected. Closing...')
-        await this._exitProcess()
+        await this._exitProcess(this.job)
       }
     }, 10000) // Check every second
   }
 
-  static async _exitProcess (targetController, exitCode = 0) {
+  /**
+   * Finish process
+   *
+   * @param {Job} job - The Job in execution
+   * @param exitCode
+   * @returns {Promise<void>}
+   * @private
+   */
+  static async _exitProcess (job, exitCode = 0) {
     try {
-      await targetController.jobTeardown()
+      for (const teardownFunction of job.teardownFunctions) {
+        logger.info(`Running job teardown on ERROR from  "${this.job.name}" `)
+        await teardownFunction()
+      }
     } catch (error) {
       console.error('Error during teardown:', error)
     } finally {
@@ -158,24 +131,4 @@ export default class WorkerRunner {
     }
   }
 
-  /**
-   * This method is responsible for finding and returning a specific controller
-   * that matches the command-line arguments.
-   *
-   * @private
-   *
-   * @static
-   */
-  static _getJobController (application) {
-    for (const controller of application.getControllers()) {
-      const isTargetController =
-                controller.applicationName === process.argv[3] &&
-                controller.appName === process.argv[4] &&
-                controller.controllerName === process.argv[5]
-
-      if (isTargetController) {
-        return controller
-      }
-    }
-  }
 }

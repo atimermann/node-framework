@@ -8,18 +8,13 @@
  */
 import createLogger from '../../library/logger.mjs'
 import WorkerRunner from '../jobs/worker-runner.mjs'
+
 const logger = createLogger('Controller')
 
-/**
- * @typedef {Object} Job
- * @property {string}   name         - The name of the job.
- * @property {string}   applicationName - The name of the application.
- * @property {string}   appName         - The name of the app.
- * @property {string}   controllerName  - The name of the controller
- * @property {string}   schedule        - The schedule of the job in cron format.
- * @property {function} jobFunction     - The function to be executed for the job.
- * @property {Object}   options         - The options for the job.
- */
+import JobManager from '../jobs/job-manager.mjs'
+import Job from '../jobs/job.mjs'
+import Worker from '../jobs/worker.mjs'
+import WorkerManager from '../jobs/worker-manager.mjs'
 
 /**
  * Provides job-related functionality for extending classes.
@@ -35,20 +30,6 @@ const logger = createLogger('Controller')
  * @requires {string} Controller#controllerName   - Expected to be defined in the base class. *
  */
 export default class JobsMixin {
-  /**
-   * A list of jobs to be executed. Each job in the list is an
-   * instance of Job, which contains 'jobName', 'schedule',
-   * 'jobFunction', and 'options'.
-   *
-   * @type {Job[]}
-   */
-  jobsList = []
-
-  /**
-   * Lista de Workers
-   * @type {[]}
-   */
-  workersList = []
 
   /**
    * Create a new job.
@@ -60,11 +41,8 @@ export default class JobsMixin {
    * @throws {Error} If a job with the provided name already exists.
    */
   createJob (name, schedule, jobFunction, options = {}) {
-    if (this.jobsList.some(job => job.name === name)) {
-      throw new Error(`Job "${name}" already exists.`)
-    }
 
-    this.jobsList.push({
+    const newJob = Job.create({
       applicationName: this.applicationName,
       appName: this.appName,
       controllerName: this.controllerName,
@@ -73,6 +51,9 @@ export default class JobsMixin {
       jobFunction,
       options
     })
+
+    JobManager.addJob(newJob)
+
   }
 
   /**
@@ -83,18 +64,54 @@ export default class JobsMixin {
    * @param options Configuração dos workers
    */
   createWorkers (name, jobName, options) {
-    if (this.workersList.some(job => job.workersList === name)) {
-      throw new Error(`Worker "${name}" already exists.`)
-    }
 
-    this.workersList.push({
-      applicationName: this.applicationName,
-      appName: this.appName,
-      controllerName: this.controllerName,
+    const job = JobManager.getJob(this.applicationName, this.appName, this.controllerName, jobName)
+    const newWorker = Worker.create({
       name,
-      jobName,
+      job,
+      persistent: true,
+      auto: false,
       options
     })
+
+    WorkerManager.addWorker(newWorker)
+  }
+
+  /**
+   * Defines a function that will be executed in all jobs in this controller when initializing the job
+   *
+   * @param {function} jobSetupFunction Function to be performed
+   * @param {boolean} allApplications    Runs on all jobs in all applications
+   * @param {boolean} allApps            Run all games from all apps in this application
+   * @param {boolean} allControllers     Executes all jobs on all controllers in this app
+   */
+  jobSetup (jobSetupFunction, allApplications = false, allApps = false, allControllers = false) {
+
+    JobManager.setSetupFunction(
+      jobSetupFunction,
+      allApplications ? null : this.applicationName,
+      allApps ? null : this.appName,
+      allControllers ? null : this.controllerName,
+    )
+  }
+
+  /**
+   * Defines a function that will be executed in all jobs after the job is finished
+   * For persistent jobs, only when an error occurs
+   *
+   * @param {function} jobTeardownFunction Function to be performed
+   * @param {boolean} allApplications    Runs on all jobs in all applications
+   * @param {boolean} allApps            Run all games from all apps in this application
+   * @param {boolean} allControllers     Executes all jobs on all controllers in this app
+   */
+  jobTeardown (jobTeardownFunction, allApplications = false, allApps = false, allControllers = false) {
+
+    JobManager.setTeardownFunction(
+      jobTeardownFunction,
+      allApplications ? null : this.applicationName,
+      allApps ? null : this.appName,
+      allControllers ? null : this.controllerName
+    )
   }
 
   async exit (exitCode) {
@@ -106,30 +123,10 @@ export default class JobsMixin {
    * Loading jobs
    *
    * Optional abstract method, used for defining jobs.
-   *
    * Can be overridden in a subclass if custom job definitions are needed.
    */
   async jobs () {
     logger.debug(`No jobs configured in ${this.completeIndentification}.`)
   }
 
-  /**
-   * Inicialização, executado para todos os jobs
-   * // TODO: Migrar para metodos executado dentro de jobs, ex: this.jobSetup(function)
-   * Roda no worker
-   * @returns {Promise<void>}
-   */
-  async jobSetup () {
-    logger.debug(`No jobsSetup configured in ${this.completeIndentification}.`)
-  }
-
-  /**
-   * Executado depois do job finalizar
-   // TODO: Migrar para metodos executado dentro de jobs, ex: this.jobTeardown(function)
-   * Roda no worker
-   * @returns {Promise<void>}
-   */
-  async jobTeardown () {
-    logger.debug(`No jobTeardown configured in ${this.completeIndentification}.`)
-  }
 }
