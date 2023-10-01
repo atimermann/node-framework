@@ -4,6 +4,8 @@
  * library/winstonTransport/socket.mjs
  * @author André Timermann <andre@timermann.com.br>
  *
+ *   TODO: Não conecta no modo HTTP_SERVER
+ *
  */
 
 import Transport from 'winston-transport'

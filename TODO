@@ -34,3 +34,9 @@
 
 *** LOGS ***
 - Melhorar segurança da conexão socket de log em produção
+
+
+*** CONFIG ***
+
+Alterar o config para carregar apenas variaveis de ambiente definidos na configurações como nuxt faz:
+Your desired variables must be defined in your nuxt.config. This ensures that arbitrary environment variables are not exposed to your application code.

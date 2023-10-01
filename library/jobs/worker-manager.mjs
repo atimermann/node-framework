@@ -4,23 +4,34 @@
  * /worker-manager.mjs
  * @author André Timermann <andre@timermann.com.br>
  *
+ * @typedef {import('./worker.mjs').default} Worker
+ *
  * TODO: Criar controle de processos zumbis
  * TODO: Parametrizar delay
  * TODO: Parametrizar options for workers
- * TODO: Criar classe/objeto/typedef para worker
  *
- * TODO: URGENTE - URGENTE - REFACTORUNG - Criar CLsses para Worker, Jobs, JobProcess e documentar relacionamento entre eles, migrar métodos
+ * TODO: URGENTE - URGENTE - REFACTORUNG - Criar CLsses para Worker, Jobs e documentar relacionamento entre eles, migrar métodos
  *
  */
 import JobManager from './job-manager.mjs'
 import createLogger from '../logger.mjs'
 import { EventEmitter } from 'events'
-import JobProcess from './job-process.mjs'
+import Worker from './worker.mjs'
 
 const logger = createLogger('WorkerManager')
 
 export default class WorkerManager {
+  /**
+   * List of workers
+   * @type {Worker[]}
+   */
   static workers = []
+
+  /**
+   * Workers dictionary, indexed by name
+   *
+   * @type {Object.<string, Worker>}
+   */
   static indexedWorkers = {}
   static checking = false
   static events = new EventEmitter()
@@ -34,10 +45,10 @@ export default class WorkerManager {
   static createUserWorkers (application) {
     for (const controller of application.getControllers()) {
       logger.debug(`Loading controller: ${controller.completeIndentification}`)
-      for (const worker of controller.workersList) {
-        const job = JobManager.getJob(worker.applicationName, worker.appName, worker.controllerName, worker.jobName)
-        job.workerName = worker.name
-        this.createWorker(worker.name, job, true, false, worker.options)
+      for (const workerInfo of controller.workersList) {
+        const job = JobManager.getJob(workerInfo.applicationName, workerInfo.appName, workerInfo.controllerName, workerInfo.jobName)
+        job.workerName = workerInfo.name
+        this.createWorker(workerInfo.name, job, true, false, workerInfo.options)
       }
     }
   }
@@ -46,6 +57,7 @@ export default class WorkerManager {
    * Creates workers for all the jobs that have been scheduled. Each job is assigned a worker
    * that will be responsible for executing the job as per its schedule.
    *
+   * TODO: Verificar necessidade de um metodo para isso, talvez criar por demanda
    * @static
    */
   static createScheduledWorkers (jobs) {
@@ -63,20 +75,16 @@ export default class WorkerManager {
    * @param {string} name - The name of the worker.
    * @param {Object} job - The job associated with the worker.
    * @param {boolean} persistent - Whether the worker is persistent.
-   * @param {boolean }auto  - automatically created
+   * @param {boolean} auto  - automatically created
    * @param {Object} options - The options for the worker.
    */
   static createWorker (name, job, persistent, auto, options = {}) {
-    logger.info(`Creating worker: "${name}" Job: "${job.name}" Persistent: "${persistent}" Schedule: "${job.schedule}"`)
 
-    const newWorker = {
-      name,
-      job,
-      persistent,
-      options,
-      auto,
-      jobProcesses: []
-    }
+    const newWorker = Worker.create(name, job, persistent, auto, options)
+
+    newWorker.on('processError', jobProcess => {
+      this.events.emit('processError', jobProcess)
+    })
 
     this.workers.push(newWorker)
     this.indexedWorkers[newWorker.name] = newWorker
@@ -89,7 +97,7 @@ export default class WorkerManager {
   static async runPersistentWorkers () {
     for (const worker of this.workers) {
       if (worker.persistent) {
-        await this.runWorkerProcesses(worker.name)
+        await worker.runProcess()
       }
     }
   }
@@ -102,33 +110,10 @@ export default class WorkerManager {
    */
   static async runWorkerProcesses (workerName) {
     const worker = this.indexedWorkers[workerName]
-
-    if (worker.jobProcesses.length > 0) {
-      logger.info(`Restarting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}"`)
-      await this.restartWorkerProcesses(worker)
-    } else {
-      const concurrency = worker.options.concurrency || 1
-      logger.info(`Starting Worker: "${workerName}" Job: "${worker.job.name}" Persistent: "${worker.persistent}" Concurrency: ${concurrency}`)
-      for (let i = 1; i <= concurrency; i++) {
-        const jobProcess = JobProcess.create(worker, `#${i}`, worker.options)
-
-        jobProcess.on('processError', jobProcess => {
-          this.events.emit('processError', jobProcess)
-        })
-
-        worker.jobProcesses.push(jobProcess)
-      }
-    }
+    await worker.runProcess()
   }
 
-  /**
-   * Restart jobs for a specific worker.
-   */
-  static async restartWorkerProcesses (worker) {
-    for (const jobProcess of worker.jobProcesses) {
-      await jobProcess.restart()
-    }
-  }
+
 
   /**
    * Monitors workers health at regular intervals.
@@ -136,14 +121,14 @@ export default class WorkerManager {
   static monitorWorkersHealth () {
     // TODO: Parametrizar tempo de verificação
     setInterval(() => {
-      this.verifyWorkerHealth()
+      this.verifyWorkersHealth()
     }, 30 * 1000) // verifica a cada 30 segundos
   }
 
   /**
    * Checks the health of all workers.
    */
-  static verifyWorkerHealth () {
+  static verifyWorkersHealth () {
     if (this.checking) return
 
     logger.info('Checking Health')
@@ -152,14 +137,7 @@ export default class WorkerManager {
     // console.log('[WorkerManager]', 'Check Workers:')
 
     for (const worker of this.workers) {
-      // console.log('[WorkerManager]', `Check Worker "${worker.name}" `)
-      if (worker.persistent) {
-        // Verifica se o Processo finalizou e reinicia
-        for (const jobProcess of worker.jobProcesses) {
-          jobProcess.checkHealth()
-          // this.verifyPersistentJobHealth(worker, jobProcess)
-        }
-      }
+      worker.checkHealth()
     }
 
     this.checking = false

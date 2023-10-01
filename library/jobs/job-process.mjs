@@ -5,6 +5,8 @@
  *
  * This class extends EventEmitter to allow monitoring and reacting to different states of the job process through various events.
  *
+ * @typedef {import('./worker.mjs').default} Worker
+ *
  * @class
  * @extends EventEmitter
  *
@@ -29,8 +31,7 @@ export default class JobProcess extends EventEmitter {
   /**
    * The worker instance that owns this process.
    *
-   * // TODO: Criar classe para worker e definir tipo aqui
-   *
+   * @type {Worker}
    */
   worker
 
@@ -95,7 +96,7 @@ export default class JobProcess extends EventEmitter {
   /**
    * Factory method to create a new JobProcess instance, set its properties, and initiate the process.
    *
-   * @param {Object} worker - The worker that owns this process.
+   * @param {Worker} worker - The worker that owns this process.
    * @param {string} id - A unique identifier for this process.
    * @param {Object} options - Additional options for this process.
    *
