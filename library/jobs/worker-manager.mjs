@@ -68,6 +68,8 @@ export default class WorkerManager {
    * @param {boolean} persistent - Whether the worker is persistent.
    * @param {boolean} auto  - automatically created
    * @param {Object} options - The options for the worker.
+   *
+   * @returns {Worker}
    */
   static createWorker (name, job, persistent, auto, options = {}) {
     const newWorker = Worker.create({
@@ -77,7 +79,10 @@ export default class WorkerManager {
       auto,
       options
     })
+
     this.addWorker(newWorker)
+
+    return newWorker
   }
 
   /**
@@ -90,17 +95,6 @@ export default class WorkerManager {
         await worker.runProcess()
       }
     }
-  }
-
-  /**
-   * Executes workers.
-   *
-   * @param {string} workerName - The name of the worker.
-   * @returns {Promise<void>}
-   */
-  static async runWorkerProcesses (workerName) {
-    const worker = this.indexedWorkers[workerName]
-    await worker.runProcess()
   }
 
   /**

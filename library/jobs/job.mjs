@@ -76,6 +76,7 @@ export default class Job extends EventEmitter {
 
   /**
    * The worker assigned to execute the job.
+   * TODO: Jobs podem ter mais de um worker, se for criar referencia cruzada tratar isso
    * @type {Worker}
    */
   worker
@@ -119,6 +120,14 @@ export default class Job extends EventEmitter {
     job.options = options
     job.setUUID()
 
+    // Force enumerable false to avoid problems reading the socket, which goes into an infinite loop (Cross Reference)
+    Object.defineProperty(job, 'worker', {
+      value: undefined,
+      enumerable: false,
+      writable: true,
+      configurable: false
+    })
+
     return job
   }
 
@@ -142,5 +151,22 @@ export default class Job extends EventEmitter {
   static createUUID (applicationName, appName, controllerName, name) {
     const uniqueString = `${applicationName}${appName}${controllerName}${name}`
     return crypto.createHash('md5').update(uniqueString).digest('hex')
+  }
+
+  /**
+   * Starts the execution of a job. This involves spawning a child process
+   * that executes the job's function.
+   *
+   * @param {Job} job - The job object that needs to be executed.
+   * @returns {Promise<void>} A promise that resolves when the job starts execution.
+   * @static
+   */
+  async run () {
+    if (!this.worker) {
+      throw new Error(`Worker not defined in "${this.name}", cannot execute!`)
+    }
+
+    logger.info(`Running job: "${this.name}" Schedule: "${this.schedule}" Worker: "${this.worker.name}"`)
+    await this.worker.runProcess()
   }
 }

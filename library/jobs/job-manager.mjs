@@ -155,8 +155,7 @@ export default class JobManager {
   static createScheduledWorkers () {
     for (const [, job] of Object.entries(this.jobs)) {
       if (job.schedule) {
-        job.workerName = `${job.name}-${job.uuid}`
-        WorkerManager.createWorker(job.workerName, job, false, true, {})
+        job.worker = WorkerManager.createWorker(`${job.name}-${job.uuid}`, job, false, true, {})
       }
     }
   }
@@ -223,7 +222,7 @@ export default class JobManager {
     for (const [, job] of Object.entries(this.jobs)) {
       if (job.schedule) {
         if (job.schedule === 'now') {
-          promises.push(this.runJob(job))
+          promises.push(job.run())
         } else if (job.schedule) {
           promises.push(this.schedulingJob(job))
         }
@@ -243,7 +242,7 @@ export default class JobManager {
   static async schedulingJob (job) {
     cron.schedule(job.schedule, async () => {
       try {
-        await this.runJob(job)
+        await job.run()
       } catch (error) {
         console.error(error)
       }
@@ -251,19 +250,6 @@ export default class JobManager {
       scheduled: true,
       timezone: Config.get('httpServer.timezone')
     })
-  }
-
-  /**
-   * Starts the execution of a job. This involves spawning a child process
-   * that executes the job's function.
-   *
-   * @param {Job} job - The job object that needs to be executed.
-   * @returns {Promise<void>} A promise that resolves when the job starts execution.
-   * @static
-   */
-  static async runJob (job) {
-    logger.info(`Running job: "${job.name}" Schedule: "${job.schedule}" Worker: "${job.workerName}"`)
-    await WorkerManager.runWorkerProcesses(job.workerName)
   }
 
   /**
