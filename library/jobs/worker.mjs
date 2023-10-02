@@ -97,8 +97,12 @@ export default class Worker extends EventEmitter {
       for (let i = 1; i <= concurrency; i++) {
         const jobProcess = JobProcess.create(this, `#${i}`, this.options)
 
-        jobProcess.on('processError', jobProcess => {
+        jobProcess.on('error', () => {
           this.emit('processError', jobProcess)
+        })
+
+        jobProcess.on('log', data => {
+          this.emit('processLog', jobProcess, data)
         })
 
         this.jobProcesses.push(jobProcess)
