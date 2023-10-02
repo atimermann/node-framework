@@ -119,8 +119,12 @@ export default class JobProcess extends EventEmitter {
    * @param {Buffer|string} data - Data from child process output.
    */
   log (childLogger, data) {
+
     for (const line of data.toString().split('\n')) {
       try {
+
+        this.emit('log', data)
+
         const logObj = JSON.parse(line)
         const logModule = logObj.module ? `[${logObj.module}] ` : ''
         childLogger[logObj.level](`${logModule}${logObj.message}`)
@@ -171,7 +175,7 @@ export default class JobProcess extends EventEmitter {
       this.countClose++
 
       if (code !== 0) {
-        this.emit('processError', this)
+        this.emit('processError')
       }
     })
   }

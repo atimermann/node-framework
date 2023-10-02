@@ -11,6 +11,7 @@ import Config from '../config.mjs'
 import cloneDeep from 'lodash/cloneDeep.js'
 import createLogger from '../logger.mjs'
 import Job from './job.mjs'
+import { EventEmitter } from 'events'
 
 const logger = createLogger('JobManager')
 
@@ -34,15 +35,17 @@ export default class JobManager {
 
   static jobSetupAndTeadDownFunctions = []
 
+  static events = new EventEmitter()
+
   /**
-   * Carrega Manager
-   * (carrega jobs and workers)
+   * Load Manager
+   * (Loads jobs and workers)
    *
    * @param application
    * @returns {Promise<void>}
    */
   static async load (application) {
-    await this.loadJobsAndWorkersFromController(application)
+    await this._loadJobsAndWorkersFromController(application)
     this._configureSetupAndTeardownFunctions()
   }
 
@@ -60,9 +63,9 @@ export default class JobManager {
 
     await this.load(application)
 
-    this.createScheduledWorkers()
+    this._createScheduledWorkers()
 
-    await this.startScheduleJob()
+    await this._startScheduleJob()
     await WorkerManager.run()
   }
 
@@ -107,60 +110,6 @@ export default class JobManager {
   }
 
   /**
-   * Configures setup and teardown functions for all system jobs according to application, app and controller
-   * @private
-   */
-  static _configureSetupAndTeardownFunctions () {
-    for (const [, job] of Object.entries(this.jobs)) {
-      const jobSetupAndTeadDownFunctions = this._filterFunctiontoJob(job)
-
-      for (const jobSetupAndTeadDownFunction of jobSetupAndTeadDownFunctions) {
-        if (jobSetupAndTeadDownFunction.type === SETUP_FUNCTION) {
-          job.setupFunctions.push(jobSetupAndTeadDownFunction.jobSetupFunction)
-        } else if (jobSetupAndTeadDownFunction.type === TEARDOWN_FUNCTION) {
-          job.teardownFunctions.push(jobSetupAndTeadDownFunction.jobTeardownFunction)
-        }
-      }
-    }
-  }
-
-  /**
-   * Filter list of setup and teardown functions for specific job
-   *
-   * @param job
-   * @returns {*[]}
-   * @private
-   */
-  static _filterFunctiontoJob (job) {
-    return this.jobSetupAndTeadDownFunctions.filter(jobSetupFunction => {
-      if (jobSetupFunction.applicationName && jobSetupFunction.applicationName !== job.applicationName) {
-        return false
-      }
-      if (jobSetupFunction.appName && jobSetupFunction.appName !== job.appName) {
-        return false
-      }
-      if (jobSetupFunction.controllerName && jobSetupFunction.controllerName !== job.controllerName) {
-        return false
-      }
-      return true
-    })
-  }
-
-  /**
-   * Creates workers for all the jobs that have been scheduled. Each job is assigned a worker
-   * that will be responsible for executing the job as per its schedule.
-   *
-   * @static
-   */
-  static createScheduledWorkers () {
-    for (const [, job] of Object.entries(this.jobs)) {
-      if (job.schedule) {
-        job.worker = WorkerManager.createWorker(`${job.name}-${job.uuid}`, job, false, true, {})
-      }
-    }
-  }
-
-  /**
    * Add a new job
    *
    * @param {Job} job
@@ -190,66 +139,6 @@ export default class JobManager {
 
     this.jobs[job.uuid] = job
     logger.info(`Loading Job: "${job.name}" UUID:  ${job.uuid}`)
-  }
-
-  /**
-   * Loads the job and worker details from the user-defined application context.
-   * This involves scanning through all the controllers and extracting the job details.
-   *
-   * @param {import('../application.mjs').Application} application - The application context within which to find the jobs.
-   *
-   * @returns {Promise<void>} A promise that resolves when all jobs and workers have been loaded.
-   * @static
-   */
-
-  static async loadJobsAndWorkersFromController (application) {
-    logger.info('Loading jobs and Workers from controllers...')
-    for (const controller of application.getControllers()) {
-      logger.info(`Loading "${controller.completeIndentification}"...`)
-      await controller.jobs()
-    }
-  }
-
-  /**
-   * Starts all the scheduled jobs. This involves initiating the execution of each job
-   * as per its predefined schedule.
-   *
-   * @returns {Promise<void>} A promise that resolves when all scheduled jobs have started execution.
-   * @static
-   */
-  static async startScheduleJob () {
-    const promises = []
-    for (const [, job] of Object.entries(this.jobs)) {
-      if (job.schedule) {
-        if (job.schedule === 'now') {
-          promises.push(job.run())
-        } else if (job.schedule) {
-          promises.push(this.schedulingJob(job))
-        }
-      }
-    }
-    await Promise.all(promises)
-  }
-
-  /**
-   * Schedules a job to run at predefined intervals. This involves creating a cron job
-   * that triggers the job execution as per its schedule.
-   *
-   * @param {Job} job - The job object that needs to be scheduled.
-   * @returns {Promise<void>} A promise that resolves when the job has been scheduled.
-   * @static
-   */
-  static async schedulingJob (job) {
-    cron.schedule(job.schedule, async () => {
-      try {
-        await job.run()
-      } catch (error) {
-        console.error(error)
-      }
-    }, {
-      scheduled: true,
-      timezone: Config.get('httpServer.timezone')
-    })
   }
 
   /**
@@ -321,5 +210,123 @@ export default class JobManager {
     })
 
     return clonedJobs
+  }
+
+  /**
+   * Configures setup and teardown functions for all system jobs according to application, app and controller
+   * @private
+   */
+  static _configureSetupAndTeardownFunctions () {
+    for (const [, job] of Object.entries(this.jobs)) {
+      const jobSetupAndTeadDownFunctions = this._filterFunctiontoJob(job)
+
+      for (const jobSetupAndTeadDownFunction of jobSetupAndTeadDownFunctions) {
+        if (jobSetupAndTeadDownFunction.type === SETUP_FUNCTION) {
+          job.setupFunctions.push(jobSetupAndTeadDownFunction.jobSetupFunction)
+        } else if (jobSetupAndTeadDownFunction.type === TEARDOWN_FUNCTION) {
+          job.teardownFunctions.push(jobSetupAndTeadDownFunction.jobTeardownFunction)
+        }
+      }
+    }
+  }
+
+  /**
+   * Filter list of setup and teardown functions for specific job
+   *
+   * @param job
+   * @returns {*[]}
+   * @private
+   */
+  static _filterFunctiontoJob (job) {
+    return this.jobSetupAndTeadDownFunctions.filter(jobSetupFunction => {
+      if (jobSetupFunction.applicationName && jobSetupFunction.applicationName !== job.applicationName) {
+        return false
+      }
+      if (jobSetupFunction.appName && jobSetupFunction.appName !== job.appName) {
+        return false
+      }
+      if (jobSetupFunction.controllerName && jobSetupFunction.controllerName !== job.controllerName) {
+        return false
+      }
+      return true
+    })
+  }
+
+  /**
+   * Creates workers for all the jobs that have been scheduled. Each job is assigned a worker
+   * that will be responsible for executing the job as per its schedule.
+   *
+   * @static
+   * @private
+   */
+  static _createScheduledWorkers () {
+    for (const [, job] of Object.entries(this.jobs)) {
+      if (job.schedule) {
+        job.worker = WorkerManager.createWorker(`${job.name}-${job.uuid}`, job, false, true, {})
+      }
+    }
+  }
+
+  /**
+   * Loads the job and worker details from the user-defined application context.
+   * This involves scanning through all the controllers and extracting the job details.
+   *
+   * @param {import('../application.mjs').Application} application - The application context within which to find the jobs.
+   *
+   * @returns {Promise<void>} A promise that resolves when all jobs and workers have been loaded.
+   * @static
+   * @private
+   */
+
+  static async _loadJobsAndWorkersFromController (application) {
+    logger.info('Loading jobs and Workers from controllers...')
+    for (const controller of application.getControllers()) {
+      logger.info(`Loading "${controller.completeIndentification}"...`)
+      await controller.jobs()
+    }
+  }
+
+  /**
+   * Starts all the scheduled jobs. This involves initiating the execution of each job
+   * as per its predefined schedule.
+   *
+   * @returns {Promise<void>} A promise that resolves when all scheduled jobs have started execution.
+   * @static
+   * @private
+   */
+  static async _startScheduleJob () {
+    const promises = []
+    for (const [, job] of Object.entries(this.jobs)) {
+      if (job.schedule) {
+        if (job.schedule === 'now') {
+          promises.push(job.run())
+        } else if (job.schedule) {
+          promises.push(this._schedulingJob(job))
+        }
+      }
+    }
+    await Promise.all(promises)
+  }
+
+  /**
+   * Schedules a job to run at predefined intervals. This involves creating a cron job
+   * that triggers the job execution as per its schedule.
+   *
+   * @param {Job} job - The job object that needs to be scheduled.
+   * @returns {Promise<void>} A promise that resolves when the job has been scheduled.
+   * @static
+   * @private
+   */
+  static async _schedulingJob (job) {
+    cron.schedule(job.schedule, async () => {
+      try {
+        await job.run()
+      } catch (error) {
+        console.error(error)
+      }
+    }, {
+      scheduled: true,
+      timezone: Config.get('httpServer.timezone')
+    })
   }
 }
