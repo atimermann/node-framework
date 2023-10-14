@@ -72,6 +72,9 @@ export default {
         key: fs.readFileSync(Config.get('httpServer.https.key')),
         cert: fs.readFileSync(Config.get('httpServer.https.cert'))
       })
+
+      // TODO: Criar fallback para porta 80 redirecionar para porta https, vai ter q subir dois servidores
+
     } else {
       httpServer = createServer()
     }
@@ -190,6 +193,26 @@ export default {
     // TODO: Parametrizar: https://expressjs.com/en/resources/middleware/cors.html#installation
     /// /////////////////////////////////////////////////
     app.use(cors())
+
+    // TODO: Necessário habilitar http fallback
+    // // Middleware para redirecionamento de HTTP para HTTPS
+    // function ensureSecure (req, res, next) {
+    //   if (req.secure) {
+    //     console.log('NÃO REDIRECIONANDO =========================================================================================================')
+    //     // Requisição já é HTTPS, não precisa de redirecionamento
+    //     return next()
+    //   }
+    //
+    //   console.log('REDIRECIONANDO =========================================================================================================')
+    //
+    //   // Redireciona para a versão HTTPS da mesma URL
+    //   res.redirect('https://' + req.hostname + req.url)
+    // }
+    //
+    // // Adicione o middleware de redirecionamento antes de outras rotas
+    // if (HTTPS_ENABLED) {
+    //   app.use(ensureSecure)
+    // }
 
     /// /////////////////////////////////////////////////
     // TODO: Parametrizar possibilidade de usar CDN ou servidor separado
