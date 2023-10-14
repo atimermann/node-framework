@@ -29,9 +29,13 @@ import { createServer } from 'http'
 import cors from 'cors'
 import Config from './config.mjs'
 import SocketServer from './socket-server.mjs'
+import fs from 'node:fs'
 
 import createLogger from './logger.mjs'
+
 const logger = createLogger('Http Server')
+
+const HTTPS_ENABLED = Config.get('httpServer.https.enabled')
 
 export default {
 
@@ -51,7 +55,26 @@ export default {
     // Deserializa informações da aplicação
     // let application = JSON.parse(serializedApplication)
 
-    const httpServer = createServer()
+    let httpServer
+
+    if (HTTPS_ENABLED) {
+      let https
+      try {
+        https = await import('node:https')
+      } catch (err) {
+        console.error('https support is disabled!')
+      }
+
+      // Estender se necessário:
+      // - https://nodejs.org/docs/latest-v18.x/api/tls.html#tlscreatesecurecontextoptions
+      //  - https://nodejs.org/docs/latest-v18.x/api/tls.html#tlscreateserveroptions-secureconnectionlistener
+      httpServer = https.createServer({
+        key: fs.readFileSync(Config.get('httpServer.https.key')),
+        cert: fs.readFileSync(Config.get('httpServer.https.cert'))
+      })
+    } else {
+      httpServer = createServer()
+    }
 
     /**
      * Route for accessing static resources (e.g., jpeg, html, js etc...)
@@ -114,6 +137,7 @@ export default {
     logger.info('==============================================================')
     logger.info(`Hostname:         ${this.hostname}`)
     logger.info(`Port:             ${this.port}`)
+    logger.info(`Https (SSL):      ${HTTPS_ENABLED}`)
     logger.info(`Static route:     http://${this.hostname}${this.port === 80 ? `:${this.port}` : ''}${this.staticRoute}`)
     logger.info(`Static root path: ${join(process.cwd(), this.staticPath)}`)
     logger.info('==============================================================')
@@ -330,7 +354,9 @@ export default {
       logger.info('Port:    ' + httpServer.address().port)
       logger.info('Family:  ' + httpServer.address().family)
       logger.info('--------------------------------------------------------------')
-      logger.info('Http server started!')
+      Config.get('httpServer.https.enabled')
+        ? logger.info('Https server started!')
+        : logger.info('Https server started!')
     })
   }
 

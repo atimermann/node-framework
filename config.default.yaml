@@ -45,6 +45,11 @@ httpServer:
 
   timezone: "America/Sao_Paulo"
 
+  https:
+    enabled: false
+    key: 'key.pem'
+    cert: 'cert.pem'
+
 # Habilita Sistema Gerenciador de Jobs e Worker
 jobManager:
   enabled: true

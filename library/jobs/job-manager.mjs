@@ -121,24 +121,35 @@ export default class JobManager {
       throw new Error(`Job "${job.name}" already exists.`)
     }
 
-    // Does not load if set not to load
-    if (applicationEnabled && (!Array.isArray(applicationEnabled) || !applicationEnabled.includes(job.applicationName))) {
-      logger.info(`Application "${job.applicationName}" disabled!`)
-      return
-    }
-
-    if (appsEnabled && (!Array.isArray(appsEnabled) || !appsEnabled.includes(job.appName))) {
-      logger.info(`App "${job.appName}" disabled!`)
-      return
-    }
-
-    if (controllersEnabled && (!Array.isArray(controllersEnabled) || !controllersEnabled.includes(job.controllerName))) {
-      logger.info(`Controller "${job.controllerName}" disabled!`)
-      return
-    }
-
     this.jobs[job.uuid] = job
     logger.info(`Loading Job: "${job.name}" UUID:  ${job.uuid}`)
+  }
+
+  /**
+   * Checks if job is active
+   *
+   * @param {Controller} controller
+   * @return boolean
+   * @private
+   */
+  static _isJobEnabled (controller) {
+    // Does not load if set not to load
+    if (applicationEnabled && (!Array.isArray(applicationEnabled) || !applicationEnabled.includes(controller.applicationName))) {
+      logger.info(`Application "${controller.applicationName}" disabled!`)
+      return false
+    }
+
+    if (appsEnabled && (!Array.isArray(appsEnabled) || !appsEnabled.includes(controller.appName))) {
+      logger.info(`App "${controller.appName}" disabled!`)
+      return false
+    }
+
+    if (controllersEnabled && (!Array.isArray(controllersEnabled) || !controllersEnabled.includes(controller.controllerName))) {
+      logger.info(`Controller "${controller.controllerName}" disabled!`)
+      return false
+    }
+
+    return true
   }
 
   /**
@@ -282,6 +293,9 @@ export default class JobManager {
     logger.info('Loading jobs and Workers from controllers...')
     for (const controller of application.getControllers()) {
       logger.info(`Loading "${controller.completeIndentification}"...`)
+
+      if (!this._isJobEnabled(controller)) return
+
       await controller.jobs()
     }
   }
