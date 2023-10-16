@@ -99,7 +99,7 @@ export default class Application {
    */
   loadApplication (applicationLoader) {
 
-    const application = applicationLoader(Application)
+    const application = applicationLoader(applicationLoader)
 
     if (!application.constructor._nodeFrameworkVersion) {
       throw new TypeError('Application must be an instance of Application')
