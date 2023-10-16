@@ -30,12 +30,20 @@ const logger = createLogger('Init')
 export default {
 
   /**
-   * Initializes Server
+   * Initializes the server.
    *
-   * @param {Application} application
+   * @param {function(Application): Application} applicationLoader - A function that receives the Application class and returns an instance of it.
+   *
+   * @throws {TypeError} If the provided applicationLoader does not return an instance of Application.
+   * @throws {Error} If the jobManager is disabled when running in 'job' mode.
+   *
+   * @returns {void}
    */
-  async init (application) {
+  async init (applicationLoader) {
     try {
+
+      const application = applicationLoader(Application)
+
       if (!(application instanceof Application)) {
         // noinspection ExceptionCaughtLocallyJS
         throw new TypeError('application must be instance of Application')

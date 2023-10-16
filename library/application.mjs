@@ -92,12 +92,15 @@ export default class Application {
   }
 
   /**
-   * Loads a sub-application (a dependency of the main application)
+   * Loads a sub-application (a dependency of the main application).
    *
-   * @param {Application} application - An instance of the Application class
-   * @throws {TypeError} Will throw an error if the provided application is not an instance of Application.
+   * @param {function(Application): Application} applicationLoader - A function that receives the Application class and returns an instance of it.
+   * @throws {TypeError} Will throw an error if the provided applicationLoader is not a valid function.
    */
-  loadApplication (application) {
+  loadApplication (applicationLoader) {
+
+    const application = applicationLoader(Application)
+
     if (!application.constructor._nodeFrameworkVersion) {
       throw new TypeError('Application must be an instance of Application')
     }
@@ -111,8 +114,8 @@ export default class Application {
     //  o motivo e como resolver
     if (!(application instanceof Application)) {
       throw new TypeError('Application must be an instance of Application. If you are importing a sub-application ' +
-          'of a module, make sure that both are using the same version of the node-framework, you must use the same ' +
-          'instance, import from the same file.')
+        'of a module, make sure that both are using the same version of the node-framework, you must use the same ' +
+        'instance, import from the same file. Use ApplicationLoader!')
     }
 
     if (this.initialized) {
