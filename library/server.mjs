@@ -81,12 +81,15 @@ export default {
 
     this.logInfo(application)
 
-    await Promise.all([
-      Config.get('httpServer.enabled', 'boolean') ? HttpServer.run(application) : null,
-      Config.get('jobManager.enabled', 'boolean') ? JobManager.run(application) : null
-    ])
+    // Order is important
+    if (Config.get('httpServer.enabled', 'boolean')) {
+      await HttpServer.run(application)
+    }
 
-    // Wait for http-server to load
+    if (Config.get('httpServer.enabled', 'boolean')) {
+      await JobManager.run(application)
+    }
+
     if (Config.get('socket.enabled', 'boolean')) await SocketServer.run(application)
   },
 

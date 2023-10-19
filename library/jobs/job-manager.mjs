@@ -60,7 +60,6 @@ export default class JobManager {
    */
   static async run (application) {
     logger.info('Initializing...')
-
     await this.load(application)
 
     this._createScheduledWorkers()

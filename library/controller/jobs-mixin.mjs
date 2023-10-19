@@ -54,7 +54,7 @@ export default class JobsMixin {
   }
 
   /**
-   * Cria workees para processar determinado job
+   * Creates workers to process a given job
    *
    * @param {string} name Nome do Grupo de workes
    * @param {string} jobName  Nome da tarefa que será processda
