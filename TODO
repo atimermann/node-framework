@@ -1,5 +1,12 @@
 - Migrar todos os arquivos para ESM
 - Criar teste unitário
+- Criar validação restrita do JSDOC com todos os tipos
+    - https://github.com/tjw-lint/eslint-config-tjw-jsdoc
+    - @ts-check
+    - https://www.typescriptlang.org/docs/handbook/intro-to-js-ts.html
+    - https://www.reddit.com/r/vuejs/comments/st2zkt/jsdoc_or_typescript/
+
+
 - configuração CORS
 - Suporte CDN https://github.com/niftylettuce/express-cdn
 - JS-2-DOC MARDKDOWN
@@ -40,3 +47,31 @@
 
 Alterar o config para carregar apenas variaveis de ambiente definidos na configurações como nuxt faz:
 Your desired variables must be defined in your nuxt.config. This ensures that arbitrary environment variables are not exposed to your application code.
+
+
+*** PROBLEMA DO NODE_FRAMEWORK INCOMPATIVEL ***
+
+Quando o projeto carrega um app terceiro em outro modulo, pode acontecer desse módulo estar usando uma versão mais antiga do '@agtm/node-framework'
+
+Para evitar isso foi criado a função loadApplication em main.js, forçando carregar aplicação na mesma versão do node-framwork do projeto.
+
+
+Porém nos controllers definido no app terceiro pode ser chamado dessa forma:
+
+import { Controller, createLogger, JobManager, WorkerManager } from '@agtm/node-framework'
+
+Nesse caso o Controller, createLogger, JobManager e WorkerManager vai não vai ser a mesma instancia da versão usada no projeto
+
+Isso pode causar incompatibilidades, sendo a mais grade velas do JobManager e WOrkerManager, que armazena dados internamente
+como eventos, variaveis.
+
+Neste caso o WorkerManager carregado desse controller NÂO É O WOrker manager em execução no projeto, ou seja, toda operação
+feita neste WorkerManager será ignroado, pois é outra instancia, ou como se fosse outra aplicação q nem rodando está
+
+o correto seria fazer algo como this.workermanager no controller, infelizmente o controller também é inválido e já
+existe uma validação no framework que disparada erro, ou seja o projeto nem vai funcionar
+
+Porém precisamos q apps de terceiro em versões mais antigas continue funcionando, necessário descobrir uma abordagem
+
+
+DOCUMENTAR IMPLEMENTAÇÂO DE LIBRARY

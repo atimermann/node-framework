@@ -12,6 +12,7 @@
 import path from 'path'
 import { readdir, access } from 'fs/promises'
 
+import Controller from './controller/controller.mjs'
 import createLogger from './logger.mjs'
 const logger = createLogger('ApplicationController')
 
@@ -86,13 +87,20 @@ export default class ApplicationController {
 
     for (const controllerName of await readdir(controllersPath)) {
       const controllerPath = path.join(controllersPath, controllerName)
-      let Controller
+      let TargetController
 
       if (['.mjs', '.js'].includes(path.extname(controllerPath))) {
         logger.debug(`Loading controller '${path.basename(controllerName)}'`)
 
-        Controller = (await import(controllerPath)).default
-        const controllerInstance = new Controller()
+        TargetController = (await import(controllerPath)).default
+        const controllerInstance = new TargetController()
+
+        if (!(controllerInstance instanceof Controller)) {
+          throw new TypeError('Controller must be an instance of Controller. If you are importing a sub-application ' +
+              'of a module, make sure that both are using the same version of the node-framework, you must use the same ' +
+              `instance, import from the same file. Use ApplicationLoader! Controller incompatible in "${controllerPath}"!`)
+        }
+
         controllerInstance.controllerName = path.basename(controllerName, path.extname(controllerPath))
         controllersInstances.push(controllerInstance)
       }

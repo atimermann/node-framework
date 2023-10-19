@@ -17,6 +17,10 @@ import path from 'path'
 import { readdir } from 'fs/promises'
 import createLogger from './logger.mjs'
 import { readFileSync } from 'fs'
+import Controller from './controller/controller.mjs'
+import WorkerManager from './jobs/worker-manager.mjs'
+import JobManager from './jobs/job-manager.mjs'
+import Config from './config.mjs'
 
 const filePath = new URL('../package.json', import.meta.url)
 const packageInfo = JSON.parse(readFileSync(filePath, 'utf8'))
@@ -55,12 +59,26 @@ export default class Application {
   initialized = false
 
   /**
-   * The constructor of the Application class.
-   *
-   * @param {string} applicationPath - The physical path of the application. This should be defined using __dirname.
-   * @param {string} name - The name of the application that will be loaded. This is mandatory.
-   * @throws {Error} Will throw an error if the path or name parameters are not provided or not of type 'string'.
+   * Returns list of applications to be used in importable apps
+   * @returns {{createLogger: ((function(*): {warn(*): void, debug(*): void, error(*): void, info(*): void})|*), WorkerManager: WorkerManager, Config: Config, JobManager: JobManager, Controller: Controller}}
    */
+  static getLibraries () {
+    return {
+      createLogger,
+      Controller,
+      JobManager,
+      WorkerManager,
+      Config
+    }
+  }
+
+  /**
+     * The constructor of the Application class.
+     *
+     * @param {string} applicationPath - The physical path of the application. This should be defined using __dirname.
+     * @param {string} name - The name of the application that will be loaded. This is mandatory.
+     * @throws {Error} Will throw an error if the path or name parameters are not provided or not of type 'string'.
+     */
   constructor (applicationPath, name) {
     logger.info(`Instantiating application "${name}"...`)
 
@@ -98,20 +116,12 @@ export default class Application {
    * @throws {TypeError} Will throw an error if the provided applicationLoader is not a valid function.
    */
   loadApplication (applicationLoader) {
-
     const application = applicationLoader(Application)
 
     if (!application.constructor._nodeFrameworkVersion) {
       throw new TypeError('Application must be an instance of Application')
     }
 
-    if (application.constructor._nodeFrameworkVersion !== this.constructor._nodeFrameworkVersion) {
-      console.warn(`Node framework version mismatch ${application.constructor._nodeFrameworkVersion} <> ${this.constructor._nodeFrameworkVersion}`)
-    }
-
-    // TODO: JobProcess perde os valores quando subaplicação utiliza versão diferente, no futuro analisar e verificar
-    //  o motivo deste problema, ao utilizar versão diferente ambos importam JOBProcess de arquivos diferente,entender
-    //  o motivo e como resolver
     if (!(application instanceof Application)) {
       throw new TypeError('Application must be an instance of Application. If you are importing a sub-application ' +
         'of a module, make sure that both are using the same version of the node-framework, you must use the same ' +

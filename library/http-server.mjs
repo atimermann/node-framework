@@ -74,7 +74,6 @@ export default {
       })
 
       // TODO: Criar fallback para porta 80 redirecionar para porta https, vai ter q subir dois servidores
-
     } else {
       httpServer = createServer()
     }

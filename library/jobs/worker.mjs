@@ -7,14 +7,30 @@
  *   @typedef {import('./job-process.mjs').default} JobProcess
  *   @typedef {import('./job.mjs').default} Job
  *
+ *
+ */
+
+/**
+ *  `run` event.
+ *
+ * @event WorkerManager#run *
+ * @type {object}
+ *
+ * @fires WorkerManager#run
  */
 
 import createLogger from '../logger.mjs'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import JobProcess from './job-process.mjs'
 
 const logger = createLogger('WorkerManager')
 
+/**
+ * Manages the executions of a given job
+ *
+ *  Events:
+ *    run - Fired whenever a new worker execution starts
+ */
 export default class Worker extends EventEmitter {
   /**
    * The name of the worker.
@@ -48,13 +64,13 @@ export default class Worker extends EventEmitter {
   options = {}
 
   /**
-   *  jobProcess list
+   *  List of processes that are running the job
    *  @type {JobProcess[]}
    */
   jobProcesses = []
 
   /**
-   *  Instancia um novo worker
+   *  Instantiate a new worker
    *
    * @param name
    * @param job
@@ -87,7 +103,7 @@ export default class Worker extends EventEmitter {
    *
    * @returns {Promise<void>}
    */
-  async runProcess () {
+  async run () {
     if (this.jobProcesses.length > 0) {
       logger.info(`Restarting Worker: "${this.name}" Job: "${this.job.name}" Persistent: "${this.persistent}"`)
       await this.restartProcesses()
@@ -108,6 +124,8 @@ export default class Worker extends EventEmitter {
         this.jobProcesses.push(jobProcess)
       }
     }
+
+    this.emit('run')
   }
 
   /**

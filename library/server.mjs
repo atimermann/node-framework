@@ -41,7 +41,6 @@ export default {
    */
   async init (applicationLoader) {
     try {
-
       const application = applicationLoader(Application)
 
       if (!(application instanceof Application)) {

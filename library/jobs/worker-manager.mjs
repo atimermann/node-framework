@@ -9,15 +9,31 @@
  * TODO: Criar controle de processos zumbis
  * TODO: Parametrizar delay
  * TODO: Parametrizar options for workers
- *
- *
  */
+
+/**
+ *  `run` event.
+ *
+ * @event WorkerManager#run
+ *
+ * @type {object}
+ * @property {Worker} worker - Worker who started new execution
+ */
+
 import createLogger from '../logger.mjs'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import Worker from './worker.mjs'
 
 const logger = createLogger('WorkerManager')
 
+/**
+ * Manages and oversees all workers.
+ *
+ * Note: A `Worker` in this context doesn't represent the job's execution,
+ * but rather the entity executing a given job. It gets initialized,
+ *
+ * @fires WorkerManager#run
+ */
 export default class WorkerManager {
   /**
    * List of workers
@@ -31,10 +47,27 @@ export default class WorkerManager {
    * @type {Object.<string, Worker>}
    */
   static indexedWorkers = {}
+
+  /**
+   * Flag that indicates that workManager is in the verification phase
+   * TODO: Validar necessidade
+   *
+   * @type {boolean}
+   */
   static checking = false
+
+  /**
+   * EventEmitter
+   * @type {module:events.EventEmitter}
+   */
   static events = new EventEmitter()
 
-  static async run () {
+  /**
+   * Starts Worker Manager
+   *
+   * @returns {Promise<void>}
+   */
+  static async init () {
     if (this.workers.length > 0) {
       await this.runPersistentWorkers()
       await this.monitorWorkersHealth()
@@ -51,6 +84,10 @@ export default class WorkerManager {
     if (this.indexedWorkers[worker.name]) {
       throw new Error(`Worker "${worker.name}" already exists.`)
     }
+
+    worker.on('run', () => {
+      this.events.emit('run', worker)
+    })
 
     worker.on('processError', jobProcess => {
       this.events.emit('processError', worker, jobProcess)
@@ -96,7 +133,7 @@ export default class WorkerManager {
   static async runPersistentWorkers () {
     for (const worker of this.workers) {
       if (worker.persistent) {
-        await worker.runProcess()
+        await worker.run()
       }
     }
   }
@@ -134,13 +171,5 @@ export default class WorkerManager {
    */
   static getWorkersInformation () {
     return this.indexedWorkers
-  }
-
-  /**
-   * Retorna EventEmmiter
-   * @returns {module:events.EventEmitter}
-   */
-  static event () {
-    return this.events
   }
 }

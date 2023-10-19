@@ -66,7 +66,7 @@ export default class JobManager {
     this._createScheduledWorkers()
 
     await this._startScheduleJob()
-    await WorkerManager.run()
+    await WorkerManager.init()
   }
 
   /**
@@ -115,7 +115,7 @@ export default class JobManager {
    * @param {Job} job
    */
   static addJob (job) {
-    logger.info(`Add new Job: ${job}`)
+    logger.info(`Add new Job: ${job.name}`)
 
     if (this.jobs[job.name]) {
       throw new Error(`Job "${job.name}" already exists.`)
@@ -133,22 +133,18 @@ export default class JobManager {
    * @private
    */
   static _isJobEnabled (controller) {
-    // Does not load if set not to load
     if (applicationEnabled && (!Array.isArray(applicationEnabled) || !applicationEnabled.includes(controller.applicationName))) {
       logger.info(`Application "${controller.applicationName}" disabled!`)
       return false
     }
-
     if (appsEnabled && (!Array.isArray(appsEnabled) || !appsEnabled.includes(controller.appName))) {
       logger.info(`App "${controller.appName}" disabled!`)
       return false
     }
-
     if (controllersEnabled && (!Array.isArray(controllersEnabled) || !controllersEnabled.includes(controller.controllerName))) {
       logger.info(`Controller "${controller.controllerName}" disabled!`)
       return false
     }
-
     return true
   }
 
@@ -291,11 +287,10 @@ export default class JobManager {
 
   static async _loadJobsAndWorkersFromController (application) {
     logger.info('Loading jobs and Workers from controllers...')
+
     for (const controller of application.getControllers()) {
       logger.info(`Loading "${controller.completeIndentification}"...`)
-
-      if (!this._isJobEnabled(controller)) return
-
+      if (!this._isJobEnabled(controller)) continue
       await controller.jobs()
     }
   }

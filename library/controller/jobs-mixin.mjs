@@ -108,7 +108,13 @@ export default class JobsMixin {
     )
   }
 
-  async exit (exitCode) {
+  /**
+   * Ends the execution of the job, it must always be called to perform finishing tasks.
+   *
+   * @param {number}  exitCode
+   * @returns {Promise<void>}
+   */
+  async exit (exitCode = 0) {
     logger.debug(`Exiting controller "${this.completeIndentification}..."`)
     await WorkerRunner.exitProcess(exitCode)
   }

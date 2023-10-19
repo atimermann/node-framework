@@ -167,6 +167,6 @@ export default class Job extends EventEmitter {
     }
 
     logger.info(`Running job: "${this.name}" Schedule: "${this.schedule}" Worker: "${this.worker.name}"`)
-    await this.worker.runProcess()
+    await this.worker.run()
   }
 }
