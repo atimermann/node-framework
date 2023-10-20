@@ -111,7 +111,7 @@ export default class Worker extends EventEmitter {
       const concurrency = this.options.concurrency || 1
       logger.info(`Starting Worker: "${this.name}" Job: "${this.job.name}" Persistent: "${this.persistent}" Concurrency: ${concurrency}`)
       for (let i = 1; i <= concurrency; i++) {
-        const jobProcess = JobProcess.create(this, `#${i}`, this.options)
+        const jobProcess = JobProcess.createAndRun(this, i, this.options)
 
         jobProcess.on('error', () => {
           this.emit('processError', jobProcess)

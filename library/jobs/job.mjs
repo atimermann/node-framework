@@ -52,6 +52,7 @@ export default class Job extends EventEmitter {
 
   /**
    * The schedule for the job in cron format, or null if the job is not scheduled.
+   * TODO: Deve ir para o worker
    * @type {string|null}
    */
   schedule
@@ -76,13 +77,14 @@ export default class Job extends EventEmitter {
 
   /**
    * The worker assigned to execute the job.
-   * TODO: Jobs podem ter mais de um worker, se for criar referencia cruzada tratar isso
+   * TODO: Jobs podem ter mais de um worker, remover esta refêrencia
    * @type {Worker}
    */
   worker
 
   /**
    * Optional settings for the job.
+   * TODO: Definir Options
    * @type {Object}
    */
   options
@@ -157,7 +159,6 @@ export default class Job extends EventEmitter {
    * Starts the execution of a job. This involves spawning a child process
    * that executes the job's function.
    *
-   * @param {Job} job - The job object that needs to be executed.
    * @returns {Promise<void>} A promise that resolves when the job starts execution.
    * @static
    */

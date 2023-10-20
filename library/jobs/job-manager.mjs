@@ -161,10 +161,25 @@ export default class JobManager {
    */
   static getJob (applicationName, appName, controllerName, name) {
     const jobUUID = Job.createUUID(applicationName, appName, controllerName, name)
-    const job = this.jobs[jobUUID]
+
+    try {
+      return this.getJobByUUID(jobUUID)
+    } catch (e) {
+      throw new Error(`Job "${name}" does not exist in the Application "${applicationName}", App: "${appName}", Controller: "${controllerName}".`)
+    }
+  }
+
+  /**
+   * Retrieves a Job instance by uuid
+   *
+   * @param {string} uuid
+   * @returns {Job} The job instance that matches the given attributes.
+   */
+  static getJobByUUID (uuid) {
+    const job = this.jobs[uuid]
 
     if (!job) {
-      throw new Error(`Job "${name}" does not exist in the Application "${applicationName}", App: "${appName}", Controller: "${controllerName}".`)
+      throw new Error(`Job "${uuid}" does not exist.`)
     }
 
     return job

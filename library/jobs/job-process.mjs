@@ -24,7 +24,7 @@ const logger = createLogger('WorkerManager')
 export default class JobProcess extends EventEmitter {
   /**
    * A unique identifier for the process.
-   * @type {string}
+   * @type {number}
    */
   id
 
@@ -97,12 +97,12 @@ export default class JobProcess extends EventEmitter {
    * Factory method to create a new JobProcess instance, set its properties, and initiate the process.
    *
    * @param {Worker} worker - The worker that owns this process.
-   * @param {string} id - A unique identifier for this process.
+   * @param {number} id - A unique identifier for this process.
    * @param {Object} options - Additional options for this process.
    *
    * @returns {JobProcess} - A new JobProcess instance.
    */
-  static create (worker, id, options = {}) {
+  static createAndRun (worker, id, options = {}) {
     const process = new this()
     process.id = id
     process.options = { ...process.options, ...options }
@@ -121,7 +121,7 @@ export default class JobProcess extends EventEmitter {
   log (childLogger, data) {
     for (const line of data.toString().split('\n')) {
       try {
-        this.emit('log', data)
+        this.emit('log', line)
 
         const logObj = JSON.parse(line)
         const logModule = logObj.module ? `[${logObj.module}] ` : ''
@@ -139,7 +139,7 @@ export default class JobProcess extends EventEmitter {
    * Logs the initiation details including the worker name, job name, and process ID.
    */
   run () {
-    logger.info(`Running process: Worker: "${this.worker.name}" Job: "${this.worker.job.name}" Process: "${this.id}"}`)
+    logger.info(`Running process: Worker: "${this.worker.name}" Job: "${this.worker.job.name}" Process: "#${this.id}"}`)
 
     const args = [
       'job',
@@ -155,7 +155,7 @@ export default class JobProcess extends EventEmitter {
     this.childProcess = fork('./src/run.mjs', args, { silent: this.options.silent })
     this.running = true
 
-    const childLogger = createLogger(`Job ${this.worker.job.name} ${this.id}`)
+    const childLogger = createLogger(`Job ${this.worker.job.name} #${this.id}`)
 
     this.childProcess.stdout.on('data', (data) => {
       this.log(childLogger, data)
@@ -203,11 +203,11 @@ export default class JobProcess extends EventEmitter {
    */
   checkHealth () {
     // console.log('[WorkerManager]', )
-    logger.debug(`Checking process ${this.id} Pid:#${this.childProcess?.pid} Running:${this.running} Connected:${this.childProcess?.connected}`)
+    logger.debug(`Checking process #${this.id} Pid:#${this.childProcess?.pid} Running:${this.running} Connected:${this.childProcess?.connected}`)
 
     // Verifica se Job está parado
     if (this.running === false) {
-      logger.error(`Process hangout: Worker: "${this.worker.name}" Job: "${this.worker.job.name}" Process: "${this.id}"}`)
+      logger.error(`Process hangout: Worker: "${this.worker.name}" Job: "${this.worker.job.name}" Process: "#${this.id}"}`)
       this.run()
     }
 
@@ -231,13 +231,13 @@ export default class JobProcess extends EventEmitter {
   async _killAndRun () {
     this.killing = true
 
-    logger.warn(`Killing job: "${this.worker.job.name}" Worker:"${this.worker.name}" ID: "${this.id}"`)
+    logger.warn(`Killing job: "${this.worker.job.name}" Worker:"${this.worker.name}" ID: "#${this.id}"`)
 
     const pidToKill = this.childProcess.pid
 
     // Prepares callback to restart the process when finished.
     this.childProcess.once('exit', async () => {
-      logger.warn(`Killing successful: "${this.worker.job.name}" Worker:"${this.worker.name}" ID: "${this.id}" `)
+      logger.warn(`Killing successful: "${this.worker.job.name}" Worker:"${this.worker.name}" ID: "#${this.id}" `)
       this.run()
       this.killing = false
     })

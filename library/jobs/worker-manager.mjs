@@ -93,8 +93,8 @@ export default class WorkerManager {
       this.events.emit('processError', worker, jobProcess)
     })
 
-    worker.on('processLog', jobProcess => {
-      this.events.emit('processLog', worker, jobProcess)
+    worker.on('processLog', (jobProcess, data) => {
+      this.events.emit('processLog', worker, jobProcess, data)
     })
 
     this.workers.push(worker)

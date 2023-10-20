@@ -19,7 +19,7 @@
   "license": "ISC",
   "main": "./index.mjs",
   "dependencies": {
-    "@agtm/util": "^4.0.2",
+    "@agtm/util": "^4.2.4",
     "@airbnb/node-memwatch": "^2.0.0",
     "blessed": "^0.1.81",
     "body-parser": "^1.19.0",

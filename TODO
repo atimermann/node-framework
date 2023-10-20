@@ -6,6 +6,10 @@
     - https://www.typescriptlang.org/docs/handbook/intro-to-js-ts.html
     - https://www.reddit.com/r/vuejs/comments/st2zkt/jsdoc_or_typescript/
 
+- Setup funciona apenas quando http_server está ativado, como é um metodo globa, vamos tirar do http_server e deixar rodando independentemente
+    - Verificar outros métodos do controller tb
+    - remover do escodo do http_server
+
 
 - configuração CORS
 - Suporte CDN https://github.com/niftylettuce/express-cdn
@@ -17,7 +21,12 @@
 - Dupliquei sleep em varios lugares, centralizar no agt/util e puxar de lá ou pensar numa forma melhor
 - Parametrizar Cors
 
-**** JOBS ****
+************************************************************************************************************************
+JOBS
+************************************************************************************************************************
+- Mudar atributo id para instance (pois ele representa a instancia do jobprocess e não um id unico)
+- Verificar se processLog envia erros tb ou só no processError (os dois deve enviar)
+
 - Documentar uso da nova funcionalidade jobs
     - Dizer q implementa jobs simples, sem fila, algo parecido com cron com fork
     - Dizer q precisar ser definido dentro do método jobs
@@ -39,17 +48,30 @@
 
 - Criar um teste automatizado que englobe criação de projeto execução (em docker)
 
-*** LOGS ***
+- Conceito de schedule deve ficar no WORKER, q é o executor, ao associar ao job vc força ter apenas uma instancia,
+  causando confusão, já q varios worker pode executar o mesmo job, neste caso vc está colocando sob responsabilidade
+    do job a execução do worker, oq deixa a lógica confusa
+  - O lado ruim é q vc teria q ficar defindo um worker para cada job, uma solução e deixar a definição assim, mas ao
+    executar ele por baixo dos panos cria um novo worker com schedule automaticamente, mas a lógica de execução e
+    agendamento fica no worker, evitando confusão
+
+************************************************************************************************************************
+ LOGS
+************************************************************************************************************************
 - Melhorar segurança da conexão socket de log em produção
 
 
-*** CONFIG ***
+************************************************************************************************************************
+CONFIG
+************************************************************************************************************************
 
 Alterar o config para carregar apenas variaveis de ambiente definidos na configurações como nuxt faz:
 Your desired variables must be defined in your nuxt.config. This ensures that arbitrary environment variables are not exposed to your application code.
 
 
-*** PROBLEMA DO NODE_FRAMEWORK INCOMPATIVEL ***
+************************************************************************************************************************
+PROBLEMA DO NODE_FRAMEWORK INCOMPATIVEL
+************************************************************************************************************************
 
 Quando o projeto carrega um app terceiro em outro modulo, pode acontecer desse módulo estar usando uma versão mais antiga do '@agtm/node-framework'
 
